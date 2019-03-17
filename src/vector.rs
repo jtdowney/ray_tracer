@@ -1,5 +1,6 @@
+use crate::Scalar;
 use generic_array::{ArrayLength, GenericArray};
-use num_traits::{Float, Num};
+use num_traits::Float;
 use std::iter::Sum;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 use typenum::U3;
@@ -7,7 +8,7 @@ use typenum::U3;
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Vector<T, N>
 where
-    T: Default + Num + PartialEq + PartialOrd,
+    T: Scalar,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -18,7 +19,7 @@ pub type Vector3<T> = Vector<T, U3>;
 
 impl<T, N> Vector<T, N>
 where
-    T: Clone + Default + Num + PartialEq + PartialOrd,
+    T: Scalar,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -31,7 +32,7 @@ where
 
 impl<T, N> Vector<T, N>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd + Sum,
+    T: Scalar + Mul<Output = T> + Sum,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -47,7 +48,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Mul<Output = T> + Sub<Output = T>,
 {
     pub fn cross(&self, other: &Vector<T, U3>) -> Vector<T, U3> {
         Vector::<T, U3>::new(&[
@@ -60,7 +61,7 @@ where
 
 impl<T, N> Vector<T, N>
 where
-    T: Default + Float + Num + PartialEq + PartialOrd + Sum,
+    T: Scalar + Float + Sum,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -87,7 +88,7 @@ where
 
 impl<T, N> Add<Vector<T, N>> for Vector<T, N>
 where
-    T: Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Add<Output = T>,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -106,7 +107,7 @@ where
 
 impl<T, N> Div<T> for Vector<T, N>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Div<Output = T>,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -120,7 +121,7 @@ where
 
 impl<T, N> Mul<T> for Vector<T, N>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Mul<Output = T>,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -134,7 +135,7 @@ where
 
 impl<T, N> Neg for Vector<T, N>
 where
-    T: Default + Neg<Output = T> + Num + PartialEq + PartialOrd,
+    T: Scalar + Neg<Output = T>,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
@@ -148,7 +149,7 @@ where
 
 impl<T, N> PartialEq for Vector<T, N>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Sub<Output = T>,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
     f64: From<T>,
@@ -164,7 +165,7 @@ where
 
 impl<T, N> Sub<Vector<T, N>> for Vector<T, N>
 where
-    T: Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Sub<Output = T>,
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {

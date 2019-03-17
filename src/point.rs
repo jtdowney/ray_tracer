@@ -1,9 +1,8 @@
-use crate::Vector3;
-use num_traits::Num;
+use crate::{Scalar, Vector3};
 use std::ops::{Add, Sub};
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Point<T: Num> {
+pub struct Point<T: Scalar> {
     pub x: T,
     pub y: T,
     pub z: T,
@@ -11,7 +10,7 @@ pub struct Point<T: Num> {
 
 impl<T> Point<T>
 where
-    T: Num,
+    T: Scalar,
 {
     pub fn new(x: T, y: T, z: T) -> Point<T> {
         Point { x, y, z }
@@ -20,7 +19,7 @@ where
 
 impl<T> Add<Point<T>> for Point<T>
 where
-    T: Num,
+    T: Scalar + Add<Output = T>,
 {
     type Output = Point<T>;
 
@@ -31,7 +30,7 @@ where
 
 impl<T> Add<Vector3<T>> for Point<T>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Add<Output = T>,
 {
     type Output = Point<T>;
 
@@ -46,8 +45,7 @@ where
 
 impl<T> Sub<Point<T>> for Point<T>
 where
-    T: Num,
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Sub<Output = T>,
 {
     type Output = Vector3<T>;
 
@@ -58,7 +56,7 @@ where
 
 impl<T> Sub<Vector3<T>> for Point<T>
 where
-    T: Copy + Default + Num + PartialEq + PartialOrd,
+    T: Scalar + Sub<Output = T>,
 {
     type Output = Point<T>;
 
@@ -73,7 +71,7 @@ where
 
 impl<T> PartialEq for Point<T>
 where
-    T: Copy + Num,
+    T: Scalar + Sub<Output = T>,
     f64: From<T>,
 {
     fn eq(&self, other: &Point<T>) -> bool {
