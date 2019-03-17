@@ -1,14 +1,14 @@
-use ray_tracer::{Point, Vector};
+use ray_tracer::{Point, Vector3};
 
 #[derive(Copy, Clone, Debug)]
 struct Projectile {
-    position: Point,
-    velocity: Vector,
+    position: Point<f32>,
+    velocity: Vector3<f32>,
 }
 
 struct Simulation {
-    gravity: Vector,
-    wind: Vector,
+    gravity: Vector3<f32>,
+    wind: Vector3<f32>,
 }
 
 impl Simulation {
@@ -21,13 +21,13 @@ impl Simulation {
 
 fn main() {
     let simulation = Simulation {
-        gravity: Vector::new(0.0, -0.05, 0.0),
-        wind: Vector::new(0.00, 0.0, 0.0),
+        gravity: Vector3::new(&[0.0, -0.05, 0.0]),
+        wind: Vector3::new(&[0.00, 0.0, 0.0]),
     };
 
     let mut projectile = Projectile {
         position: Point::new(0.0, 1.0, 0.0),
-        velocity: Vector::new(1.0, 1.0, 0.0).normalize(),
+        velocity: Vector3::new(&[1.0, 1.0, 0.0]).normalize(),
     };
 
     while projectile.position.y >= 0.0 {
