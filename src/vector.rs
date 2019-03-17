@@ -1,9 +1,9 @@
 use crate::Scalar;
-use generic_array::{ArrayLength, GenericArray};
+use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use num_traits::Float;
-use std::iter::Sum;
+use std::iter::{FromIterator, Sum};
 use std::ops::{Add, Div, Mul, Neg, Sub};
-use typenum::U3;
+use typenum::{U3, U4};
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Vector<T, N>
@@ -16,6 +16,7 @@ where
 }
 
 pub type Vector3<T> = Vector<T, U3>;
+pub type Vector4<T> = Vector<T, U4>;
 
 impl<T, N> Vector<T, N>
 where
@@ -24,9 +25,7 @@ where
     N::ArrayType: Copy,
 {
     pub fn new(values: &[T]) -> Vector<T, N> {
-        Vector {
-            values: GenericArray::clone_from_slice(values),
-        }
+        values.iter().cloned().collect()
     }
 }
 
@@ -36,7 +35,7 @@ where
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
-    pub fn dot(&self, other: Vector<T, N>) -> T {
+    pub fn dot(&self, other: &Vector<T, N>) -> T {
         self.values
             .as_slice()
             .iter()
@@ -116,6 +115,36 @@ where
     fn div(self, other: T) -> Self::Output {
         let values = self.values.into_iter().map(|n| n / other).collect();
         Vector { values }
+    }
+}
+
+impl<T, N> FromIterator<T> for Vector<T, N>
+where
+    T: Scalar,
+    N: ArrayLength<T>,
+    N::ArrayType: Copy,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = T>,
+    {
+        Vector {
+            values: iter.into_iter().collect(),
+        }
+    }
+}
+
+impl<T, N> IntoIterator for Vector<T, N>
+where
+    T: Scalar,
+    N: ArrayLength<T>,
+    N::ArrayType: Copy,
+{
+    type Item = T;
+    type IntoIter = GenericArrayIter<T, N>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.values.into_iter()
     }
 }
 
@@ -257,7 +286,7 @@ mod tests {
     fn test_vector_dot_product() {
         let v1 = Vector3::new(&[1, 2, 3]);
         let v2 = Vector3::new(&[2, 3, 4]);
-        assert_eq!(20, v1.dot(v2));
+        assert_eq!(20, v1.dot(&v2));
     }
 
     #[test]
