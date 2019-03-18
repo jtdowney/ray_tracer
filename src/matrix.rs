@@ -8,29 +8,26 @@ use std::ops::{Index, IndexMut, Mul, Neg, Sub};
 use typenum::{Prod, U2, U3, U4};
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Matrix<T, M, N, S = Prod<M, N>>
+pub struct Matrix<T, N, S = Prod<N, N>>
 where
     T: Scalar,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
     S::ArrayType: Copy,
 {
     pub values: GenericArray<T, S>,
-    _phantom: PhantomData<(M, N)>,
+    _phantom: PhantomData<N>,
 }
 
-pub type Matrix2<T> = Matrix<T, U2, U2>;
-pub type Matrix3<T> = Matrix<T, U3, U3>;
-pub type Matrix4<T> = Matrix<T, U4, U4>;
+pub type Matrix2<T> = Matrix<T, U2>;
+pub type Matrix3<T> = Matrix<T, U3>;
+pub type Matrix4<T> = Matrix<T, U4>;
 
-impl<T, M, N, S> Matrix<T, M, N, S>
+impl<T, N, S> Matrix<T, N, S>
 where
     T: Scalar,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
-    M::ArrayType: Copy,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
@@ -38,17 +35,17 @@ where
         values.iter().cloned().collect()
     }
 
-    pub fn row(&self, row: usize) -> Vector<T, M> {
+    pub fn row(&self, row: usize) -> Vector<T, N> {
         let offset = row * N::to_usize();
         let values = self.values[offset..]
             .iter()
-            .take(M::to_usize())
+            .take(N::to_usize())
             .cloned()
             .collect();
         Vector { values }
     }
 
-    pub fn column(&self, column: usize) -> Vector<T, M> {
+    pub fn column(&self, column: usize) -> Vector<T, N> {
         let values = self.values[column..]
             .iter()
             .step_by(N::to_usize())
@@ -62,16 +59,16 @@ where
     }
 }
 
-impl<T, M, S> Matrix<T, M, M, S>
+impl<T, N, S> Matrix<T, N, S>
 where
     T: Scalar + One,
-    M: ArrayLength<T> + Default,
+    N: ArrayLength<T> + Default,
     S: ArrayLength<T> + Default,
     S::ArrayType: Copy,
 {
     pub fn identity() -> Self {
         let mut output = Matrix::default();
-        for i in 0..M::to_usize() {
+        for i in 0..N::to_usize() {
             output[(i, i)] = T::one();
         }
 
@@ -79,10 +76,9 @@ where
     }
 }
 
-impl<T, M, N, S> FromIterator<T> for Matrix<T, M, N, S>
+impl<T, N, S> FromIterator<T> for Matrix<T, N, S>
 where
     T: Scalar,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
     S::ArrayType: Copy,
@@ -98,10 +94,9 @@ where
     }
 }
 
-impl<T, M, N, S> Index<(usize, usize)> for Matrix<T, M, N, S>
+impl<T, N, S> Index<(usize, usize)> for Matrix<T, N, S>
 where
     T: Scalar,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
     S::ArrayType: Copy,
@@ -109,29 +104,27 @@ where
     type Output = T;
 
     fn index(&self, (i, j): (usize, usize)) -> &Self::Output {
-        let offset = i * M::to_usize() + j;
+        let offset = i * N::to_usize() + j;
         &self.values[offset]
     }
 }
 
-impl<T, M, N, S> IndexMut<(usize, usize)> for Matrix<T, M, N, S>
+impl<T, N, S> IndexMut<(usize, usize)> for Matrix<T, N, S>
 where
     T: Scalar,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
     S::ArrayType: Copy,
 {
     fn index_mut(&mut self, (i, j): (usize, usize)) -> &mut Self::Output {
-        let offset = i * M::to_usize() + j;
+        let offset = i * N::to_usize() + j;
         &mut self.values[offset]
     }
 }
 
-impl<T, M, N, S> IntoIterator for Matrix<T, M, N, S>
+impl<T, N, S> IntoIterator for Matrix<T, N, S>
 where
     T: Scalar,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
     S::ArrayType: Copy,
@@ -144,54 +137,49 @@ where
     }
 }
 
-impl<T, M, N, S> Mul<Matrix<T, M, N, S>> for Matrix<T, M, N, S>
+impl<T, N, S> Mul<Matrix<T, N, S>> for Matrix<T, N, S>
 where
     T: Scalar + Mul<Output = T> + Sum<T>,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
-    M::ArrayType: Copy,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
-    type Output = Matrix<T, M, N, S>;
+    type Output = Matrix<T, N, S>;
 
-    fn mul(self, other: Matrix<T, M, N, S>) -> Self::Output {
-        iproduct!(0..M::to_usize(), 0..N::to_usize())
+    fn mul(self, other: Matrix<T, N, S>) -> Self::Output {
+        iproduct!(0..N::to_usize(), 0..N::to_usize())
             .map(|(i, j)| self.row(i).dot(&other.column(j)))
             .collect()
     }
 }
 
-impl<T, M, N, S> Mul<Vector<T, M>> for Matrix<T, M, N, S>
+impl<T, N, S> Mul<Vector<T, N>> for Matrix<T, N, S>
 where
     T: Scalar + Mul<Output = T> + Sum<T>,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
-    M::ArrayType: Copy,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
-    type Output = Vector<T, M>;
+    type Output = Vector<T, N>;
 
-    fn mul(self, other: Vector<T, M>) -> Self::Output {
-        (0..M::to_usize())
+    fn mul(self, other: Vector<T, N>) -> Self::Output {
+        (0..N::to_usize())
             .map(|i| self.row(i).dot(&other))
             .collect()
     }
 }
 
-impl<T, M, N, S> PartialEq for Matrix<T, M, N, S>
+impl<T, N, S> PartialEq for Matrix<T, N, S>
 where
     T: Scalar + Sub<Output = T>,
-    M: ArrayLength<T>,
     N: ArrayLength<T>,
     S: ArrayLength<T>,
     S::ArrayType: Copy,
     f64: From<T>,
 {
-    fn eq(&self, other: &Matrix<T, M, N, S>) -> bool {
+    fn eq(&self, other: &Matrix<T, N, S>) -> bool {
         self.values
             .as_slice()
             .iter()
