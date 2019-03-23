@@ -13,7 +13,7 @@ fn main() {
     dbg!(m.transpose().inverse().unwrap());
 
     let mut i = Matrix4::<f32>::identity();
-    let v = Vector4::new(&[1.0, 2.0, 3.0, 4.0]);
+    let v = Vector4::new(1.0, 2.0, 3.0, 4.0);
     dbg!(i * v);
 
     i[(1, 0)] = 2.0;

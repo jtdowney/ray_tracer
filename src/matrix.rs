@@ -334,14 +334,14 @@ mod tests {
     fn test_matrix_row() {
         let m = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
 
-        assert_eq!(Vector::<_, U4>::new(&[5, 6, 7, 8]), m.row(1));
+        assert_eq!(Vector4::new(5, 6, 7, 8), m.row(1));
     }
 
     #[test]
     fn test_matrix_column() {
         let m = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
 
-        assert_eq!(Vector::<_, U4>::new(&[2, 6, 8, 4]), m.column(1));
+        assert_eq!(Vector4::new(2, 6, 8, 4), m.column(1));
     }
 
     #[test]
@@ -374,9 +374,9 @@ mod tests {
     #[test]
     fn test_multiplying_matrix_by_vector() {
         let a = Matrix4::new(&[1, 2, 3, 4, 2, 4, 4, 2, 8, 6, 4, 1, 0, 0, 0, 1]);
-        let b = Vector4::new(&[1, 2, 3, 1]);
+        let b = Vector4::new(1, 2, 3, 1);
 
-        assert_eq!(Vector4::new(&[18, 24, 33, 1]), a * b);
+        assert_eq!(Vector4::new(18, 24, 33, 1), a * b);
     }
 
     #[test]

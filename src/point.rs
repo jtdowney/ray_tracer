@@ -50,7 +50,7 @@ where
     type Output = Vector3<T>;
 
     fn sub(self, other: Point<T>) -> Self::Output {
-        Vector3::new(&[self.x - other.x, self.y - other.y, self.z - other.z])
+        Vector3::new(self.x - other.x, self.y - other.y, self.z - other.z)
     }
 }
 
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn test_adding_point_and_vector() {
         let p = Point::new(3, -2, 5);
-        let v = Vector3::new(&[-2, 3, 1]);
+        let v = Vector3::new(-2, 3, 1);
         assert_eq!(Point::new(1, 1, 6), p + v);
     }
 
@@ -104,13 +104,13 @@ mod tests {
     fn test_subtracting_points() {
         let p1 = Point::new(3, 2, 1);
         let p2 = Point::new(5, 6, 7);
-        assert_eq!(Vector3::new(&[-2, -4, -6]), p1 - p2);
+        assert_eq!(Vector3::new(-2, -4, -6), p1 - p2);
     }
 
     #[test]
     fn test_subtracting_vector_from_point() {
         let p = Point::new(3, 2, 1);
-        let v = Vector3::new(&[5, 6, 7]);
+        let v = Vector3::new(5, 6, 7);
         assert_eq!(Point::new(-2, -4, -6), p - v);
     }
 }

@@ -21,13 +21,13 @@ impl Simulation {
 
 fn main() {
     let simulation = Simulation {
-        gravity: Vector3::new(&[0.0, -0.1, 0.0]),
-        wind: Vector3::new(&[-0.01, 0.0, 0.0]),
+        gravity: Vector3::new(0.0, -0.1, 0.0),
+        wind: Vector3::new(-0.01, 0.0, 0.0),
     };
 
     let mut projectile = Projectile {
         position: Point::new(0.0, 1.0, 0.0),
-        velocity: Vector3::new(&[1.0, 1.8, 0.0]).normalize() * 11.25,
+        velocity: Vector3::new(1.0, 1.8, 0.0).normalize() * 11.25,
     };
 
     let mut canvas = Canvas::new(900, 550);
