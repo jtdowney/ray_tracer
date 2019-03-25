@@ -24,7 +24,7 @@ where
     N: ArrayLength<T>,
     N::ArrayType: Copy,
 {
-    pub fn dot(&self, other: &Vector<T, N>) -> T {
+    pub fn dot(self, other: Vector<T, N>) -> T {
         self.values
             .as_slice()
             .iter()
@@ -293,7 +293,7 @@ mod tests {
     fn test_vector_dot_product() {
         let v1 = Vector3::new(1, 2, 3);
         let v2 = Vector3::new(2, 3, 4);
-        assert_eq!(20, v1.dot(&v2));
+        assert_eq!(20, v1.dot(v2));
     }
 
     #[test]

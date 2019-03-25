@@ -149,15 +149,15 @@ where
 
     fn mul(self, other: Matrix<T, N, S>) -> Self::Output {
         iproduct!(0..N::to_usize(), 0..N::to_usize())
-            .map(|(i, j)| self.row(i).dot(&other.column(j)))
+            .map(|(i, j)| self.row(i).dot(other.column(j)))
             .collect()
     }
 }
 
 impl<T, N, S> Mul<Vector<T, N>> for Matrix<T, N, S>
 where
-    T: Scalar + Mul<Output = T> + Sum<T>,
-    N: ArrayLength<T>,
+    T: Scalar + Mul<Output = T> + Sum<T> + Default,
+    N: ArrayLength<T> + Copy,
     S: ArrayLength<T>,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
@@ -165,9 +165,7 @@ where
     type Output = Vector<T, N>;
 
     fn mul(self, other: Vector<T, N>) -> Self::Output {
-        (0..N::to_usize())
-            .map(|i| self.row(i).dot(&other))
-            .collect()
+        (0..N::to_usize()).map(|i| self.row(i).dot(other)).collect()
     }
 }
 
