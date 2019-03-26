@@ -1,22 +1,27 @@
+use crate::Scalar;
+use num_traits::{Float, One, Zero};
 use std::ops::{Add, Mul, Sub};
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Color {
-    red: f32,
-    green: f32,
-    blue: f32,
+pub struct Color<T> {
+    red: T,
+    green: T,
+    blue: T,
 }
 
-impl Color {
-    pub fn new(red: f32, green: f32, blue: f32) -> Color {
+impl<T: Scalar> Color<T> {
+    pub fn new(red: T, green: T, blue: T) -> Color<T> {
         Color { red, green, blue }
     }
 }
 
-impl Add<Color> for Color {
-    type Output = Color;
+impl<T> Add<Color<T>> for Color<T>
+where
+    T: Scalar + Add<Output = T>,
+{
+    type Output = Color<T>;
 
-    fn add(self, other: Color) -> Self::Output {
+    fn add(self, other: Color<T>) -> Self::Output {
         Color::new(
             self.red + other.red,
             self.green + other.green,
@@ -25,10 +30,13 @@ impl Add<Color> for Color {
     }
 }
 
-impl Mul<Color> for Color {
-    type Output = Color;
+impl<T> Mul<Color<T>> for Color<T>
+where
+    T: Scalar + Mul<Output = T>,
+{
+    type Output = Color<T>;
 
-    fn mul(self, other: Color) -> Self::Output {
+    fn mul(self, other: Color<T>) -> Self::Output {
         Color::new(
             self.red * other.red,
             self.green * other.green,
@@ -37,38 +45,36 @@ impl Mul<Color> for Color {
     }
 }
 
-impl Mul<f32> for Color {
-    type Output = Color;
+impl<T> Mul<T> for Color<T>
+where
+    T: Scalar + Mul<Output = T>,
+{
+    type Output = Color<T>;
 
-    fn mul(self, other: f32) -> Self::Output {
+    fn mul(self, other: T) -> Self::Output {
         Color::new(self.red * other, self.green * other, self.blue * other)
     }
 }
 
-impl Sub<Color> for Color {
-    type Output = Color;
-
-    fn sub(self, other: Color) -> Self::Output {
-        Color::new(
-            self.red - other.red,
-            self.green - other.green,
-            self.blue - other.blue,
-        )
+impl<T> PartialEq for Color<T>
+where
+    T: Scalar + Sub<Output = T>,
+    f64: From<T>,
+{
+    fn eq(&self, other: &Color<T>) -> bool {
+        const EPSILON: f64 = 0.00001;
+        f64::from(self.red - other.red).abs() < EPSILON
+            && f64::from(self.green - other.green).abs() < EPSILON
+            && f64::from(self.blue - other.blue).abs() < EPSILON
     }
 }
 
-impl PartialEq for Color {
-    fn eq(&self, other: &Color) -> bool {
-        const EPSILON: f32 = 0.00001;
-        (self.red - other.red).abs() < EPSILON
-            && (self.green - other.green).abs() < EPSILON
-            && (self.blue - other.blue).abs() < EPSILON
-    }
-}
-
-impl IntoIterator for Color {
+impl<T> IntoIterator for Color<T>
+where
+    T: Scalar + Float + From<f32> + One + Zero,
+{
     type Item = u8;
-    type IntoIter = ColorIterator;
+    type IntoIter = ColorIterator<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         ColorIterator {
@@ -78,12 +84,15 @@ impl IntoIterator for Color {
     }
 }
 
-pub struct ColorIterator {
-    color: Color,
+pub struct ColorIterator<T: Scalar> {
+    color: Color<T>,
     index: u8,
 }
 
-impl Iterator for ColorIterator {
+impl<T> Iterator for ColorIterator<T>
+where
+    T: Scalar + Float + From<f32> + One + Zero,
+{
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -95,8 +104,9 @@ impl Iterator for ColorIterator {
             _ => return None,
         };
 
-        let byte = (color.min(1.0).max(0.0) * 255.0).round() as u8;
-        Some(byte)
+        (color.min(T::one()).max(T::zero()) * Into::<T>::into(255.0))
+            .round()
+            .to_u8()
     }
 }
 
@@ -106,16 +116,9 @@ mod tests {
 
     #[test]
     fn test_adding_colors() {
-        let c1 = Color::new(0.9, 0.6, 0.75);
-        let c2 = Color::new(0.7, 0.1, 0.25);
-        assert_eq!(Color::new(1.6, 0.7, 1.0), c1 + c2);
-    }
-
-    #[test]
-    fn test_subtracting_colors() {
-        let c1 = Color::new(0.9, 0.6, 0.75);
-        let c2 = Color::new(0.7, 0.1, 0.25);
-        assert_eq!(Color::new(0.2, 0.5, 0.5), c1 - c2);
+        let c1 = Color::new(1.0, 0.2, 0.4);
+        let c2 = Color::new(0.9, 1.0, 0.1);
+        assert_eq!(Color::new(1.9, 1.2, 0.5), c1 + c2);
     }
 
     #[test]
