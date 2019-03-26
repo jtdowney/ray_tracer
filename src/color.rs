@@ -104,7 +104,7 @@ where
             _ => return None,
         };
 
-        (color.min(T::one()).max(T::zero()) * Into::<T>::into(255.0))
+        (color.min(T::one()).max(T::zero()) * 255.0.into())
             .round()
             .to_u8()
     }

@@ -19,10 +19,10 @@ where
     fn default() -> Self {
         Material {
             color: Color::new(T::one(), T::one(), T::one()),
-            ambient: Into::<T>::into(0.1),
-            diffuse: Into::<T>::into(0.9),
-            specular: Into::<T>::into(0.9),
-            shininess: Into::<T>::into(200.0),
+            ambient: 0.1.into(),
+            diffuse: 0.9.into(),
+            specular: 0.9.into(),
+            shininess: 200.0.into(),
         }
     }
 }
