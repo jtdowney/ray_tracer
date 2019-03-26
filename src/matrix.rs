@@ -2,10 +2,23 @@ use crate::{Point, Scalar, Vector, Vector3};
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use itertools::iproduct;
 use num_traits::{Float, One, Zero};
+use std::error::Error;
+use std::fmt::{self, Display};
 use std::iter::{FromIterator, Sum};
 use std::marker::PhantomData;
 use std::ops::{Add, Index, IndexMut, Mul, Neg, Sub};
 use typenum::{Prod, U2, U3, U4};
+
+#[derive(Debug)]
+pub struct NotInvertableError;
+
+impl Error for NotInvertableError {}
+
+impl Display for NotInvertableError {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "Matrix cannot be inverted")
+    }
+}
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Matrix<T, N, S = Prod<N, N>>
@@ -314,10 +327,10 @@ impl<T> Matrix4<T>
 where
     T: Scalar + Neg<Output = T> + Mul<Output = T> + Sub<Output = T> + Sum<T> + Zero + Float,
 {
-    pub fn inverse(&self) -> Option<Self> {
+    pub fn inverse(&self) -> Result<Self, NotInvertableError> {
         let determinant = self.determinant();
         if determinant == T::zero() {
-            return None;
+            return Err(NotInvertableError);
         }
 
         let output = iproduct!(0..4, 0..4)
@@ -327,7 +340,7 @@ where
             .into_iter()
             .map(|n| n / determinant)
             .collect();
-        Some(output)
+        Ok(output)
     }
 }
 
@@ -587,7 +600,7 @@ mod tests {
             6.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 6.0, 4.0, -9.0, 3.0, -7.0, 9.0, 1.0, 7.0, -6.0,
         ]);
         assert_eq!(-2120.0, m.determinant());
-        assert!(m.inverse().is_some());
+        assert!(m.inverse().is_ok());
     }
 
     #[test]
@@ -596,7 +609,7 @@ mod tests {
             -4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0,
         ]);
         assert_eq!(0.0, m.determinant());
-        assert!(m.inverse().is_none());
+        assert!(m.inverse().is_err());
     }
 
     #[test]

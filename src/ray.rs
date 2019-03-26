@@ -1,3 +1,4 @@
+use crate::matrix;
 use crate::{Matrix4, Point, Scalar, Sphere, Vector3};
 use num_traits::{Float, Zero};
 use std::iter::Sum;
@@ -50,7 +51,10 @@ where
         + Zero,
     f64: From<T>,
 {
-    pub fn intersect(self, object: &Sphere<T>) -> Option<Intersections<T>> {
+    pub fn intersect(
+        self,
+        object: &Sphere<T>,
+    ) -> Result<Intersections<T>, matrix::NotInvertableError> {
         let ray = self.transform(object.transform.inverse()?);
         let object_to_ray = ray.origin - Point::default();
         let a = ray.direction.dot(ray.direction);
@@ -67,7 +71,7 @@ where
             intersections.push(Intersection { time: t2, object });
         }
 
-        Some(Intersections { intersections })
+        Ok(Intersections { intersections })
     }
 }
 

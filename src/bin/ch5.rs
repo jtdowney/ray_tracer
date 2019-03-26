@@ -21,7 +21,7 @@ fn main() -> Result<(), fmt::Error> {
             let position = Point::new(world_x, world_y, wall_z);
             let r = Ray::new(ray_origin, (position - ray_origin).normalize());
 
-            if let Some(xs) = r.intersect(&shape) {
+            if let Ok(xs) = r.intersect(&shape) {
                 if xs.is_hit() {
                     canvas.write_pixel(x, y, color);
                 }
