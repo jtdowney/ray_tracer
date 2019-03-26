@@ -10,8 +10,8 @@ pub struct Ray<T>
 where
     T: Scalar,
 {
-    origin: Point<T>,
-    direction: Vector3<T>,
+    pub origin: Point<T>,
+    pub direction: Vector3<T>,
 }
 
 impl<T> Ray<T>
@@ -81,8 +81,8 @@ where
     T: Scalar + Sub<Output = T>,
     f64: From<T>,
 {
-    time: T,
-    object: &'a Sphere<T>,
+    pub time: T,
+    pub object: &'a Sphere<T>,
 }
 
 #[derive(Debug)]
@@ -219,11 +219,11 @@ mod tests {
     fn test_hit_with_all_positive_times() {
         let s = Sphere::new();
         let i1 = Intersection {
-            time: 1,
+            time: 1.0,
             object: &s,
         };
         let i2 = Intersection {
-            time: 2,
+            time: 2.0,
             object: &s,
         };
         let xs = Intersections {
@@ -237,11 +237,11 @@ mod tests {
     fn test_hit_with_some_negative_times() {
         let s = Sphere::new();
         let i1 = Intersection {
-            time: -1,
+            time: -1.0,
             object: &s,
         };
         let i2 = Intersection {
-            time: 1,
+            time: 1.0,
             object: &s,
         };
         let xs = Intersections {
@@ -255,11 +255,11 @@ mod tests {
     fn test_hit_with_all_negative_times() {
         let s = Sphere::new();
         let i1 = Intersection {
-            time: -2,
+            time: -2.0,
             object: &s,
         };
         let i2 = Intersection {
-            time: -1,
+            time: -1.0,
             object: &s,
         };
         let xs = Intersections {
@@ -272,19 +272,19 @@ mod tests {
     fn test_hit_lowest_positive_intersection() {
         let s = Sphere::new();
         let i1 = Intersection {
-            time: 5,
+            time: 5.0,
             object: &s,
         };
         let i2 = Intersection {
-            time: 7,
+            time: 7.0,
             object: &s,
         };
         let i3 = Intersection {
-            time: -3,
+            time: -3.0,
             object: &s,
         };
         let i4 = Intersection {
-            time: 2,
+            time: 2.0,
             object: &s,
         };
         let xs = Intersections {

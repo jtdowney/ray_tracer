@@ -34,6 +34,17 @@ where
     }
 }
 
+impl<T, N> Vector<T, N>
+where
+    T: Scalar + Mul<Output = T> + Sub<Output = T> + Sum<T> + From<u8>,
+    N: ArrayLength<T> + Copy,
+    N::ArrayType: Copy,
+{
+    pub fn reflect(self, other: Vector<T, N>) -> Self {
+        self - other * Into::<T>::into(2) * self.dot(other)
+    }
+}
+
 impl<T> Vector3<T>
 where
     T: Scalar,
@@ -195,7 +206,7 @@ where
             .as_slice()
             .iter()
             .zip(other.values.as_slice())
-            .all(|(&a, &b)| f64::from(a - b) <= 0.00001)
+            .all(|(&a, &b)| f64::from(a - b).abs() <= 0.00001)
     }
 }
 
@@ -302,5 +313,19 @@ mod tests {
         let v2 = Vector3::new(2, 3, 4);
         assert_eq!(Vector3::new(-1, 2, -1), v1.cross(&v2));
         assert_eq!(Vector3::new(1, -2, 1), v2.cross(&v1));
+    }
+
+    #[test]
+    fn test_reflecting_vector_approaching_45() {
+        let v = Vector3::new(1.0, -1.0, 0.0);
+        let n = Vector3::new(0.0, 1.0, 0.0);
+        assert_eq!(Vector3::new(1.0, 1.0, 0.0), v.reflect(n));
+    }
+
+    #[test]
+    fn test_reflecting_vector_off_slanted_surface() {
+        let v = Vector3::new(0.0, -1.0, 0.0);
+        let n = Vector3::new(2.0.sqrt() / 2.0, 2.0.sqrt() / 2.0, 0.0);
+        assert_eq!(Vector3::new(1.0, 0.0, 0.0), v.reflect(n));
     }
 }
