@@ -19,9 +19,9 @@ fn main() -> Result<(), fmt::Error> {
         for x in 0..canvas_pixels {
             let world_x = -half + pixel_size * x as f32;
             let position = Point::new(world_x, world_y, wall_z);
-            let r = Ray::new(ray_origin, (position - ray_origin).normalize());
+            let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
 
-            if let Ok(xs) = r.intersect(&shape) {
+            if let Ok(xs) = shape.intersect(ray) {
                 if xs.is_hit() {
                     canvas.write_pixel(x, y, color);
                 }

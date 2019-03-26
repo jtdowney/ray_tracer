@@ -25,7 +25,7 @@ fn main() -> Result<(), Error> {
             let position = Point::new(world_x, world_y, wall_z);
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
 
-            if let Ok(xs) = ray.intersect(&shape) {
+            if let Ok(xs) = shape.intersect(ray) {
                 if let Some(hit) = xs.hit() {
                     let point = ray.position(hit.time);
                     let normal = hit.object.normal_at(point).unwrap();
