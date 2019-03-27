@@ -10,6 +10,7 @@ mod point;
 mod ray;
 mod render;
 mod scalar;
+pub mod transforms;
 mod vector;
 pub mod world;
 

@@ -1,6 +1,6 @@
 use crate::{
-    intersection, matrix, Color, Intersection, Intersections, Matrix4, Point, PointLight, Ray,
-    Scalar, Sphere, Vector3,
+    intersection, matrix, transforms, Color, Intersection, Intersections, Matrix4, Point,
+    PointLight, Ray, Scalar, Sphere, Vector3,
 };
 use num_traits::{Float, One, Zero};
 use std::iter::Sum;
@@ -38,7 +38,7 @@ where
         T::one(),
     ]);
 
-    orientation * Matrix4::translation(-from.x, -from.y, -from.z)
+    orientation * transforms::translation(-from.x, -from.y, -from.z)
 }
 
 impl<T> World<T>
@@ -65,7 +65,7 @@ where
         s1.material.specular = 0.2.into();
 
         let mut s2 = Sphere::default();
-        s2.transform = Matrix4::scaling(0.5.into(), 0.5.into(), 0.5.into());
+        s2.transform = transforms::scaling(0.5.into(), 0.5.into(), 0.5.into());
 
         let objects = vec![s1, s2];
         let light = PointLight::new(
@@ -193,7 +193,7 @@ mod tests {
         let to = Point::new(0.0, 0.0, 1.0);
         let up = Vector3::new(0.0, 1.0, 0.0);
         assert_eq!(
-            Matrix4::scaling(-1.0, 1.0, -1.0),
+            transforms::scaling(-1.0, 1.0, -1.0),
             view_transform(from, to, up)
         );
     }
@@ -204,7 +204,7 @@ mod tests {
         let to = Point::new(0.0, 0.0, 0.0);
         let up = Vector3::new(0.0, 1.0, 0.0);
         assert_eq!(
-            Matrix4::translation(0.0, 0.0, -8.0),
+            transforms::translation(0.0, 0.0, -8.0),
             view_transform(from, to, up)
         );
     }

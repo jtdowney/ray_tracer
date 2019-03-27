@@ -38,6 +38,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::transforms;
 
     #[test]
     fn test_creating_ray() {
@@ -60,7 +61,7 @@ mod tests {
     #[test]
     fn test_translating_ray() {
         let r = Ray::new(Point::new(1.0, 2.0, 3.0), Vector3::new(0.0, 1.0, 0.0));
-        let m = Matrix4::translation(3.0, 4.0, 5.0);
+        let m = transforms::translation(3.0, 4.0, 5.0);
         let r2 = r.transform(m);
         assert_eq!(Point::new(4.0, 6.0, 8.0), r2.origin);
         assert_eq!(Vector3::new(0.0, 1.0, 0.0), r2.direction);
@@ -69,7 +70,7 @@ mod tests {
     #[test]
     fn test_scaling_ray() {
         let r = Ray::new(Point::new(1.0, 2.0, 3.0), Vector3::new(0.0, 1.0, 0.0));
-        let m = Matrix4::scaling(2.0, 3.0, 4.0);
+        let m = transforms::scaling(2.0, 3.0, 4.0);
         let r2 = r.transform(m);
         assert_eq!(Point::new(2.0, 6.0, 12.0), r2.origin);
         assert_eq!(Vector3::new(0.0, 3.0, 0.0), r2.direction);

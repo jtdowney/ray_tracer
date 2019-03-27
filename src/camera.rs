@@ -66,7 +66,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Vector3;
+    use crate::{transforms, Vector3};
     use std::f32::consts::PI;
 
     #[test]
@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn test_ray_for_transformed_camera() {
         let mut c = Camera::new(201, 101, PI / 2.0);
-        c.transform = Matrix4::rotation_y(PI / 4.0) * Matrix4::translation(0.0, -2.0, 5.0);
+        c.transform = transforms::rotation_y(PI / 4.0) * transforms::translation(0.0, -2.0, 5.0);
         let r = c.ray_for_pixel(100, 50).unwrap();
         assert_eq!(Point::new(0.0, 2.0, -5.0), r.origin);
         assert_eq!(

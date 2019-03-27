@@ -90,6 +90,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::transforms;
     use std::f32::consts::PI;
 
     #[test]
@@ -155,7 +156,7 @@ mod tests {
     #[test]
     fn test_computing_normal_on_translated_sphere() {
         let mut s = Sphere::default();
-        s.transform = Matrix4::translation(0.0, 1.0, 0.0);
+        s.transform = transforms::translation(0.0, 1.0, 0.0);
         assert_eq!(
             Vector3::new(0.0, 0.70711, -0.70711),
             s.normal_at(Point::new(0.0, 1.70711, -0.70711)).unwrap()
@@ -165,7 +166,7 @@ mod tests {
     #[test]
     fn test_computing_normal_on_transformed_sphere() {
         let mut s = Sphere::default();
-        s.transform = Matrix4::scaling(1.0, 0.5, 1.0) * Matrix4::rotation_z(PI / 5.0);
+        s.transform = transforms::scaling(1.0, 0.5, 1.0) * transforms::rotation_z(PI / 5.0);
         assert_eq!(
             Vector3::new(0.0, 0.97014, -0.24254),
             s.normal_at(Point::new(0.0, 2.0.sqrt() / 2.0, -2.0.sqrt() / 2.0))
@@ -247,7 +248,7 @@ mod tests {
     fn test_intersecting_scaled_sphere_with_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut s = Sphere::default();
-        s.transform = Matrix4::scaling(2.0, 2.0, 2.0);
+        s.transform = transforms::scaling(2.0, 2.0, 2.0);
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(3.0, xs.next().unwrap().time);
         assert_eq!(7.0, xs.next().unwrap().time);
@@ -258,7 +259,7 @@ mod tests {
     fn test_intersecting_translated_sphere_with_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut s = Sphere::default();
-        s.transform = Matrix4::translation(5.0, 0.0, 0.0);
+        s.transform = transforms::translation(5.0, 0.0, 0.0);
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert!(xs.next().is_none());
     }
