@@ -1,5 +1,5 @@
 use crate::matrix;
-use crate::{Material, Matrix4, Point, Ray, Scalar, Vector3};
+use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Scalar, Vector3};
 use num_traits::{Float, One, Zero};
 use std::iter::Sum;
 use std::ops::{Add, Mul, Sub};
@@ -84,54 +84,6 @@ where
 {
     fn eq(&self, other: &Sphere<T>) -> bool {
         self.transform.eq(&other.transform)
-    }
-}
-
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Intersection<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    pub time: T,
-    pub object: &'a Sphere<T>,
-}
-
-#[derive(Debug)]
-pub struct Intersections<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    intersections: Vec<Intersection<'a, T>>,
-}
-
-impl<'a, T> IntoIterator for Intersections<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    type Item = Intersection<'a, T>;
-    type IntoIter = vec::IntoIter<Self::Item>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.intersections.into_iter()
-    }
-}
-
-impl<'a, T> Intersections<'a, T>
-where
-    T: Scalar + Sub<Output = T> + PartialOrd + Zero,
-    f64: From<T>,
-{
-    pub fn hit(self) -> Option<Intersection<'a, T>> {
-        self.into_iter()
-            .filter(|i| i.time >= T::zero())
-            .min_by(|a, b| a.time.partial_cmp(&b.time).unwrap())
-    }
-
-    pub fn is_hit(self) -> bool {
-        self.hit().is_some()
     }
 }
 
@@ -289,85 +241,6 @@ mod tests {
         assert_eq!(&s, xs.next().unwrap().object);
         assert_eq!(&s, xs.next().unwrap().object);
         assert!(xs.next().is_none());
-    }
-
-    #[test]
-    fn test_hit_with_all_positive_times() {
-        let s = Sphere::new();
-        let i1 = Intersection {
-            time: 1.0,
-            object: &s,
-        };
-        let i2 = Intersection {
-            time: 2.0,
-            object: &s,
-        };
-        let xs = Intersections {
-            intersections: vec![i1, i2],
-        };
-        let i = xs.hit().unwrap();
-        assert_eq!(i1, i);
-    }
-
-    #[test]
-    fn test_hit_with_some_negative_times() {
-        let s = Sphere::new();
-        let i1 = Intersection {
-            time: -1.0,
-            object: &s,
-        };
-        let i2 = Intersection {
-            time: 1.0,
-            object: &s,
-        };
-        let xs = Intersections {
-            intersections: vec![i2, i1],
-        };
-        let i = xs.hit().unwrap();
-        assert_eq!(i2, i);
-    }
-
-    #[test]
-    fn test_hit_with_all_negative_times() {
-        let s = Sphere::new();
-        let i1 = Intersection {
-            time: -2.0,
-            object: &s,
-        };
-        let i2 = Intersection {
-            time: -1.0,
-            object: &s,
-        };
-        let xs = Intersections {
-            intersections: vec![i2, i1],
-        };
-        assert!(xs.hit().is_none());
-    }
-
-    #[test]
-    fn test_hit_lowest_positive_intersection() {
-        let s = Sphere::new();
-        let i1 = Intersection {
-            time: 5.0,
-            object: &s,
-        };
-        let i2 = Intersection {
-            time: 7.0,
-            object: &s,
-        };
-        let i3 = Intersection {
-            time: -3.0,
-            object: &s,
-        };
-        let i4 = Intersection {
-            time: 2.0,
-            object: &s,
-        };
-        let xs = Intersections {
-            intersections: vec![i1, i2, i3, i4],
-        };
-        let i = xs.hit().unwrap();
-        assert_eq!(i4, i);
     }
 
     #[test]

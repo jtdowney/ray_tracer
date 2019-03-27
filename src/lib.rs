@@ -1,5 +1,6 @@
 mod canvas;
 mod color;
+mod intersection;
 mod light;
 mod material;
 mod matrix;
@@ -11,6 +12,7 @@ mod vector;
 
 pub use crate::canvas::Canvas;
 pub use crate::color::Color;
+pub use crate::intersection::{Intersection, Intersections};
 pub use crate::light::PointLight;
 pub use crate::material::Material;
 pub use crate::matrix::{Matrix, Matrix2, Matrix3, Matrix4};
