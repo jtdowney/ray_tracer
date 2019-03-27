@@ -1,6 +1,6 @@
 use crate::{
-    intersection, matrix, transforms, Color, Intersection, Intersections, Matrix4, Point,
-    PointLight, Ray, Scalar, Sphere, Vector3,
+    intersection, matrix, transforms, Color, Intersection, Intersections, Point, PointLight, Ray,
+    Scalar, Sphere,
 };
 use num_traits::{Float, One, Zero};
 use std::iter::Sum;
@@ -10,35 +10,6 @@ use std::ops::{Add, Mul, Sub};
 pub struct World<T: Scalar> {
     objects: Vec<Sphere<T>>,
     light: PointLight<T>,
-}
-
-pub fn view_transform<T>(from: Point<T>, to: Point<T>, up: Vector3<T>) -> Matrix4<T>
-where
-    T: Scalar + Float + One + Sub<Output = T> + Sum<T> + Zero,
-{
-    let forward = (to - from).normalize();
-    let left = forward.cross(up.normalize());
-    let true_up = left.cross(forward);
-    let orientation = Matrix4::new(&[
-        left[0],
-        left[1],
-        left[2],
-        T::zero(),
-        true_up[0],
-        true_up[1],
-        true_up[2],
-        T::zero(),
-        -forward[0],
-        -forward[1],
-        -forward[2],
-        T::zero(),
-        T::zero(),
-        T::zero(),
-        T::zero(),
-        T::one(),
-    ]);
-
-    orientation * transforms::translation(-from.x, -from.y, -from.z)
 }
 
 impl<T> World<T>
@@ -177,49 +148,5 @@ mod tests {
         w.objects[1].material.ambient = 1.0;
         let r = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
         assert_eq!(w.objects[1].material.color, w.color_at(r).unwrap());
-    }
-
-    #[test]
-    fn test_view_transform_for_default_orientation() {
-        let from = Point::new(0.0, 0.0, 0.0);
-        let to = Point::new(0.0, 0.0, -1.0);
-        let up = Vector3::new(0.0, 1.0, 0.0);
-        assert_eq!(Matrix4::identity(), view_transform(from, to, up));
-    }
-
-    #[test]
-    fn test_view_transform_looks_positive_z_direction() {
-        let from = Point::new(0.0, 0.0, 0.0);
-        let to = Point::new(0.0, 0.0, 1.0);
-        let up = Vector3::new(0.0, 1.0, 0.0);
-        assert_eq!(
-            transforms::scaling(-1.0, 1.0, -1.0),
-            view_transform(from, to, up)
-        );
-    }
-
-    #[test]
-    fn test_view_transform_moves_the_world() {
-        let from = Point::new(0.0, 0.0, 8.0);
-        let to = Point::new(0.0, 0.0, 0.0);
-        let up = Vector3::new(0.0, 1.0, 0.0);
-        assert_eq!(
-            transforms::translation(0.0, 0.0, -8.0),
-            view_transform(from, to, up)
-        );
-    }
-
-    #[test]
-    fn test_view_transformation() {
-        let from = Point::new(1.0, 3.0, 2.0);
-        let to = Point::new(4.0, -2.0, 8.0);
-        let up = Vector3::new(1.0, 1.0, 0.0);
-        assert_eq!(
-            Matrix4::new(&[
-                -0.50709, 0.50709, 0.67612, -2.36643, 0.76772, 0.60609, 0.12122, -2.82843,
-                -0.35857, 0.59761, -0.71714, 0.0, 0.0, 0.0, 0.0, 1.0
-            ]),
-            view_transform(from, to, up)
-        );
     }
 }

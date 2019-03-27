@@ -12,7 +12,7 @@ mod render;
 mod scalar;
 pub mod transforms;
 mod vector;
-pub mod world;
+mod world;
 
 pub use crate::camera::Camera;
 pub use crate::canvas::Canvas;

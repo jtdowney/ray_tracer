@@ -1,5 +1,7 @@
-use crate::{Matrix4, Scalar};
-use num_traits::{Float, One};
+use crate::{Matrix4, Point, Scalar, Vector3};
+use num_traits::{Float, One, Zero};
+use std::iter::Sum;
+use std::ops::Sub;
 
 pub fn translation<T: Scalar + One>(x: T, y: T, z: T) -> Matrix4<T> {
     let mut output = Matrix4::identity();
@@ -63,6 +65,35 @@ pub fn rotation_z<T: Scalar + Float + One>(rotation: T) -> Matrix4<T> {
     output[(2, 2)] = T::one();
     output[(3, 3)] = T::one();
     output
+}
+
+pub fn view<T>(from: Point<T>, to: Point<T>, up: Vector3<T>) -> Matrix4<T>
+where
+    T: Scalar + Float + One + Sub<Output = T> + Sum<T> + Zero,
+{
+    let forward = (to - from).normalize();
+    let left = forward.cross(up.normalize());
+    let true_up = left.cross(forward);
+    let orientation = Matrix4::new(&[
+        left[0],
+        left[1],
+        left[2],
+        T::zero(),
+        true_up[0],
+        true_up[1],
+        true_up[2],
+        T::zero(),
+        -forward[0],
+        -forward[1],
+        -forward[2],
+        T::zero(),
+        T::zero(),
+        T::zero(),
+        T::zero(),
+        T::one(),
+    ]);
+
+    orientation * translation(-from.x, -from.y, -from.z)
 }
 
 #[cfg(test)]
@@ -239,5 +270,43 @@ mod tests {
         let c = translation(10.0, 5.0, 7.0);
         let transform = c * b * a;
         assert_eq!(Point::new(15.0, 0.0, 7.0), transform * p);
+    }
+
+    #[test]
+    fn test_view_transform_for_default_orientation() {
+        let from = Point::new(0.0, 0.0, 0.0);
+        let to = Point::new(0.0, 0.0, -1.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+        assert_eq!(Matrix4::identity(), view(from, to, up));
+    }
+
+    #[test]
+    fn test_view_transform_looks_positive_z_direction() {
+        let from = Point::new(0.0, 0.0, 0.0);
+        let to = Point::new(0.0, 0.0, 1.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+        assert_eq!(scaling(-1.0, 1.0, -1.0), view(from, to, up));
+    }
+
+    #[test]
+    fn test_view_transform_moves_the_world() {
+        let from = Point::new(0.0, 0.0, 8.0);
+        let to = Point::new(0.0, 0.0, 0.0);
+        let up = Vector3::new(0.0, 1.0, 0.0);
+        assert_eq!(translation(0.0, 0.0, -8.0), view(from, to, up));
+    }
+
+    #[test]
+    fn test_view_transformation() {
+        let from = Point::new(1.0, 3.0, 2.0);
+        let to = Point::new(4.0, -2.0, 8.0);
+        let up = Vector3::new(1.0, 1.0, 0.0);
+        assert_eq!(
+            Matrix4::new(&[
+                -0.50709, 0.50709, 0.67612, -2.36643, 0.76772, 0.60609, 0.12122, -2.82843,
+                -0.35857, 0.59761, -0.71714, 0.0, 0.0, 0.0, 0.0, 1.0
+            ]),
+            view(from, to, up)
+        );
     }
 }

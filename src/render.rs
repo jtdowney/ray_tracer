@@ -26,7 +26,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{world, Color, Point, Vector3};
+    use crate::{transforms, Color, Point, Vector3};
     use std::f32::consts::PI;
 
     #[test]
@@ -37,7 +37,7 @@ mod tests {
 
         let w = World::default();
         let mut c = Camera::new(11, 11, PI / 2.0);
-        c.transform = world::view_transform(from, to, up);
+        c.transform = transforms::view(from, to, up);
 
         let image = render(c, w).unwrap();
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), image.pixel_at(5, 5));

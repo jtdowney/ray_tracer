@@ -1,5 +1,5 @@
 use failure::Error;
-use ray_tracer::{transforms, world, Camera, Color, Point, PointLight, Sphere, Vector3, World};
+use ray_tracer::{transforms, Camera, Color, Point, PointLight, Sphere, Vector3, World};
 use std::f32::consts::PI;
 
 fn main() -> Result<(), Error> {
@@ -46,7 +46,7 @@ fn main() -> Result<(), Error> {
     let world = World::new(light, objects);
 
     let mut camera = Camera::new(1000, 500, PI / 3.0);
-    camera.transform = world::view_transform(
+    camera.transform = transforms::view(
         Point::new(0.0, 1.5, -5.0),
         Point::new(0.0, 1.0, 0.0),
         Vector3::new(0.0, 1.0, 0.0),
