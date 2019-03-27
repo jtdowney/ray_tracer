@@ -6,11 +6,11 @@ fn main() -> Result<(), Error> {
     let wall_z = 10.0;
     let wall_size = 7.0;
     let canvas_pixels = 100;
-    let pixel_size = wall_size / canvas_pixels as f32;
+    let pixel_size = wall_size / f32::from(canvas_pixels);
     let half = wall_size / 2.0;
 
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
-    let mut shape = Sphere::new();
+    let mut shape = Sphere::default();
     shape.material.color = Color::new(1.0, 0.2, 1.0);
 
     let light_position = Point::new(-10.0, 10.0, -10.0);
@@ -18,10 +18,10 @@ fn main() -> Result<(), Error> {
     let light = PointLight::new(light_position, light_color);
 
     for y in 0..canvas_pixels {
-        let world_y = half - pixel_size * y as f32;
+        let world_y = half - pixel_size * f32::from(y);
 
         for x in 0..canvas_pixels {
-            let world_x = -half + pixel_size * x as f32;
+            let world_x = -half + pixel_size * f32::from(x);
             let position = Point::new(world_x, world_y, wall_z);
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
 

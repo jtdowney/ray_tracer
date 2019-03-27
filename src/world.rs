@@ -59,12 +59,12 @@ where
     T: Scalar + Float + From<f32> + Sub<Output = T> + One,
 {
     fn default() -> Self {
-        let mut s1 = Sphere::new();
+        let mut s1 = Sphere::default();
         s1.material.color = Color::new(0.8.into(), 1.0.into(), 0.6.into());
         s1.material.diffuse = 0.7.into();
         s1.material.specular = 0.2.into();
 
-        let mut s2 = Sphere::new();
+        let mut s2 = Sphere::default();
         s2.transform = Matrix4::scaling(0.5.into(), 0.5.into(), 0.5.into());
 
         let objects = vec![s1, s2];

@@ -37,7 +37,7 @@ fn main() {
         projectile = simulation.tick(projectile);
 
         let x = projectile.position.x.round() as u16;
-        let y = (canvas.height as f32 - projectile.position.y).round() as u16;
+        let y = (f32::from(canvas.height) - projectile.position.y).round() as u16;
 
         if x > canvas.width || y > canvas.height {
             continue;

@@ -11,11 +11,11 @@ pub struct Sphere<T: Scalar> {
     pub material: Material<T>,
 }
 
-impl<T> Sphere<T>
+impl<T> Default for Sphere<T>
 where
     T: Scalar + Float + From<f32> + Sub<Output = T> + One,
 {
-    pub fn new() -> Self {
+    fn default() -> Self {
         Sphere {
             transform: Matrix4::identity(),
             material: Material::default(),
@@ -94,13 +94,13 @@ mod tests {
 
     #[test]
     fn test_spheres_default_transformation() {
-        let s = Sphere::<f32>::new();
+        let s = Sphere::<f32>::default();
         assert_eq!(Matrix4::identity(), s.transform);
     }
 
     #[test]
     fn test_normal_on_sphere_at_x_axis() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         assert_eq!(
             Vector3::new(1.0, 0.0, 0.0),
             s.normal_at(Point::new(1.0, 0.0, 0.0)).unwrap()
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn test_normal_on_sphere_at_y_axis() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         assert_eq!(
             Vector3::new(0.0, 1.0, 0.0),
             s.normal_at(Point::new(0.0, 1.0, 0.0)).unwrap()
@@ -118,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_normal_on_sphere_at_z_axis() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         assert_eq!(
             Vector3::new(0.0, 0.0, 1.0),
             s.normal_at(Point::new(0.0, 0.0, 1.0)).unwrap()
@@ -127,7 +127,7 @@ mod tests {
 
     #[test]
     fn test_normal_on_sphere_at_nonaxial_point() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         assert_eq!(
             Vector3::new(3.0.sqrt() / 3.0, 3.0.sqrt() / 3.0, 3.0.sqrt() / 3.0),
             s.normal_at(Point::new(
@@ -141,7 +141,7 @@ mod tests {
 
     #[test]
     fn test_normal_is_a_normalized_vector() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let n = s
             .normal_at(Point::new(
                 3.0.sqrt() / 3.0,
@@ -154,7 +154,7 @@ mod tests {
 
     #[test]
     fn test_computing_normal_on_translated_sphere() {
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         s.transform = Matrix4::translation(0.0, 1.0, 0.0);
         assert_eq!(
             Vector3::new(0.0, 0.70711, -0.70711),
@@ -164,7 +164,7 @@ mod tests {
 
     #[test]
     fn test_computing_normal_on_transformed_sphere() {
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         s.transform = Matrix4::scaling(1.0, 0.5, 1.0) * Matrix4::rotation_z(PI / 5.0);
         assert_eq!(
             Vector3::new(0.0, 0.97014, -0.24254),
@@ -176,7 +176,7 @@ mod tests {
     #[test]
     fn test_ray_intersects_sphere_at_two_points() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(4.0, xs.next().unwrap().time);
         assert_eq!(6.0, xs.next().unwrap().time);
@@ -186,7 +186,7 @@ mod tests {
     #[test]
     fn test_ray_intersects_sphere_at_tangent() {
         let r = Ray::new(Point::new(0.0, 1.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(5.0, xs.next().unwrap().time);
         assert_eq!(5.0, xs.next().unwrap().time);
@@ -196,7 +196,7 @@ mod tests {
     #[test]
     fn test_ray_misses_sphere() {
         let r = Ray::new(Point::new(0.0, 2.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(0, xs.count());
     }
@@ -204,7 +204,7 @@ mod tests {
     #[test]
     fn test_ray_originates_inside_sphere() {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(-1.0, xs.next().unwrap().time);
         assert_eq!(1.0, xs.next().unwrap().time);
@@ -214,7 +214,7 @@ mod tests {
     #[test]
     fn test_sphere_behind_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(-6.0, xs.next().unwrap().time);
         assert_eq!(-4.0, xs.next().unwrap().time);
@@ -223,7 +223,7 @@ mod tests {
 
     #[test]
     fn test_intersection_has_time_and_object() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i = Intersection {
             time: 3.5,
             object: &s,
@@ -236,7 +236,7 @@ mod tests {
     #[test]
     fn test_intersect_sets_objects() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let s = Sphere::new();
+        let s = Sphere::default();
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(&s, xs.next().unwrap().object);
         assert_eq!(&s, xs.next().unwrap().object);
@@ -246,7 +246,7 @@ mod tests {
     #[test]
     fn test_intersecting_scaled_sphere_with_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         s.transform = Matrix4::scaling(2.0, 2.0, 2.0);
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert_eq!(3.0, xs.next().unwrap().time);
@@ -257,7 +257,7 @@ mod tests {
     #[test]
     fn test_intersecting_translated_sphere_with_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let mut s = Sphere::new();
+        let mut s = Sphere::default();
         s.transform = Matrix4::translation(5.0, 0.0, 0.0);
         let mut xs = s.intersect(r).unwrap().into_iter();
         assert!(xs.next().is_none());

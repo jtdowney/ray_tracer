@@ -92,10 +92,6 @@ where
             .filter(|i| i.time >= T::zero())
             .min_by(|a, b| a.time.partial_cmp(&b.time).unwrap())
     }
-
-    pub fn is_hit(self) -> bool {
-        self.hit().is_some()
-    }
 }
 
 #[cfg(test)]
@@ -104,7 +100,7 @@ mod tests {
 
     #[test]
     fn test_hit_with_all_positive_times() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection {
             time: 1.0,
             object: &s,
@@ -122,7 +118,7 @@ mod tests {
 
     #[test]
     fn test_hit_with_some_negative_times() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection {
             time: -1.0,
             object: &s,
@@ -140,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_hit_with_all_negative_times() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection {
             time: -2.0,
             object: &s,
@@ -157,7 +153,7 @@ mod tests {
 
     #[test]
     fn test_hit_lowest_positive_intersection() {
-        let s = Sphere::new();
+        let s = Sphere::default();
         let i1 = Intersection {
             time: 5.0,
             object: &s,
@@ -184,7 +180,7 @@ mod tests {
     #[test]
     fn test_precomputing_state_of_intersection() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let shape = Sphere::new();
+        let shape = Sphere::default();
         let i = Intersection {
             time: 4.0,
             object: &shape,
@@ -201,7 +197,7 @@ mod tests {
     #[test]
     fn test_precomputing_state_of_intersection_with_hit_inside() {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
-        let shape = Sphere::new();
+        let shape = Sphere::default();
         let i = Intersection {
             time: 1.0,
             object: &shape,

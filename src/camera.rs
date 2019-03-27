@@ -18,15 +18,18 @@ where
     pub fn new(horizontal_size: u16, vertical_size: u16, field_of_view: T) -> Self {
         let half_view = (field_of_view / 2.into()).tan();
         let aspect: T = Into::<T>::into(horizontal_size) / vertical_size.into();
-        let half_width: T;
-        let half_height: T;
-        if aspect >= T::one() {
-            half_width = half_view;
-            half_height = half_view / aspect;
+
+        let half_width = if aspect >= T::one() {
+            half_view
         } else {
-            half_width = half_view * aspect;
-            half_height = half_view;
-        }
+            half_view * aspect
+        };
+
+        let half_height = if aspect >= T::one() {
+            half_view / aspect
+        } else {
+            half_view
+        };
 
         let pixel_size = half_width * 2.into() / horizontal_size.into();
 
