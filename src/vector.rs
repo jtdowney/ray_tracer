@@ -67,7 +67,7 @@ impl<T> Vector3<T>
 where
     T: Scalar + Mul<Output = T> + Sub<Output = T>,
 {
-    pub fn cross(&self, other: &Vector3<T>) -> Vector3<T> {
+    pub fn cross(&self, other: Vector3<T>) -> Vector3<T> {
         Vector3::<T>::new(
             self[1] * other[2] - self[2] * other[1],
             self[2] * other[0] - self[0] * other[2],
@@ -324,8 +324,8 @@ mod tests {
     fn test_vector_cross_product() {
         let v1 = Vector3::new(1, 2, 3);
         let v2 = Vector3::new(2, 3, 4);
-        assert_eq!(Vector3::new(-1, 2, -1), v1.cross(&v2));
-        assert_eq!(Vector3::new(1, -2, 1), v2.cross(&v1));
+        assert_eq!(Vector3::new(-1, 2, -1), v1.cross(v2));
+        assert_eq!(Vector3::new(1, -2, 1), v2.cross(v1));
     }
 
     #[test]
