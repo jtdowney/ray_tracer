@@ -190,11 +190,11 @@ where
 
     fn mul(self, Point { x, y, z }: Point<T>) -> Self::Output {
         let row = self.row(0);
-        let t0 = row.values[0] * x + row.values[1] * y + row.values[2] * z + row.values[3];
+        let t0 = row[0] * x + row[1] * y + row[2] * z + row[3];
         let row = self.row(1);
-        let t1 = row.values[0] * x + row.values[1] * y + row.values[2] * z + row.values[3];
+        let t1 = row[0] * x + row[1] * y + row[2] * z + row[3];
         let row = self.row(2);
-        let t2 = row.values[0] * x + row.values[1] * y + row.values[2] * z + row.values[3];
+        let t2 = row[0] * x + row[1] * y + row[2] * z + row[3];
 
         Point::new(t0, t1, t2)
     }
@@ -208,17 +208,11 @@ where
 
     fn mul(self, vector: Vector3<T>) -> Self::Output {
         let row = self.row(0);
-        let t0 = row.values[0] * vector.values[0]
-            + row.values[1] * vector.values[1]
-            + row.values[2] * vector.values[2];
+        let t0 = row[0] * vector[0] + row[1] * vector[1] + row[2] * vector[2];
         let row = self.row(1);
-        let t1 = row.values[0] * vector.values[0]
-            + row.values[1] * vector.values[1]
-            + row.values[2] * vector.values[2];
+        let t1 = row[0] * vector[0] + row[1] * vector[1] + row[2] * vector[2];
         let row = self.row(2);
-        let t2 = row.values[0] * vector.values[0]
-            + row.values[1] * vector.values[1]
-            + row.values[2] * vector.values[2];
+        let t2 = row[0] * vector[0] + row[1] * vector[1] + row[2] * vector[2];
 
         Vector3::new(t0, t1, t2)
     }

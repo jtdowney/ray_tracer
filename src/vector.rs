@@ -2,7 +2,7 @@ use crate::Scalar;
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use num_traits::Float;
 use std::iter::{FromIterator, Sum};
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, Div, Index, Mul, Neg, Sub};
 use typenum::{U3, U4};
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -69,9 +69,9 @@ where
 {
     pub fn cross(&self, other: &Vector3<T>) -> Vector3<T> {
         Vector3::<T>::new(
-            self.values[1] * other.values[2] - self.values[2] * other.values[1],
-            self.values[2] * other.values[0] - self.values[0] * other.values[2],
-            self.values[0] * other.values[1] - self.values[1] * other.values[0],
+            self[1] * other[2] - self[2] * other[1],
+            self[2] * other[0] - self[0] * other[2],
+            self[0] * other[1] - self[1] * other[0],
         )
     }
 }
@@ -133,6 +133,19 @@ where
     fn div(self, other: T) -> Self::Output {
         let values = self.values.into_iter().map(|n| n / other).collect();
         Vector { values }
+    }
+}
+
+impl<T, N> Index<usize> for Vector<T, N>
+where
+    T: Scalar,
+    N: ArrayLength<T>,
+    N::ArrayType: Copy,
+{
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.values[index]
     }
 }
 
