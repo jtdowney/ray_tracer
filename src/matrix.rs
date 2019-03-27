@@ -1,6 +1,5 @@
 use crate::{Point, Scalar, Vector, Vector3};
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
-use itertools::iproduct;
 use num_traits::{Float, One, Zero};
 use std::error::Error;
 use std::fmt::{self, Display};
@@ -153,17 +152,25 @@ where
 impl<T, N, S> Mul<Matrix<T, N, S>> for Matrix<T, N, S>
 where
     T: Scalar + Mul<Output = T> + Sum<T>,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<T> + Default + Copy,
+    S: ArrayLength<T> + Default,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
     type Output = Matrix<T, N, S>;
 
     fn mul(self, other: Matrix<T, N, S>) -> Self::Output {
-        iproduct!(0..N::to_usize(), 0..N::to_usize())
-            .map(|(i, j)| self.row(i).dot(other.column(j)))
-            .collect()
+        let mut result = Matrix::<T, N, S>::default();
+
+        for j in 0..N::to_usize() {
+            let column = other.column(j);
+            for i in 0..N::to_usize() {
+                let row = self.row(i);
+                result[(i, j)] = row.dot(column)
+            }
+        }
+
+        result
     }
 }
 
@@ -327,13 +334,14 @@ where
             return Err(NotInvertableError);
         }
 
-        let output = iproduct!(0..4, 0..4)
-            .map(|(i, j)| self.cofactor(i, j))
-            .collect::<Matrix4<T>>()
-            .transpose()
-            .into_iter()
-            .map(|n| n / determinant)
-            .collect();
+        let mut output = Matrix4::default();
+        for j in 0..4 {
+            for i in 0..4 {
+                let cofactor = self.cofactor(i, j);
+                output[(j, i)] = cofactor / determinant;
+            }
+        }
+
         Ok(output)
     }
 }
