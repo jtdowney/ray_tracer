@@ -36,7 +36,7 @@ where
 
 impl<T, N> Vector<T, N>
 where
-    T: Scalar + Mul<Output = T> + Sub<Output = T> + Sum<T> + From<u8>,
+    T: Scalar + Mul<Output = T> + Sub<Output = T> + Sum<T> + From<u16>,
     N: ArrayLength<T> + Copy,
     N::ArrayType: Copy,
 {

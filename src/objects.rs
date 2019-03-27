@@ -43,7 +43,7 @@ where
     T: Scalar
         + Add<Output = T>
         + Float
-        + From<u8>
+        + From<u16>
         + Mul<Output = T>
         + Sub<Output = T>
         + Sum<T>
@@ -54,7 +54,7 @@ where
         let ray = ray.transform(self.transform.inverse()?);
         let object_to_ray = ray.origin - Point::default();
         let a = ray.direction.dot(ray.direction);
-        let b = Into::<T>::into(2u8) * ray.direction.dot(object_to_ray);
+        let b = Into::<T>::into(2) * ray.direction.dot(object_to_ray);
         let c = object_to_ray.dot(object_to_ray) - 1.into();
         let discriminant = b.powi(2) - Into::<T>::into(4) * a * c;
 

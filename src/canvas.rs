@@ -4,8 +4,8 @@ use std::fmt::{self, Write};
 
 #[derive(Debug)]
 pub struct Canvas<T: Scalar> {
-    pub width: usize,
-    pub height: usize,
+    pub width: u16,
+    pub height: u16,
     pixels: Vec<Color<T>>,
 }
 
@@ -13,20 +13,22 @@ impl<T> Canvas<T>
 where
     T: Scalar + Float + From<f32> + One + Zero,
 {
-    pub fn new(width: usize, height: usize) -> Canvas<T> {
+    pub fn new(width: u16, height: u16) -> Canvas<T> {
         Canvas {
             width,
             height,
-            pixels: vec![Color::default(); width * height],
+            pixels: vec![Color::default(); width as usize * height as usize],
         }
     }
 
-    pub fn write_pixel(&mut self, x: usize, y: usize, pixel: Color<T>) {
-        self.pixels[y * self.width + x] = pixel;
+    pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color<T>) {
+        let offset = y as usize * self.width as usize + x as usize;
+        self.pixels[offset] = pixel;
     }
 
-    pub fn pixel_at(&self, x: usize, y: usize) -> Color<T> {
-        self.pixels[y * self.width + x]
+    pub fn pixel_at(&self, x: u16, y: u16) -> Color<T> {
+        let offset = y as usize * self.width as usize + x as usize;
+        self.pixels[offset]
     }
 
     pub fn fill(&mut self, color: Color<T>) {
@@ -44,9 +46,10 @@ where
         writeln!(output, "255")?;
 
         for y in 0..self.height {
-            let codes = self.pixels[y * self.width..]
+            let offset = y as usize * self.width as usize;
+            let codes = self.pixels[offset..]
                 .iter()
-                .take(self.width)
+                .take(self.width as usize)
                 .flat_map(|&p| p)
                 .map(|b| b.to_string())
                 .collect::<Vec<String>>();

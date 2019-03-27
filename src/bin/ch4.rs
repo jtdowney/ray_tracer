@@ -9,8 +9,8 @@ fn main() -> Result<(), fmt::Error> {
 
     for _ in 0..12 {
         canvas.write_pixel(
-            (p.x + 250.0).round() as usize,
-            (p.y + 250.0).round() as usize,
+            (p.x + 250.0).round() as u16,
+            (p.y + 250.0).round() as u16,
             Color::new(1.0, 0.5, 0.0),
         );
 

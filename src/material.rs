@@ -29,7 +29,7 @@ where
 
 impl<T> Material<T>
 where
-    T: Scalar + Float + From<u8> + Mul<Output = T> + Sub<Output = T> + Sum<T> + Zero,
+    T: Scalar + Float + From<u16> + Mul<Output = T> + Sub<Output = T> + Sum<T> + Zero,
 {
     pub fn lighting(
         &self,

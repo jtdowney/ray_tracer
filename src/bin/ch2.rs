@@ -36,8 +36,8 @@ fn main() {
     while projectile.position.y >= 0.0 {
         projectile = simulation.tick(projectile);
 
-        let x = projectile.position.x.round() as usize;
-        let y = (canvas.height as f32 - projectile.position.y).round() as usize;
+        let x = projectile.position.x.round() as u16;
+        let y = (canvas.height as f32 - projectile.position.y).round() as u16;
 
         if x > canvas.width || y > canvas.height {
             continue;
