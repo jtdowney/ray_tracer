@@ -1,6 +1,20 @@
-use failure::Error;
 use ray_tracer::{transforms, Camera, Color, Point, PointLight, Sphere, Vector3, World};
+use std::error;
 use std::f32::consts::PI;
+use std::fmt::Display;
+
+#[derive(Debug)]
+struct Error {
+    error: String,
+}
+
+impl<T: Display + error::Error> From<T> for Error {
+    fn from(error: T) -> Self {
+        Error {
+            error: format!("Error: {}", error),
+        }
+    }
+}
 
 fn main() -> Result<(), Error> {
     let mut floor = Sphere::default();

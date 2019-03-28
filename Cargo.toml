@@ -4,9 +4,6 @@ version = "0.1.0"
 authors = ["John Downey <jdowney@gmail.com>"]
 edition = "2018"
 
-[dev-dependencies]
-failure = "0.1.5"
-
 [dependencies]
 generic-array = "0.12.0"
 num-traits = "0.2.6"

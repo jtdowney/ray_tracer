@@ -1,5 +1,19 @@
-use failure::Error;
 use ray_tracer::{Canvas, Color, Point, PointLight, Ray, Sphere};
+use std::error;
+use std::fmt::Display;
+
+#[derive(Debug)]
+struct Error {
+    error: String,
+}
+
+impl<T: Display + error::Error> From<T> for Error {
+    fn from(error: T) -> Self {
+        Error {
+            error: format!("Error: {}", error),
+        }
+    }
+}
 
 fn main() -> Result<(), Error> {
     let ray_origin = Point::new(0.0, 0.0, -5.0);
