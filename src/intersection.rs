@@ -1,4 +1,4 @@
-use crate::{matrix, Point, Ray, Sphere, Vector3};
+use crate::{matrix, Point, Ray, Sphere, Vector3, EPSILON};
 use std::vec;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -6,6 +6,7 @@ pub struct Computations<'a> {
     pub time: f32,
     pub object: &'a Sphere,
     pub point: Point,
+    pub over_point: Point,
     pub eye_vector: Vector3,
     pub normal_vector: Vector3,
     pub inside: bool,
@@ -34,9 +35,12 @@ impl<'a> Intersection<'a> {
             inside = false;
         }
 
+        let over_point = point + normal_vector * EPSILON;
+
         Ok(Computations {
             time: self.time,
             object: self.object,
+            over_point,
             point,
             eye_vector,
             normal_vector,
@@ -70,6 +74,7 @@ impl<'a> Intersections<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::transforms;
 
     #[test]
     fn test_hit_with_all_positive_times() {
@@ -180,5 +185,19 @@ mod tests {
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), comps.eye_vector);
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), comps.normal_vector);
         assert_eq!(true, comps.inside);
+    }
+
+    #[test]
+    fn test_hit_should_offset_point() {
+        let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
+        let mut shape = Sphere::default();
+        shape.transform = transforms::translation(0.0, 0.0, 1.0);
+        let i = Intersection {
+            time: 5.0,
+            object: &shape,
+        };
+        let comps = i.prepare_computations(r).unwrap();
+        assert!(comps.over_point.z < -(EPSILON / 2.0));
+        assert!(comps.point.z > comps.over_point.z);
     }
 }

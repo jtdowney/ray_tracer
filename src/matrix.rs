@@ -1,4 +1,4 @@
-use crate::{Point, Vector, Vector3};
+use crate::{Point, Vector, Vector3, EPSILON};
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use std::error::Error;
 use std::fmt::{self, Display};
@@ -219,7 +219,7 @@ where
             .as_slice()
             .iter()
             .zip(other.values.as_slice())
-            .all(|(&a, &b)| (a - b).abs() <= 0.00001)
+            .all(|(&a, &b)| (a - b).abs() <= EPSILON)
     }
 }
 

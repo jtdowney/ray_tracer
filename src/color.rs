@@ -1,3 +1,4 @@
+use crate::EPSILON;
 use std::ops::{Add, Mul};
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -47,7 +48,6 @@ impl Mul<f32> for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
-        const EPSILON: f32 = 0.0001;
         (self.red - other.red).abs() < EPSILON
             && (self.green - other.green).abs() < EPSILON
             && (self.blue - other.blue).abs() < EPSILON

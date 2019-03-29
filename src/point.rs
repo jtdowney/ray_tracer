@@ -1,4 +1,4 @@
-use crate::Vector3;
+use crate::{Vector3, EPSILON};
 use std::ops::{Add, Sub};
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -48,7 +48,6 @@ impl Sub<Vector3> for Point {
 
 impl PartialEq for Point {
     fn eq(&self, other: &Point) -> bool {
-        const EPSILON: f32 = 0.00001;
         (self.x - other.x).abs() < EPSILON
             && (self.y - other.y).abs() < EPSILON
             && (self.z - other.z).abs() < EPSILON

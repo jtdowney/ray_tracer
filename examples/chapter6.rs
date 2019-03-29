@@ -44,7 +44,10 @@ fn main() -> Result<(), Error> {
                     let point = ray.position(hit.time);
                     let normal = hit.object.normal_at(point).unwrap();
                     let eye = -ray.direction;
-                    let color = hit.object.material.lighting(light, point, eye, normal);
+                    let color = hit
+                        .object
+                        .material
+                        .lighting(light, point, eye, normal, false);
                     canvas.write_pixel(x, y, color);
                 }
             }

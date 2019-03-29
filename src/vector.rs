@@ -1,3 +1,4 @@
+use crate::EPSILON;
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use std::iter::FromIterator;
 use std::ops::{Add, Div, Index, Mul, Neg, Sub};
@@ -181,7 +182,7 @@ where
             .as_slice()
             .iter()
             .zip(other.values.as_slice())
-            .all(|(&a, &b)| (a - b).abs() <= 0.00001)
+            .all(|(&a, &b)| (a - b).abs() <= EPSILON)
     }
 }
 
