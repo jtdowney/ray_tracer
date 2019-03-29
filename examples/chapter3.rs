@@ -1,7 +1,7 @@
 use ray_tracer::{Matrix4, Vector4};
 
 fn main() {
-    dbg!(Matrix4::<f32>::identity().inverse().unwrap());
+    dbg!(Matrix4::identity().inverse().unwrap());
 
     let m = Matrix4::new(&[
         3.0, -9.0, 7.0, 3.0, 3.0, -8.0, 2.0, -9.0, -4.0, 4.0, 4.0, 1.0, -6.0, 5.0, -1.0, 1.0,
@@ -12,7 +12,7 @@ fn main() {
     dbg!(m.inverse().unwrap().transpose());
     dbg!(m.transpose().inverse().unwrap());
 
-    let mut i = Matrix4::<f32>::identity();
+    let mut i = Matrix4::identity();
     let v = Vector4::new(1.0, 2.0, 3.0, 4.0);
     dbg!(i * v);
 

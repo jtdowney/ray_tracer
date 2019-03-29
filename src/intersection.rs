@@ -1,48 +1,33 @@
-use crate::{matrix, Point, Ray, Scalar, Sphere, Vector3};
-use num_traits::{Float, Zero};
-use std::iter::Sum;
-use std::ops::{Add, Mul, Sub};
+use crate::{matrix, Point, Ray, Sphere, Vector3};
 use std::vec;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Computations<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    pub time: T,
-    pub object: &'a Sphere<T>,
-    pub point: Point<T>,
-    pub eye_vector: Vector3<T>,
-    pub normal_vector: Vector3<T>,
+pub struct Computations<'a> {
+    pub time: f32,
+    pub object: &'a Sphere,
+    pub point: Point,
+    pub eye_vector: Vector3,
+    pub normal_vector: Vector3,
     pub inside: bool,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
-pub struct Intersection<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    pub time: T,
-    pub object: &'a Sphere<T>,
+pub struct Intersection<'a> {
+    pub time: f32,
+    pub object: &'a Sphere,
 }
 
-impl<'a, T> Intersection<'a, T>
-where
-    T: Scalar + Add<Output = T> + Float + Mul<Output = T> + Sub<Output = T> + Sum<T> + Zero,
-    f64: From<T>,
-{
+impl<'a> Intersection<'a> {
     pub fn prepare_computations(
         &self,
-        ray: Ray<T>,
-    ) -> Result<Computations<T>, matrix::NotInvertableError> {
+        ray: Ray,
+    ) -> Result<Computations, matrix::NotInvertableError> {
         let point = ray.position(self.time);
         let eye_vector = -ray.direction;
         let mut normal_vector = self.object.normal_at(point)?;
         let inside: bool;
 
-        if normal_vector.dot(eye_vector) < T::zero() {
+        if normal_vector.dot(eye_vector) < 0.0 {
             inside = true;
             normal_vector = -normal_vector;
         } else {
@@ -61,20 +46,12 @@ where
 }
 
 #[derive(Debug)]
-pub struct Intersections<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    pub intersections: Vec<Intersection<'a, T>>,
+pub struct Intersections<'a> {
+    pub intersections: Vec<Intersection<'a>>,
 }
 
-impl<'a, T> IntoIterator for Intersections<'a, T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    type Item = Intersection<'a, T>;
+impl<'a> IntoIterator for Intersections<'a> {
+    type Item = Intersection<'a>;
     type IntoIter = vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -82,14 +59,10 @@ where
     }
 }
 
-impl<'a, T> Intersections<'a, T>
-where
-    T: Scalar + Sub<Output = T> + PartialOrd + Zero,
-    f64: From<T>,
-{
-    pub fn hit(self) -> Option<Intersection<'a, T>> {
+impl<'a> Intersections<'a> {
+    pub fn hit(self) -> Option<Intersection<'a>> {
         self.into_iter()
-            .filter(|i| i.time >= T::zero())
+            .filter(|i| i.time >= 0.0)
             .min_by(|a, b| a.time.partial_cmp(&b.time).unwrap())
     }
 }

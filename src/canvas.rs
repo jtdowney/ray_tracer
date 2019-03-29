@@ -1,19 +1,15 @@
-use crate::{Color, Scalar};
-use num_traits::{Float, One, Zero};
+use crate::Color;
 use std::fmt::{self, Write};
 
 #[derive(Debug)]
-pub struct Canvas<T: Scalar> {
+pub struct Canvas {
     pub width: u16,
     pub height: u16,
-    pixels: Vec<Color<T>>,
+    pixels: Vec<Color>,
 }
 
-impl<T> Canvas<T>
-where
-    T: Scalar + Float + From<f32> + One + Zero,
-{
-    pub fn new(width: u16, height: u16) -> Canvas<T> {
+impl Canvas {
+    pub fn new(width: u16, height: u16) -> Canvas {
         Canvas {
             width,
             height,
@@ -21,17 +17,17 @@ where
         }
     }
 
-    pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color<T>) {
+    pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color) {
         let offset = y as usize * self.width as usize + x as usize;
         self.pixels[offset] = pixel;
     }
 
-    pub fn pixel_at(&self, x: u16, y: u16) -> Color<T> {
+    pub fn pixel_at(&self, x: u16, y: u16) -> Color {
         let offset = y as usize * self.width as usize + x as usize;
         self.pixels[offset]
     }
 
-    pub fn fill(&mut self, color: Color<T>) {
+    pub fn fill(&mut self, color: Color) {
         for y in 0..self.height {
             for x in 0..self.width {
                 self.write_pixel(x, y, color);
@@ -88,7 +84,7 @@ mod tests {
 
     #[test]
     fn test_constructing_ppm_header() {
-        let canvas = Canvas::<f32>::new(5, 3);
+        let canvas = Canvas::new(5, 3);
         let ppm = canvas.to_ppm().unwrap();
         let mut lines = ppm.lines();
         assert_eq!(Some("P3"), lines.next());
@@ -139,7 +135,7 @@ mod tests {
 
     #[test]
     fn test_ppm_files_are_newline_terminated() {
-        let canvas = Canvas::<f32>::new(5, 3);
+        let canvas = Canvas::new(5, 3);
         let ppm = canvas.to_ppm().unwrap();
         let line = ppm.lines().last();
         assert_eq!(Some(""), line);

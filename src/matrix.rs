@@ -1,11 +1,10 @@
-use crate::{Point, Scalar, Vector, Vector3};
+use crate::{Point, Vector, Vector3};
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
-use num_traits::{Float, One, Zero};
 use std::error::Error;
 use std::fmt::{self, Display};
-use std::iter::{FromIterator, Sum};
+use std::iter::FromIterator;
 use std::marker::PhantomData;
-use std::ops::{Add, Index, IndexMut, Mul, Neg, Sub};
+use std::ops::{Index, IndexMut, Mul};
 use typenum::{Prod, U2, U3, U4};
 
 #[derive(Debug)]
@@ -20,50 +19,46 @@ impl Display for NotInvertableError {
 }
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Matrix<T, N, S = Prod<N, N>>
+pub struct Matrix<N, S = Prod<N, N>>
 where
-    T: Scalar,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     S::ArrayType: Copy,
 {
-    pub values: GenericArray<T, S>,
+    values: GenericArray<f32, S>,
     _phantom: PhantomData<N>,
 }
 
-pub type Matrix2<T> = Matrix<T, U2>;
-pub type Matrix3<T> = Matrix<T, U3>;
-pub type Matrix4<T> = Matrix<T, U4>;
+pub type Matrix2 = Matrix<U2>;
+pub type Matrix3 = Matrix<U3>;
+pub type Matrix4 = Matrix<U4>;
 
-impl<T, N, S> Matrix<T, N, S>
+impl<N, S> Matrix<N, S>
 where
-    T: Scalar,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
-    pub fn new(values: &[T]) -> Self {
+    pub fn new(values: &[f32]) -> Self {
         values.iter().cloned().collect()
     }
 
-    pub fn row(&self, row: usize) -> Vector<T, N> {
+    pub fn row(&self, row: usize) -> Vector<N> {
         let offset = row * N::to_usize();
-        let values = self.values[offset..]
+        self.values[offset..]
             .iter()
             .take(N::to_usize())
             .cloned()
-            .collect();
-        Vector { values }
+            .collect()
     }
 
-    pub fn column(&self, column: usize) -> Vector<T, N> {
-        let values = self.values[column..]
+    pub fn column(&self, column: usize) -> Vector<N> {
+        self.values[column..]
             .iter()
             .step_by(N::to_usize())
             .cloned()
-            .collect();
-        Vector { values }
+            .collect()
     }
 
     pub fn transpose(&self) -> Self {
@@ -71,33 +66,32 @@ where
     }
 }
 
-impl<T, N, S> Matrix<T, N, S>
+impl<N, S> Matrix<N, S>
 where
-    T: Scalar + One,
-    N: ArrayLength<T> + Default,
-    S: ArrayLength<T> + Default,
+    N: ArrayLength<f32> + Default,
+    S: ArrayLength<f32> + Default,
+    N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
     pub fn identity() -> Self {
         let mut output = Matrix::default();
         for i in 0..N::to_usize() {
-            output[(i, i)] = T::one();
+            output[(i, i)] = 1.0;
         }
 
         output
     }
 }
 
-impl<T, N, S> FromIterator<T> for Matrix<T, N, S>
+impl<N, S> FromIterator<f32> for Matrix<N, S>
 where
-    T: Scalar,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     S::ArrayType: Copy,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = T>,
+        I: IntoIterator<Item = f32>,
     {
         Matrix {
             values: iter.into_iter().collect(),
@@ -106,14 +100,13 @@ where
     }
 }
 
-impl<T, N, S> Index<(usize, usize)> for Matrix<T, N, S>
+impl<N, S> Index<(usize, usize)> for Matrix<N, S>
 where
-    T: Scalar,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     S::ArrayType: Copy,
 {
-    type Output = T;
+    type Output = f32;
 
     fn index(&self, (i, j): (usize, usize)) -> &Self::Output {
         let offset = i * N::to_usize() + j;
@@ -121,11 +114,10 @@ where
     }
 }
 
-impl<T, N, S> IndexMut<(usize, usize)> for Matrix<T, N, S>
+impl<N, S> IndexMut<(usize, usize)> for Matrix<N, S>
 where
-    T: Scalar,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     S::ArrayType: Copy,
 {
     fn index_mut(&mut self, (i, j): (usize, usize)) -> &mut Self::Output {
@@ -134,33 +126,31 @@ where
     }
 }
 
-impl<T, N, S> IntoIterator for Matrix<T, N, S>
+impl<N, S> IntoIterator for Matrix<N, S>
 where
-    T: Scalar,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     S::ArrayType: Copy,
 {
-    type Item = T;
-    type IntoIter = GenericArrayIter<T, S>;
+    type Item = f32;
+    type IntoIter = GenericArrayIter<f32, S>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.values.into_iter()
     }
 }
 
-impl<T, N, S> Mul<Matrix<T, N, S>> for Matrix<T, N, S>
+impl<N, S> Mul<Matrix<N, S>> for Matrix<N, S>
 where
-    T: Scalar + Mul<Output = T> + Sum<T>,
-    N: ArrayLength<T> + Default + Copy,
-    S: ArrayLength<T> + Default,
+    N: ArrayLength<f32> + Default + Copy,
+    S: ArrayLength<f32> + Default,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
-    type Output = Matrix<T, N, S>;
+    type Output = Matrix<N, S>;
 
-    fn mul(self, other: Matrix<T, N, S>) -> Self::Output {
-        let mut result = Matrix::<T, N, S>::default();
+    fn mul(self, other: Matrix<N, S>) -> Self::Output {
+        let mut result = Matrix::<N, S>::default();
 
         for j in 0..N::to_usize() {
             let column = other.column(j);
@@ -174,28 +164,24 @@ where
     }
 }
 
-impl<T, N, S> Mul<Vector<T, N>> for Matrix<T, N, S>
+impl<N, S> Mul<Vector<N>> for Matrix<N, S>
 where
-    T: Scalar + Mul<Output = T> + Sum<T> + Default,
-    N: ArrayLength<T> + Copy,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32> + Copy,
+    S: ArrayLength<f32>,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
-    type Output = Vector<T, N>;
+    type Output = Vector<N>;
 
-    fn mul(self, other: Vector<T, N>) -> Self::Output {
+    fn mul(self, other: Vector<N>) -> Self::Output {
         (0..N::to_usize()).map(|i| self.row(i).dot(other)).collect()
     }
 }
 
-impl<T> Mul<Point<T>> for Matrix4<T>
-where
-    T: Scalar + Mul<Output = T> + Add<Output = T>,
-{
-    type Output = Point<T>;
+impl Mul<Point> for Matrix4 {
+    type Output = Point;
 
-    fn mul(self, Point { x, y, z }: Point<T>) -> Self::Output {
+    fn mul(self, Point { x, y, z }: Point) -> Self::Output {
         let row = self.row(0);
         let t0 = row[0] * x + row[1] * y + row[2] * z + row[3];
         let row = self.row(1);
@@ -207,13 +193,10 @@ where
     }
 }
 
-impl<T> Mul<Vector3<T>> for Matrix4<T>
-where
-    T: Scalar + Mul<Output = T> + Add<Output = T>,
-{
-    type Output = Vector3<T>;
+impl Mul<Vector3> for Matrix4 {
+    type Output = Vector3;
 
-    fn mul(self, vector: Vector3<T>) -> Self::Output {
+    fn mul(self, vector: Vector3) -> Self::Output {
         let row = self.row(0);
         let t0 = row[0] * vector[0] + row[1] * vector[1] + row[2] * vector[2];
         let row = self.row(1);
@@ -225,38 +208,29 @@ where
     }
 }
 
-impl<T, N, S> PartialEq for Matrix<T, N, S>
+impl<N, S> PartialEq for Matrix<N, S>
 where
-    T: Scalar + Sub<Output = T>,
-    N: ArrayLength<T>,
-    S: ArrayLength<T>,
+    N: ArrayLength<f32>,
+    S: ArrayLength<f32>,
     S::ArrayType: Copy,
-    f64: From<T>,
 {
-    fn eq(&self, other: &Matrix<T, N, S>) -> bool {
+    fn eq(&self, other: &Matrix<N, S>) -> bool {
         self.values
             .as_slice()
             .iter()
             .zip(other.values.as_slice())
-            .all(|(&a, &b)| f64::from(a - b).abs() <= 0.00001)
+            .all(|(&a, &b)| (a - b).abs() <= 0.00001)
     }
 }
 
-impl<T> Matrix2<T>
-where
-    T: Scalar + Mul<Output = T> + Sub<Output = T>,
-{
-    pub fn determinant(&self) -> T {
+impl Matrix2 {
+    pub fn determinant(&self) -> f32 {
         self.values[0] * self.values[3] - self.values[1] * self.values[2]
     }
 }
 
-// TODO: Find a way to make these generic
-impl<T> Matrix3<T>
-where
-    T: Scalar + Neg<Output = T> + Mul<Output = T> + Sub<Output = T> + Sum<T>,
-{
-    pub fn submatrix(&self, row: usize, col: usize) -> Matrix2<T> {
+impl Matrix3 {
+    pub fn submatrix(&self, row: usize, col: usize) -> Matrix2 {
         (0..3)
             .filter(|&i| i != row)
             .flat_map(|i| {
@@ -269,11 +243,11 @@ where
             .collect()
     }
 
-    pub fn minor(&self, row: usize, col: usize) -> T {
+    pub fn minor(&self, row: usize, col: usize) -> f32 {
         self.submatrix(row, col).determinant()
     }
 
-    pub fn cofactor(&self, row: usize, col: usize) -> T {
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let value = self.minor(row, col);
         if row + col % 2 == 0 {
             value
@@ -282,17 +256,14 @@ where
         }
     }
 
-    pub fn determinant(&self) -> T {
+    pub fn determinant(&self) -> f32 {
         let row = self.row(0);
         (0..3).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }
 }
 
-impl<T> Matrix4<T>
-where
-    T: Scalar + Neg<Output = T> + Mul<Output = T> + Sub<Output = T> + Sum<T> + Zero,
-{
-    pub fn submatrix(&self, row: usize, col: usize) -> Matrix3<T> {
+impl Matrix4 {
+    pub fn submatrix(&self, row: usize, col: usize) -> Matrix3 {
         (0..4)
             .filter(|&i| i != row)
             .flat_map(|i| {
@@ -305,11 +276,11 @@ where
             .collect()
     }
 
-    pub fn minor(&self, row: usize, col: usize) -> T {
+    pub fn minor(&self, row: usize, col: usize) -> f32 {
         self.submatrix(row, col).determinant()
     }
 
-    pub fn cofactor(&self, row: usize, col: usize) -> T {
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let value = self.minor(row, col);
         if (row + col) % 2 == 0 {
             value
@@ -318,19 +289,14 @@ where
         }
     }
 
-    pub fn determinant(&self) -> T {
+    pub fn determinant(&self) -> f32 {
         let row = self.row(0);
         (0..4).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }
-}
 
-impl<T> Matrix4<T>
-where
-    T: Scalar + Neg<Output = T> + Mul<Output = T> + Sub<Output = T> + Sum<T> + Zero + Float,
-{
     pub fn inverse(&self) -> Result<Self, NotInvertableError> {
         let determinant = self.determinant();
-        if determinant == T::zero() {
+        if determinant == 0.0 {
             return Err(NotInvertableError);
         }
 
@@ -353,21 +319,21 @@ mod tests {
 
     #[test]
     fn test_constructing_2x2_matrix() {
-        let m = Matrix2::new(&[-3, 5, 1, -2]);
+        let m = Matrix2::new(&[-3.0, 5.0, 1.0, -2.0]);
 
-        assert_eq!(-3, m[(0, 0)]);
-        assert_eq!(5, m[(0, 1)]);
-        assert_eq!(1, m[(1, 0)]);
-        assert_eq!(-2, m[(1, 1)]);
+        assert_eq!(-3.0, m[(0, 0)]);
+        assert_eq!(5.0, m[(0, 1)]);
+        assert_eq!(1.0, m[(1, 0)]);
+        assert_eq!(-2.0, m[(1, 1)]);
     }
 
     #[test]
     fn test_constructing_3x3_matrix() {
-        let m = Matrix3::new(&[-3, 5, 0, 1, -2, -7, 0, 1, 1]);
+        let m = Matrix3::new(&[-3.0, 5.0, 0.0, 1.0, -2.0, -7.0, 0.0, 1.0, 1.0]);
 
-        assert_eq!(-3, m[(0, 0)]);
-        assert_eq!(-2, m[(1, 1)]);
-        assert_eq!(1, m[(2, 2)]);
+        assert_eq!(-3.0, m[(0, 0)]);
+        assert_eq!(-2.0, m[(1, 1)]);
+        assert_eq!(1.0, m[(2, 2)]);
     }
 
     #[test]
@@ -387,138 +353,171 @@ mod tests {
 
     #[test]
     fn test_matrix_row() {
-        let m = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
+        let m = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        ]);
 
-        assert_eq!(Vector4::new(5, 6, 7, 8), m.row(1));
+        assert_eq!(Vector4::new(5.0, 6.0, 7.0, 8.0), m.row(1));
     }
 
     #[test]
     fn test_matrix_column() {
-        let m = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
+        let m = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        ]);
 
-        assert_eq!(Vector4::new(2, 6, 8, 4), m.column(1));
+        assert_eq!(Vector4::new(2.0, 6.0, 8.0, 4.0), m.column(1));
     }
 
     #[test]
     fn test_matrix_equality() {
-        let a = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
-        let b = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
+        let a = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        ]);
+        let b = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        ]);
 
         assert_eq!(a, b);
     }
 
     #[test]
     fn test_matrix_inequality() {
-        let a = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
-        let b = Matrix4::new(&[2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+        let a = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        ]);
+        let b = Matrix4::new(&[
+            2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0,
+        ]);
 
         assert_ne!(a, b);
     }
 
     #[test]
     fn test_multiplying_matrices() {
-        let a = Matrix4::new(&[1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2]);
-        let b = Matrix4::new(&[-2, 1, 2, 3, 3, 2, 1, -1, 4, 3, 6, 5, 1, 2, 7, 8]);
+        let a = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
+        ]);
+        let b = Matrix4::new(&[
+            -2.0, 1.0, 2.0, 3.0, 3.0, 2.0, 1.0, -1.0, 4.0, 3.0, 6.0, 5.0, 1.0, 2.0, 7.0, 8.0,
+        ]);
 
         assert_eq!(
-            Matrix4::new(&[20, 22, 50, 48, 44, 54, 114, 108, 40, 58, 110, 102, 16, 26, 46, 42]),
+            Matrix4::new(&[
+                20.0, 22.0, 50.0, 48.0, 44.0, 54.0, 114.0, 108.0, 40.0, 58.0, 110.0, 102.0, 16.0,
+                26.0, 46.0, 42.0
+            ]),
             a * b
         );
     }
 
     #[test]
     fn test_multiplying_matrix_by_vector() {
-        let a = Matrix4::new(&[1, 2, 3, 4, 2, 4, 4, 2, 8, 6, 4, 1, 0, 0, 0, 1]);
-        let b = Vector4::new(1, 2, 3, 1);
+        let a = Matrix4::new(&[
+            1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+        ]);
+        let b = Vector4::new(1.0, 2.0, 3.0, 1.0);
 
-        assert_eq!(Vector4::new(18, 24, 33, 1), a * b);
+        assert_eq!(Vector4::new(18.0, 24.0, 33.0, 1.0), a * b);
     }
 
     #[test]
     fn test_identity() {
-        assert_eq!(Matrix2::new(&[1, 0, 0, 1]), Matrix::identity());
+        assert_eq!(Matrix2::new(&[1.0, 0.0, 0.0, 1.0]), Matrix::identity());
         assert_eq!(
-            Matrix3::new(&[1, 0, 0, 0, 1, 0, 0, 0, 1]),
+            Matrix3::new(&[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]),
             Matrix::identity()
         );
         assert_eq!(
-            Matrix4::new(&[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]),
+            Matrix4::new(&[
+                1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0
+            ]),
             Matrix::identity()
         );
     }
 
     #[test]
     fn test_multiplying_matrix_by_identity() {
-        let m = Matrix4::new(&[0, 1, 2, 4, 1, 2, 4, 8, 2, 4, 8, 16, 4, 8, 16, 32]);
+        let m = Matrix4::new(&[
+            0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0, 16.0, 4.0, 8.0, 16.0, 32.0,
+        ]);
         assert_eq!(m, m * Matrix::identity());
     }
 
     #[test]
     fn test_transposing_matrix() {
-        let m = Matrix4::new(&[0, 9, 3, 0, 9, 8, 0, 8, 1, 8, 5, 3, 0, 0, 5, 8]);
+        let m = Matrix4::new(&[
+            0.0, 9.0, 3.0, 0.0, 9.0, 8.0, 0.0, 8.0, 1.0, 8.0, 5.0, 3.0, 0.0, 0.0, 5.0, 8.0,
+        ]);
         assert_eq!(
-            Matrix4::new(&[0, 9, 1, 0, 9, 8, 8, 0, 3, 0, 5, 5, 0, 8, 3, 8]),
+            Matrix4::new(&[
+                0.0, 9.0, 1.0, 0.0, 9.0, 8.0, 8.0, 0.0, 3.0, 0.0, 5.0, 5.0, 0.0, 8.0, 3.0, 8.0
+            ]),
             m.transpose()
         );
     }
 
     #[test]
     fn test_transposing_identity_matrix() {
-        let m = Matrix4::<i8>::identity();
+        let m = Matrix4::identity();
         assert_eq!(Matrix4::identity(), m.transpose());
     }
 
     #[test]
     fn test_determinant_of_2x2_matrix() {
-        let m = Matrix2::new(&[1, 5, -3, 2]);
-        assert_eq!(17, m.determinant());
+        let m = Matrix2::new(&[1.0, 5.0, -3.0, 2.0]);
+        assert_eq!(17.0, m.determinant());
     }
 
     #[test]
     fn test_submatrix_of_3x3_matrix() {
-        let m = Matrix3::new(&[1, 5, 0, -3, 2, 7, 0, 6, -3]);
-        assert_eq!(Matrix2::new(&[-3, 2, 0, 6]), m.submatrix(0, 2));
+        let m = Matrix3::new(&[1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0]);
+        assert_eq!(Matrix2::new(&[-3.0, 2.0, 0.0, 6.0]), m.submatrix(0, 2));
     }
 
     #[test]
     fn test_submatrix_of_4x4_matrix() {
-        let m = Matrix4::new(&[-6, 1, 1, 6, -8, 5, 8, 6, -1, 0, 8, 2, -7, 1, -1, 1]);
+        let m = Matrix4::new(&[
+            -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
+        ]);
         assert_eq!(
-            Matrix3::new(&[-6, 1, 6, -8, 8, 6, -7, -1, 1]),
+            Matrix3::new(&[-6.0, 1.0, 6.0, -8.0, 8.0, 6.0, -7.0, -1.0, 1.0]),
             m.submatrix(2, 1)
         );
     }
 
     #[test]
     fn test_minor_of_3x3_matrix() {
-        let m = Matrix3::new(&[3, 5, 0, 2, -1, -7, 6, -1, 5]);
-        assert_eq!(25, m.minor(1, 0));
+        let m = Matrix3::new(&[3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+        assert_eq!(25.0, m.minor(1, 0));
     }
 
     #[test]
     fn test_cofactor_of_3x3_matrix() {
-        let m = Matrix3::new(&[3, 5, 0, 2, -1, -7, 6, -1, 5]);
-        assert_eq!(-12, m.cofactor(0, 0));
-        assert_eq!(-25, m.cofactor(1, 0));
+        let m = Matrix3::new(&[3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
+        assert_eq!(-12.0, m.cofactor(0, 0));
+        assert_eq!(-25.0, m.cofactor(1, 0));
     }
 
     #[test]
     fn test_determinant_of_3x3_matrix() {
-        let m = Matrix3::new(&[1, 2, 6, -5, 8, -4, 2, 6, 4]);
-        assert_eq!(56, m.cofactor(0, 0));
-        assert_eq!(12, m.cofactor(0, 1));
-        assert_eq!(-46, m.cofactor(0, 2));
-        assert_eq!(-196, m.determinant());
+        let m = Matrix3::new(&[1.0, 2.0, 6.0, -5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
+        assert_eq!(56.0, m.cofactor(0, 0));
+        assert_eq!(12.0, m.cofactor(0, 1));
+        assert_eq!(-46.0, m.cofactor(0, 2));
+        assert_eq!(-196.0, m.determinant());
     }
 
     #[test]
     fn test_determinant_of_4x4_matrix() {
-        let m = Matrix4::new(&[-2, -8, 3, 5, -3, 1, 7, 3, 1, 2, -9, 6, -6, 7, 7, -9]);
-        assert_eq!(690, m.cofactor(0, 0));
-        assert_eq!(447, m.cofactor(0, 1));
-        assert_eq!(210, m.cofactor(0, 2));
-        assert_eq!(51, m.cofactor(0, 3));
-        assert_eq!(-4071, m.determinant());
+        let m = Matrix4::new(&[
+            -2.0, -8.0, 3.0, 5.0, -3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0,
+        ]);
+        assert_eq!(690.0, m.cofactor(0, 0));
+        assert_eq!(447.0, m.cofactor(0, 1));
+        assert_eq!(210.0, m.cofactor(0, 2));
+        assert_eq!(51.0, m.cofactor(0, 3));
+        assert_eq!(-4071.0, m.determinant());
     }
 
     #[test]

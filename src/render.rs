@@ -1,15 +1,6 @@
-use crate::{matrix, Camera, Canvas, Scalar, World};
-use num_traits::Float;
-use std::iter::Sum;
+use crate::{matrix, Camera, Canvas, World};
 
-pub fn render<T>(
-    camera: Camera<T>,
-    world: World<T>,
-) -> Result<Canvas<T>, matrix::NotInvertableError>
-where
-    T: Scalar + Float + From<u16> + From<f32> + Sum<T>,
-    f64: From<T>,
-{
+pub fn render(camera: Camera, world: World) -> Result<Canvas, matrix::NotInvertableError> {
     let mut canvas = Canvas::new(camera.horizontal_size, camera.vertical_size);
 
     for y in 0..camera.vertical_size {

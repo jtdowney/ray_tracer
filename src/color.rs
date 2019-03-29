@@ -1,27 +1,22 @@
-use crate::Scalar;
-use num_traits::{Float, One, Zero};
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, Mul};
 
 #[derive(Copy, Clone, Debug, Default)]
-pub struct Color<T> {
-    red: T,
-    green: T,
-    blue: T,
+pub struct Color {
+    red: f32,
+    green: f32,
+    blue: f32,
 }
 
-impl<T: Scalar> Color<T> {
-    pub fn new(red: T, green: T, blue: T) -> Color<T> {
+impl Color {
+    pub fn new(red: f32, green: f32, blue: f32) -> Color {
         Color { red, green, blue }
     }
 }
 
-impl<T> Add<Color<T>> for Color<T>
-where
-    T: Scalar + Add<Output = T>,
-{
-    type Output = Color<T>;
+impl Add<Color> for Color {
+    type Output = Color;
 
-    fn add(self, other: Color<T>) -> Self::Output {
+    fn add(self, other: Color) -> Self::Output {
         Color::new(
             self.red + other.red,
             self.green + other.green,
@@ -30,13 +25,10 @@ where
     }
 }
 
-impl<T> Mul<Color<T>> for Color<T>
-where
-    T: Scalar + Mul<Output = T>,
-{
-    type Output = Color<T>;
+impl Mul<Color> for Color {
+    type Output = Color;
 
-    fn mul(self, other: Color<T>) -> Self::Output {
+    fn mul(self, other: Color) -> Self::Output {
         Color::new(
             self.red * other.red,
             self.green * other.green,
@@ -45,36 +37,26 @@ where
     }
 }
 
-impl<T> Mul<T> for Color<T>
-where
-    T: Scalar + Mul<Output = T>,
-{
-    type Output = Color<T>;
+impl Mul<f32> for Color {
+    type Output = Color;
 
-    fn mul(self, other: T) -> Self::Output {
+    fn mul(self, other: f32) -> Self::Output {
         Color::new(self.red * other, self.green * other, self.blue * other)
     }
 }
 
-impl<T> PartialEq for Color<T>
-where
-    T: Scalar + Sub<Output = T>,
-    f64: From<T>,
-{
-    fn eq(&self, other: &Color<T>) -> bool {
-        const EPSILON: f64 = 0.00001;
-        f64::from(self.red - other.red).abs() < EPSILON
-            && f64::from(self.green - other.green).abs() < EPSILON
-            && f64::from(self.blue - other.blue).abs() < EPSILON
+impl PartialEq for Color {
+    fn eq(&self, other: &Color) -> bool {
+        const EPSILON: f32 = 0.0001;
+        (self.red - other.red).abs() < EPSILON
+            && (self.green - other.green).abs() < EPSILON
+            && (self.blue - other.blue).abs() < EPSILON
     }
 }
 
-impl<T> IntoIterator for Color<T>
-where
-    T: Scalar + Float + From<f32> + One + Zero,
-{
+impl IntoIterator for Color {
     type Item = u8;
-    type IntoIter = ColorIterator<T>;
+    type IntoIter = ColorIterator;
 
     fn into_iter(self) -> Self::IntoIter {
         ColorIterator {
@@ -84,15 +66,12 @@ where
     }
 }
 
-pub struct ColorIterator<T: Scalar> {
-    color: Color<T>,
+pub struct ColorIterator {
+    color: Color,
     index: u8,
 }
 
-impl<T> Iterator for ColorIterator<T>
-where
-    T: Scalar + Float + From<f32> + One + Zero,
-{
+impl Iterator for ColorIterator {
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -104,9 +83,8 @@ where
             _ => return None,
         };
 
-        (color.min(T::one()).max(T::zero()) * 255.0.into())
-            .round()
-            .to_u8()
+        let value = (color.min(1.0).max(0.0) * 255.0).round();
+        Some(value as u8)
     }
 }
 

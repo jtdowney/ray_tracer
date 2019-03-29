@@ -1,13 +1,13 @@
-use crate::{Color, Point, Scalar};
+use crate::{Color, Point};
 
 #[derive(Copy, Clone, Debug)]
-pub struct PointLight<T: Scalar> {
-    pub position: Point<T>,
-    pub intensity: Color<T>,
+pub struct PointLight {
+    pub position: Point,
+    pub intensity: Color,
 }
 
-impl<T: Scalar> PointLight<T> {
-    pub fn new(position: Point<T>, intensity: Color<T>) -> Self {
+impl PointLight {
+    pub fn new(position: Point, intensity: Color) -> Self {
         PointLight {
             position,
             intensity,

@@ -1,9 +1,6 @@
-use crate::{Matrix4, Point, Scalar, Vector3};
-use num_traits::{Float, One, Zero};
-use std::iter::Sum;
-use std::ops::Sub;
+use crate::{Matrix4, Point, Vector3};
 
-pub fn translation<T: Scalar + One>(x: T, y: T, z: T) -> Matrix4<T> {
+pub fn translation(x: f32, y: f32, z: f32) -> Matrix4 {
     let mut output = Matrix4::identity();
     output[(0, 3)] = x;
     output[(1, 3)] = y;
@@ -11,16 +8,16 @@ pub fn translation<T: Scalar + One>(x: T, y: T, z: T) -> Matrix4<T> {
     output
 }
 
-pub fn scaling<T: Scalar + One>(x: T, y: T, z: T) -> Matrix4<T> {
+pub fn scaling(x: f32, y: f32, z: f32) -> Matrix4 {
     let mut output = Matrix4::default();
     output[(0, 0)] = x;
     output[(1, 1)] = y;
     output[(2, 2)] = z;
-    output[(3, 3)] = T::one();
+    output[(3, 3)] = 1.0;
     output
 }
 
-pub fn shearing<T: Scalar + One>(x1: T, x2: T, y1: T, y2: T, z1: T, z2: T) -> Matrix4<T> {
+pub fn shearing(x1: f32, x2: f32, y1: f32, y2: f32, z1: f32, z2: f32) -> Matrix4 {
     let mut output = Matrix4::identity();
     output[(0, 1)] = x1;
     output[(0, 2)] = x2;
@@ -31,46 +28,43 @@ pub fn shearing<T: Scalar + One>(x1: T, x2: T, y1: T, y2: T, z1: T, z2: T) -> Ma
     output
 }
 
-pub fn rotation_x<T: Scalar + Float + One>(rotation: T) -> Matrix4<T> {
+pub fn rotation_x(rotation: f32) -> Matrix4 {
     let (rotation_sin, rotation_cos) = rotation.sin_cos();
     let mut output = Matrix4::default();
-    output[(0, 0)] = T::one();
+    output[(0, 0)] = 1.0;
     output[(1, 1)] = rotation_cos;
     output[(1, 2)] = -rotation_sin;
     output[(2, 1)] = rotation_sin;
     output[(2, 2)] = rotation_cos;
-    output[(3, 3)] = T::one();
+    output[(3, 3)] = 1.0;
     output
 }
 
-pub fn rotation_y<T: Scalar + Float + One>(rotation: T) -> Matrix4<T> {
+pub fn rotation_y(rotation: f32) -> Matrix4 {
     let (rotation_sin, rotation_cos) = rotation.sin_cos();
     let mut output = Matrix4::default();
     output[(0, 0)] = rotation_cos;
     output[(0, 2)] = rotation_sin;
-    output[(1, 1)] = T::one();
+    output[(1, 1)] = 1.0;
     output[(2, 0)] = -rotation_sin;
     output[(2, 2)] = rotation_cos;
-    output[(3, 3)] = T::one();
+    output[(3, 3)] = 1.0;
     output
 }
 
-pub fn rotation_z<T: Scalar + Float + One>(rotation: T) -> Matrix4<T> {
+pub fn rotation_z(rotation: f32) -> Matrix4 {
     let (rotation_sin, rotation_cos) = rotation.sin_cos();
     let mut output = Matrix4::default();
     output[(0, 0)] = rotation_cos;
     output[(0, 1)] = -rotation_sin;
     output[(1, 0)] = rotation_sin;
     output[(1, 1)] = rotation_cos;
-    output[(2, 2)] = T::one();
-    output[(3, 3)] = T::one();
+    output[(2, 2)] = 1.0;
+    output[(3, 3)] = 1.0;
     output
 }
 
-pub fn view<T>(from: Point<T>, to: Point<T>, up: Vector3<T>) -> Matrix4<T>
-where
-    T: Scalar + Float + One + Sub<Output = T> + Sum<T> + Zero,
-{
+pub fn view(from: Point, to: Point, up: Vector3) -> Matrix4 {
     let forward = (to - from).normalize();
     let left = forward.cross(up.normalize());
     let true_up = left.cross(forward);
@@ -78,19 +72,19 @@ where
         left[0],
         left[1],
         left[2],
-        T::zero(),
+        0.0,
         true_up[0],
         true_up[1],
         true_up[2],
-        T::zero(),
+        0.0,
         -forward[0],
         -forward[1],
         -forward[2],
-        T::zero(),
-        T::zero(),
-        T::zero(),
-        T::zero(),
-        T::one(),
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
     ]);
 
     orientation * translation(-from.x, -from.y, -from.z)
@@ -104,9 +98,9 @@ mod tests {
 
     #[test]
     fn test_multiplying_by_translation_matrix() {
-        let transform = translation(5, -3, 2);
-        let p = Point::new(-3, 4, 5);
-        assert_eq!(Point::new(2, 1, 7), transform * p);
+        let transform = translation(5.0, -3.0, 2.0);
+        let p = Point::new(-3.0, 4.0, 5.0);
+        assert_eq!(Point::new(2.0, 1.0, 7.0), transform * p);
     }
 
     #[test]
@@ -119,23 +113,23 @@ mod tests {
 
     #[test]
     fn test_translation_does_not_affect_vectors() {
-        let transform = translation(5, -3, 2);
-        let v = Vector3::new(-3, 4, 5);
+        let transform = translation(5.0, -3.0, 2.0);
+        let v = Vector3::new(-3.0, 4.0, 5.0);
         assert_eq!(v, transform * v);
     }
 
     #[test]
     fn test_scaling_matrix_with_point() {
-        let transform = scaling(2, 3, 4);
-        let p = Point::new(-4, 6, 8);
-        assert_eq!(Point::new(-8, 18, 32), transform * p);
+        let transform = scaling(2.0, 3.0, 4.0);
+        let p = Point::new(-4.0, 6.0, 8.0);
+        assert_eq!(Point::new(-8.0, 18.0, 32.0), transform * p);
     }
 
     #[test]
     fn test_scaling_matrix_with_vector() {
-        let transform = scaling(2, 3, 4);
-        let v = Vector3::new(-4, 6, 8);
-        assert_eq!(Vector3::new(-8, 18, 32), transform * v);
+        let transform = scaling(2.0, 3.0, 4.0);
+        let v = Vector3::new(-4.0, 6.0, 8.0);
+        assert_eq!(Vector3::new(-8.0, 18.0, 32.0), transform * v);
     }
 
     #[test]
@@ -148,9 +142,9 @@ mod tests {
 
     #[test]
     fn test_reflecting_with_scaling_matrix() {
-        let transform = scaling(-1, 1, 1);
-        let v = Vector3::new(2, 3, 4);
-        assert_eq!(Vector3::new(-2, 3, 4), transform * v);
+        let transform = scaling(-1.0, 1.0, 1.0);
+        let v = Vector3::new(2.0, 3.0, 4.0);
+        assert_eq!(Vector3::new(-2.0, 3.0, 4.0), transform * v);
     }
 
     #[test]
@@ -158,7 +152,7 @@ mod tests {
         let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
         assert_eq!(
-            Point::new(0.0, 2.0.sqrt() / 2.0, 2.0.sqrt() / 2.0),
+            Point::new(0.0, f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0),
             half_quarter * p
         );
 
@@ -172,7 +166,7 @@ mod tests {
         let half_quarter = rotation_x(PI / 4.0);
         let inv = half_quarter.inverse().unwrap();
         assert_eq!(
-            Point::new(0.0, 2.0.sqrt() / 2.0, -2.0.sqrt() / 2.0),
+            Point::new(0.0, f32::sqrt(2.0) / 2.0, -f32::sqrt(2.0) / 2.0),
             inv * p
         );
     }
@@ -182,7 +176,7 @@ mod tests {
         let p = Point::new(0.0, 0.0, 1.0);
         let half_quarter = rotation_y(PI / 4.0);
         assert_eq!(
-            Point::new(2.0.sqrt() / 2.0, 0.0, 2.0.sqrt() / 2.0),
+            Point::new(f32::sqrt(2.0) / 2.0, 0.0, f32::sqrt(2.0) / 2.0),
             half_quarter * p
         );
 
@@ -195,7 +189,7 @@ mod tests {
         let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = rotation_z(PI / 4.0);
         assert_eq!(
-            Point::new(-2.0.sqrt() / 2.0, 2.0.sqrt() / 2.0, 0.0),
+            Point::new(-f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0),
             half_quarter * p
         );
 
@@ -205,44 +199,44 @@ mod tests {
 
     #[test]
     fn test_shearing_moves_x_proportional_to_y() {
-        let transform = shearing(1, 0, 0, 0, 0, 0);
-        let p = Point::new(2, 3, 4);
-        assert_eq!(Point::new(5, 3, 4), transform * p);
+        let transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert_eq!(Point::new(5.0, 3.0, 4.0), transform * p);
     }
 
     #[test]
     fn test_shearing_moves_x_proportional_to_z() {
-        let transform = shearing(0, 1, 0, 0, 0, 0);
-        let p = Point::new(2, 3, 4);
-        assert_eq!(Point::new(6, 3, 4), transform * p);
+        let transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert_eq!(Point::new(6.0, 3.0, 4.0), transform * p);
     }
 
     #[test]
     fn test_shearing_moves_y_proportional_to_x() {
-        let transform = shearing(0, 0, 1, 0, 0, 0);
-        let p = Point::new(2, 3, 4);
-        assert_eq!(Point::new(2, 5, 4), transform * p);
+        let transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert_eq!(Point::new(2.0, 5.0, 4.0), transform * p);
     }
 
     #[test]
     fn test_shearing_moves_y_proportional_to_z() {
-        let transform = shearing(0, 0, 0, 1, 0, 0);
-        let p = Point::new(2, 3, 4);
-        assert_eq!(Point::new(2, 7, 4), transform * p);
+        let transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert_eq!(Point::new(2.0, 7.0, 4.0), transform * p);
     }
 
     #[test]
     fn test_shearing_moves_z_proportional_to_x() {
-        let transform = shearing(0, 0, 0, 0, 1, 0);
-        let p = Point::new(2, 3, 4);
-        assert_eq!(Point::new(2, 3, 6), transform * p);
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert_eq!(Point::new(2.0, 3.0, 6.0), transform * p);
     }
 
     #[test]
     fn test_shearing_moves_z_proportional_to_y() {
-        let transform = shearing(0, 0, 0, 0, 0, 1);
-        let p = Point::new(2, 3, 4);
-        assert_eq!(Point::new(2, 3, 7), transform * p);
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let p = Point::new(2.0, 3.0, 4.0);
+        assert_eq!(Point::new(2.0, 3.0, 7.0), transform * p);
     }
 
     #[test]

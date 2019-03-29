@@ -1,37 +1,32 @@
-use crate::{matrix, Matrix4, Point, Ray, Scalar};
-use num_traits::{Float, One};
-use std::iter::Sum;
+use crate::{matrix, Matrix4, Point, Ray};
 
-pub struct Camera<T: Scalar> {
+pub struct Camera {
     pub horizontal_size: u16,
     pub vertical_size: u16,
-    pub transform: Matrix4<T>,
-    pixel_size: T,
-    half_width: T,
-    half_height: T,
+    pub transform: Matrix4,
+    pixel_size: f32,
+    half_width: f32,
+    half_height: f32,
 }
 
-impl<T> Camera<T>
-where
-    T: Scalar + Float + From<u16> + One,
-{
-    pub fn new(horizontal_size: u16, vertical_size: u16, field_of_view: T) -> Self {
-        let half_view = (field_of_view / 2.into()).tan();
-        let aspect: T = Into::<T>::into(horizontal_size) / vertical_size.into();
+impl Camera {
+    pub fn new(horizontal_size: u16, vertical_size: u16, field_of_view: f32) -> Self {
+        let half_view = (field_of_view / 2.0).tan();
+        let aspect = f32::from(horizontal_size) / f32::from(vertical_size);
 
-        let half_width = if aspect >= T::one() {
+        let half_width = if aspect >= 1.0 {
             half_view
         } else {
             half_view * aspect
         };
 
-        let half_height = if aspect >= T::one() {
+        let half_height = if aspect >= 1.0 {
             half_view / aspect
         } else {
             half_view
         };
 
-        let pixel_size = half_width * 2.into() / horizontal_size.into();
+        let pixel_size = half_width * 2.0 / f32::from(horizontal_size);
 
         Camera {
             horizontal_size,
@@ -42,20 +37,15 @@ where
             transform: Matrix4::identity(),
         }
     }
-}
 
-impl<T> Camera<T>
-where
-    T: Scalar + Float + From<u16> + From<f32> + One + Sum<T>,
-{
-    pub fn ray_for_pixel(&self, px: u16, py: u16) -> Result<Ray<T>, matrix::NotInvertableError> {
-        let x_offset = (Into::<T>::into(px) + 0.5.into()) * self.pixel_size;
-        let y_offset = (Into::<T>::into(py) + 0.5.into()) * self.pixel_size;
+    pub fn ray_for_pixel(&self, px: u16, py: u16) -> Result<Ray, matrix::NotInvertableError> {
+        let x_offset = (f32::from(px) + 0.5) * self.pixel_size;
+        let y_offset = (f32::from(py) + 0.5) * self.pixel_size;
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
 
         let transform_inverse = self.transform.inverse()?;
-        let pixel = transform_inverse * Point::new(world_x, world_y, -T::one());
+        let pixel = transform_inverse * Point::new(world_x, world_y, -1.0);
         let origin = transform_inverse * Point::default();
         let direction = (pixel - origin).normalize();
 
@@ -104,7 +94,7 @@ mod tests {
         let r = c.ray_for_pixel(100, 50).unwrap();
         assert_eq!(Point::new(0.0, 2.0, -5.0), r.origin);
         assert_eq!(
-            Vector3::new(2.0.sqrt() / 2.0, 0.0, -2.0.sqrt() / 2.0),
+            Vector3::new(f32::sqrt(2.0) / 2.0, 0.0, -f32::sqrt(2.0) / 2.0),
             r.direction
         );
     }

@@ -2,13 +2,13 @@ use ray_tracer::{Point, Vector3};
 
 #[derive(Copy, Clone, Debug)]
 struct Projectile {
-    position: Point<f32>,
-    velocity: Vector3<f32>,
+    position: Point,
+    velocity: Vector3,
 }
 
 struct Simulation {
-    gravity: Vector3<f32>,
-    wind: Vector3<f32>,
+    gravity: Vector3,
+    wind: Vector3,
 }
 
 impl Simulation {

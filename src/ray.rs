@@ -1,33 +1,21 @@
-use crate::{Matrix4, Point, Scalar, Vector3};
-use std::ops::{Add, Mul};
+use crate::{Matrix4, Point, Vector3};
 
 #[derive(Copy, Clone, Debug)]
-pub struct Ray<T>
-where
-    T: Scalar,
-{
-    pub origin: Point<T>,
-    pub direction: Vector3<T>,
+pub struct Ray {
+    pub origin: Point,
+    pub direction: Vector3,
 }
 
-impl<T> Ray<T>
-where
-    T: Scalar,
-{
-    pub fn new(origin: Point<T>, direction: Vector3<T>) -> Self {
+impl Ray {
+    pub fn new(origin: Point, direction: Vector3) -> Self {
         Ray { origin, direction }
     }
-}
 
-impl<T> Ray<T>
-where
-    T: Scalar + Add<Output = T> + Mul<Output = T>,
-{
-    pub fn position(&self, time: T) -> Point<T> {
+    pub fn position(&self, time: f32) -> Point {
         self.origin + self.direction * time
     }
 
-    pub fn transform(self, transform: Matrix4<T>) -> Ray<T> {
+    pub fn transform(self, transform: Matrix4) -> Ray {
         Ray {
             origin: transform * self.origin,
             direction: transform * self.direction,
@@ -42,8 +30,8 @@ mod tests {
 
     #[test]
     fn test_creating_ray() {
-        let origin = Point::new(1, 2, 3);
-        let direction = Vector3::new(4, 5, 6);
+        let origin = Point::new(1.0, 2.0, 3.0);
+        let direction = Vector3::new(4.0, 5.0, 6.0);
         let r = Ray::new(origin, direction);
         assert_eq!(origin, r.origin);
         assert_eq!(direction, r.direction);
