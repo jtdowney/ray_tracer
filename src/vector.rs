@@ -7,10 +7,10 @@ use typenum::{U3, U4};
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
-    values: GenericArray<f32, N>,
+    values: GenericArray<f64, N>,
 }
 
 pub type Vector3 = Vector<U3>;
@@ -18,10 +18,10 @@ pub type Vector4 = Vector<U4>;
 
 impl<N> Vector<N>
 where
-    N: ArrayLength<f32> + Copy,
+    N: ArrayLength<f64> + Copy,
     N::ArrayType: Copy,
 {
-    pub fn dot(self, other: Vector<N>) -> f32 {
+    pub fn dot(self, other: Vector<N>) -> f64 {
         self.values
             .as_slice()
             .iter()
@@ -34,12 +34,12 @@ where
         self - other * 2.0 * self.dot(other)
     }
 
-    pub fn magnitude(&self) -> f32 {
+    pub fn magnitude(&self) -> f64 {
         self.values
             .as_slice()
             .iter()
             .map(|n| n.powi(2))
-            .sum::<f32>()
+            .sum::<f64>()
             .sqrt()
     }
 
@@ -56,7 +56,7 @@ where
 }
 
 impl Vector3 {
-    pub fn new(x: f32, y: f32, z: f32) -> Self {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
         [x, y, z].iter().cloned().collect()
     }
 
@@ -70,14 +70,14 @@ impl Vector3 {
 }
 
 impl Vector4 {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+    pub fn new(x: f64, y: f64, z: f64, w: f64) -> Self {
         [x, y, z, w].iter().cloned().collect()
     }
 }
 
 impl<N> Add<Vector<N>> for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     type Output = Vector<N>;
@@ -93,14 +93,14 @@ where
     }
 }
 
-impl<N> Div<f32> for Vector<N>
+impl<N> Div<f64> for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     type Output = Vector<N>;
 
-    fn div(self, other: f32) -> Self::Output {
+    fn div(self, other: f64) -> Self::Output {
         let values = self.values.into_iter().map(|n| n / other).collect();
         Vector { values }
     }
@@ -108,24 +108,24 @@ where
 
 impl<N> Index<usize> for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
-    type Output = f32;
+    type Output = f64;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.values[index]
     }
 }
 
-impl<N> FromIterator<f32> for Vector<N>
+impl<N> FromIterator<f64> for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = f32>,
+        I: IntoIterator<Item = f64>,
     {
         Vector {
             values: iter.into_iter().collect(),
@@ -135,25 +135,25 @@ where
 
 impl<N> IntoIterator for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
-    type Item = f32;
-    type IntoIter = GenericArrayIter<f32, N>;
+    type Item = f64;
+    type IntoIter = GenericArrayIter<f64, N>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.values.into_iter()
     }
 }
 
-impl<N> Mul<f32> for Vector<N>
+impl<N> Mul<f64> for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     type Output = Vector<N>;
 
-    fn mul(self, other: f32) -> Self::Output {
+    fn mul(self, other: f64) -> Self::Output {
         let values = self.values.into_iter().map(|n| n * other).collect();
         Vector { values }
     }
@@ -161,7 +161,7 @@ where
 
 impl<N> Neg for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     type Output = Vector<N>;
@@ -174,7 +174,7 @@ where
 
 impl<N> PartialEq for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     fn eq(&self, other: &Vector<N>) -> bool {
@@ -188,7 +188,7 @@ where
 
 impl<N> Sub<Vector<N>> for Vector<N>
 where
-    N: ArrayLength<f32>,
+    N: ArrayLength<f64>,
     N::ArrayType: Copy,
 {
     type Output = Vector<N>;
@@ -262,9 +262,9 @@ mod tests {
         let v = Vector3::new(0.0, 0.0, 1.0);
         assert_eq!(1.0, v.magnitude());
         let v = Vector3::new(1.0, 2.0, 3.0);
-        assert_eq!((14.0_f32).sqrt(), v.magnitude());
+        assert_eq!((14.0_f64).sqrt(), v.magnitude());
         let v = Vector3::new(-1.0, -2.0, -3.0);
-        assert_eq!((14.0_f32).sqrt(), v.magnitude());
+        assert_eq!((14.0_f64).sqrt(), v.magnitude());
     }
 
     #[test]
@@ -300,7 +300,7 @@ mod tests {
     #[test]
     fn test_reflecting_vector_off_slanted_surface() {
         let v = Vector3::new(0.0, -1.0, 0.0);
-        let n = Vector3::new(f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0);
+        let n = Vector3::new(f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0);
         assert_eq!(Vector3::new(1.0, 0.0, 0.0), v.reflect(n));
     }
 }

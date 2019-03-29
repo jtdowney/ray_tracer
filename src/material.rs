@@ -3,10 +3,10 @@ use crate::{Color, Point, PointLight, Vector3};
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Material {
     pub color: Color,
-    pub ambient: f32,
-    pub diffuse: f32,
-    pub specular: f32,
-    pub shininess: f32,
+    pub ambient: f64,
+    pub diffuse: f64,
+    pub specular: f64,
+    pub shininess: f64,
 }
 
 impl Default for Material {
@@ -82,7 +82,7 @@ mod tests {
     fn test_lighting_with_eye_between_light_and_surface_with_eye_offset() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
-        let eyev = Vector3::new(0.0, f32::sqrt(2.0) / 2.0, -f32::sqrt(2.0) / 2.0);
+        let eyev = Vector3::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
         assert_eq!(
@@ -108,7 +108,7 @@ mod tests {
     fn test_lighting_with_eye_in_path_of_reflection() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
-        let eyev = Vector3::new(0.0, -f32::sqrt(2.0) / 2.0, -f32::sqrt(2.0) / 2.0);
+        let eyev = Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
         assert_eq!(

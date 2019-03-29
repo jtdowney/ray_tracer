@@ -1,6 +1,6 @@
 use ray_tracer::{transforms, Camera, Color, Point, PointLight, Sphere, Vector3, World};
 use std::error;
-use std::f32::consts::PI;
+use std::f64::consts::PI;
 use std::fmt::Display;
 
 #[derive(Debug)]

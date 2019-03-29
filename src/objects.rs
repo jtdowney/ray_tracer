@@ -56,7 +56,7 @@ impl Sphere {
 mod tests {
     use super::*;
     use crate::transforms;
-    use std::f32::consts::PI;
+    use std::f64::consts::PI;
 
     #[test]
     fn test_spheres_default_transformation() {
@@ -96,14 +96,14 @@ mod tests {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(
-                f32::sqrt(3.0) / 3.0,
-                f32::sqrt(3.0) / 3.0,
-                f32::sqrt(3.0) / 3.0
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0
             ),
             s.normal_at(Point::new(
-                f32::sqrt(3.0) / 3.0,
-                f32::sqrt(3.0) / 3.0,
-                f32::sqrt(3.0) / 3.0
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0
             ))
             .unwrap()
         );
@@ -114,9 +114,9 @@ mod tests {
         let s = Sphere::default();
         let n = s
             .normal_at(Point::new(
-                f32::sqrt(3.0) / 3.0,
-                f32::sqrt(3.0) / 3.0,
-                f32::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
+                f64::sqrt(3.0) / 3.0,
             ))
             .unwrap();
         assert_eq!(n, n.normalize());
@@ -138,7 +138,7 @@ mod tests {
         s.transform = transforms::scaling(1.0, 0.5, 1.0) * transforms::rotation_z(PI / 5.0);
         assert_eq!(
             Vector3::new(0.0, 0.97014, -0.24254),
-            s.normal_at(Point::new(0.0, f32::sqrt(2.0) / 2.0, -f32::sqrt(2.0) / 2.0))
+            s.normal_at(Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0))
                 .unwrap()
         );
     }

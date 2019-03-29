@@ -21,11 +21,11 @@ impl Display for NotInvertableError {
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Matrix<N, S = Prod<N, N>>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     S::ArrayType: Copy,
 {
-    values: GenericArray<f32, S>,
+    values: GenericArray<f64, S>,
     _phantom: PhantomData<N>,
 }
 
@@ -35,12 +35,12 @@ pub type Matrix4 = Matrix<U4>;
 
 impl<N, S> Matrix<N, S>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
-    pub fn new(values: &[f32]) -> Self {
+    pub fn new(values: &[f64]) -> Self {
         values.iter().cloned().collect()
     }
 
@@ -68,8 +68,8 @@ where
 
 impl<N, S> Matrix<N, S>
 where
-    N: ArrayLength<f32> + Default,
-    S: ArrayLength<f32> + Default,
+    N: ArrayLength<f64> + Default,
+    S: ArrayLength<f64> + Default,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
@@ -83,15 +83,15 @@ where
     }
 }
 
-impl<N, S> FromIterator<f32> for Matrix<N, S>
+impl<N, S> FromIterator<f64> for Matrix<N, S>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     S::ArrayType: Copy,
 {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = f32>,
+        I: IntoIterator<Item = f64>,
     {
         Matrix {
             values: iter.into_iter().collect(),
@@ -102,11 +102,11 @@ where
 
 impl<N, S> Index<(usize, usize)> for Matrix<N, S>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     S::ArrayType: Copy,
 {
-    type Output = f32;
+    type Output = f64;
 
     fn index(&self, (i, j): (usize, usize)) -> &Self::Output {
         let offset = i * N::to_usize() + j;
@@ -116,8 +116,8 @@ where
 
 impl<N, S> IndexMut<(usize, usize)> for Matrix<N, S>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     S::ArrayType: Copy,
 {
     fn index_mut(&mut self, (i, j): (usize, usize)) -> &mut Self::Output {
@@ -128,12 +128,12 @@ where
 
 impl<N, S> IntoIterator for Matrix<N, S>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     S::ArrayType: Copy,
 {
-    type Item = f32;
-    type IntoIter = GenericArrayIter<f32, S>;
+    type Item = f64;
+    type IntoIter = GenericArrayIter<f64, S>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.values.into_iter()
@@ -142,8 +142,8 @@ where
 
 impl<N, S> Mul<Matrix<N, S>> for Matrix<N, S>
 where
-    N: ArrayLength<f32> + Default + Copy,
-    S: ArrayLength<f32> + Default,
+    N: ArrayLength<f64> + Default + Copy,
+    S: ArrayLength<f64> + Default,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
@@ -166,8 +166,8 @@ where
 
 impl<N, S> Mul<Vector<N>> for Matrix<N, S>
 where
-    N: ArrayLength<f32> + Copy,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64> + Copy,
+    S: ArrayLength<f64>,
     N::ArrayType: Copy,
     S::ArrayType: Copy,
 {
@@ -210,8 +210,8 @@ impl Mul<Vector3> for Matrix4 {
 
 impl<N, S> PartialEq for Matrix<N, S>
 where
-    N: ArrayLength<f32>,
-    S: ArrayLength<f32>,
+    N: ArrayLength<f64>,
+    S: ArrayLength<f64>,
     S::ArrayType: Copy,
 {
     fn eq(&self, other: &Matrix<N, S>) -> bool {
@@ -224,7 +224,7 @@ where
 }
 
 impl Matrix2 {
-    pub fn determinant(&self) -> f32 {
+    pub fn determinant(&self) -> f64 {
         self.values[0] * self.values[3] - self.values[1] * self.values[2]
     }
 }
@@ -243,11 +243,11 @@ impl Matrix3 {
             .collect()
     }
 
-    pub fn minor(&self, row: usize, col: usize) -> f32 {
+    pub fn minor(&self, row: usize, col: usize) -> f64 {
         self.submatrix(row, col).determinant()
     }
 
-    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
+    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
         let value = self.minor(row, col);
         if row + col % 2 == 0 {
             value
@@ -256,7 +256,7 @@ impl Matrix3 {
         }
     }
 
-    pub fn determinant(&self) -> f32 {
+    pub fn determinant(&self) -> f64 {
         let row = self.row(0);
         (0..3).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }
@@ -276,11 +276,11 @@ impl Matrix4 {
             .collect()
     }
 
-    pub fn minor(&self, row: usize, col: usize) -> f32 {
+    pub fn minor(&self, row: usize, col: usize) -> f64 {
         self.submatrix(row, col).determinant()
     }
 
-    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
+    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
         let value = self.minor(row, col);
         if (row + col) % 2 == 0 {
             value
@@ -289,7 +289,7 @@ impl Matrix4 {
         }
     }
 
-    pub fn determinant(&self) -> f32 {
+    pub fn determinant(&self) -> f64 {
         let row = self.row(0);
         (0..4).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }

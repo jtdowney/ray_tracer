@@ -18,7 +18,7 @@ pub fn render(camera: Camera, world: World) -> Result<Canvas, matrix::NotInverta
 mod tests {
     use super::*;
     use crate::{transforms, Color, Point, Vector3};
-    use std::f32::consts::PI;
+    use std::f64::consts::PI;
 
     #[test]
     fn test_rendering_world_with_camera() {

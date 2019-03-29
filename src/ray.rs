@@ -11,7 +11,7 @@ impl Ray {
         Ray { origin, direction }
     }
 
-    pub fn position(&self, time: f32) -> Point {
+    pub fn position(&self, time: f64) -> Point {
         self.origin + self.direction * time
     }
 

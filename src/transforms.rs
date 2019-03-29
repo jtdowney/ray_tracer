@@ -1,6 +1,6 @@
 use crate::{Matrix4, Point, Vector3};
 
-pub fn translation(x: f32, y: f32, z: f32) -> Matrix4 {
+pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     let mut output = Matrix4::identity();
     output[(0, 3)] = x;
     output[(1, 3)] = y;
@@ -8,7 +8,7 @@ pub fn translation(x: f32, y: f32, z: f32) -> Matrix4 {
     output
 }
 
-pub fn scaling(x: f32, y: f32, z: f32) -> Matrix4 {
+pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     let mut output = Matrix4::default();
     output[(0, 0)] = x;
     output[(1, 1)] = y;
@@ -17,7 +17,7 @@ pub fn scaling(x: f32, y: f32, z: f32) -> Matrix4 {
     output
 }
 
-pub fn shearing(x1: f32, x2: f32, y1: f32, y2: f32, z1: f32, z2: f32) -> Matrix4 {
+pub fn shearing(x1: f64, x2: f64, y1: f64, y2: f64, z1: f64, z2: f64) -> Matrix4 {
     let mut output = Matrix4::identity();
     output[(0, 1)] = x1;
     output[(0, 2)] = x2;
@@ -28,7 +28,7 @@ pub fn shearing(x1: f32, x2: f32, y1: f32, y2: f32, z1: f32, z2: f32) -> Matrix4
     output
 }
 
-pub fn rotation_x(rotation: f32) -> Matrix4 {
+pub fn rotation_x(rotation: f64) -> Matrix4 {
     let (rotation_sin, rotation_cos) = rotation.sin_cos();
     let mut output = Matrix4::default();
     output[(0, 0)] = 1.0;
@@ -40,7 +40,7 @@ pub fn rotation_x(rotation: f32) -> Matrix4 {
     output
 }
 
-pub fn rotation_y(rotation: f32) -> Matrix4 {
+pub fn rotation_y(rotation: f64) -> Matrix4 {
     let (rotation_sin, rotation_cos) = rotation.sin_cos();
     let mut output = Matrix4::default();
     output[(0, 0)] = rotation_cos;
@@ -52,7 +52,7 @@ pub fn rotation_y(rotation: f32) -> Matrix4 {
     output
 }
 
-pub fn rotation_z(rotation: f32) -> Matrix4 {
+pub fn rotation_z(rotation: f64) -> Matrix4 {
     let (rotation_sin, rotation_cos) = rotation.sin_cos();
     let mut output = Matrix4::default();
     output[(0, 0)] = rotation_cos;
@@ -94,7 +94,7 @@ pub fn view(from: Point, to: Point, up: Vector3) -> Matrix4 {
 mod tests {
     use super::*;
     use crate::{Point, Vector3};
-    use std::f32::consts::PI;
+    use std::f64::consts::PI;
 
     #[test]
     fn test_multiplying_by_translation_matrix() {
@@ -152,7 +152,7 @@ mod tests {
         let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
         assert_eq!(
-            Point::new(0.0, f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0),
+            Point::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
             half_quarter * p
         );
 
@@ -166,7 +166,7 @@ mod tests {
         let half_quarter = rotation_x(PI / 4.0);
         let inv = half_quarter.inverse().unwrap();
         assert_eq!(
-            Point::new(0.0, f32::sqrt(2.0) / 2.0, -f32::sqrt(2.0) / 2.0),
+            Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0),
             inv * p
         );
     }
@@ -176,7 +176,7 @@ mod tests {
         let p = Point::new(0.0, 0.0, 1.0);
         let half_quarter = rotation_y(PI / 4.0);
         assert_eq!(
-            Point::new(f32::sqrt(2.0) / 2.0, 0.0, f32::sqrt(2.0) / 2.0),
+            Point::new(f64::sqrt(2.0) / 2.0, 0.0, f64::sqrt(2.0) / 2.0),
             half_quarter * p
         );
 
@@ -189,7 +189,7 @@ mod tests {
         let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = rotation_z(PI / 4.0);
         assert_eq!(
-            Point::new(-f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0),
+            Point::new(-f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0),
             half_quarter * p
         );
 

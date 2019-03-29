@@ -3,7 +3,7 @@ use std::vec;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Computations<'a> {
-    pub time: f32,
+    pub time: f64,
     pub object: &'a Sphere,
     pub point: Point,
     pub over_point: Point,
@@ -14,7 +14,7 @@ pub struct Computations<'a> {
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Intersection<'a> {
-    pub time: f32,
+    pub time: f64,
     pub object: &'a Sphere,
 }
 

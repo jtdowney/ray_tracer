@@ -4,15 +4,15 @@ pub struct Camera {
     pub horizontal_size: u16,
     pub vertical_size: u16,
     pub transform: Matrix4,
-    pixel_size: f32,
-    half_width: f32,
-    half_height: f32,
+    pixel_size: f64,
+    half_width: f64,
+    half_height: f64,
 }
 
 impl Camera {
-    pub fn new(horizontal_size: u16, vertical_size: u16, field_of_view: f32) -> Self {
+    pub fn new(horizontal_size: u16, vertical_size: u16, field_of_view: f64) -> Self {
         let half_view = (field_of_view / 2.0).tan();
-        let aspect = f32::from(horizontal_size) / f32::from(vertical_size);
+        let aspect = f64::from(horizontal_size) / f64::from(vertical_size);
 
         let half_width = if aspect >= 1.0 {
             half_view
@@ -26,7 +26,7 @@ impl Camera {
             half_view
         };
 
-        let pixel_size = half_width * 2.0 / f32::from(horizontal_size);
+        let pixel_size = half_width * 2.0 / f64::from(horizontal_size);
 
         Camera {
             horizontal_size,
@@ -39,8 +39,8 @@ impl Camera {
     }
 
     pub fn ray_for_pixel(&self, px: u16, py: u16) -> Result<Ray, matrix::NotInvertableError> {
-        let x_offset = (f32::from(px) + 0.5) * self.pixel_size;
-        let y_offset = (f32::from(py) + 0.5) * self.pixel_size;
+        let x_offset = (f64::from(px) + 0.5) * self.pixel_size;
+        let y_offset = (f64::from(py) + 0.5) * self.pixel_size;
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
 
@@ -56,19 +56,19 @@ impl Camera {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{transforms, Vector3};
-    use std::f32::consts::PI;
+    use crate::{transforms, Vector3, EPSILON};
+    use std::f64::consts::PI;
 
     #[test]
     fn test_pixel_size_for_horizontal_canvas() {
         let c = Camera::new(200, 125, PI / 2.0);
-        assert_eq!(0.01, c.pixel_size);
+        assert!((0.01 - c.pixel_size).abs() < EPSILON);
     }
 
     #[test]
     fn test_pixel_size_for_vertical_canvas() {
         let c = Camera::new(125, 200, PI / 2.0);
-        assert_eq!(0.01, c.pixel_size);
+        assert!((0.01 - c.pixel_size).abs() < EPSILON);
     }
 
     #[test]
@@ -94,7 +94,7 @@ mod tests {
         let r = c.ray_for_pixel(100, 50).unwrap();
         assert_eq!(Point::new(0.0, 2.0, -5.0), r.origin);
         assert_eq!(
-            Vector3::new(f32::sqrt(2.0) / 2.0, 0.0, -f32::sqrt(2.0) / 2.0),
+            Vector3::new(f64::sqrt(2.0) / 2.0, 0.0, -f64::sqrt(2.0) / 2.0),
             r.direction
         );
     }
