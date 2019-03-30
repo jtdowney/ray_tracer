@@ -7,6 +7,7 @@ use std::vec;
 
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
+    fn as_any_mut(&mut self) -> &mut Any;
     fn normal_at(&self, world_point: Point) -> Vector3;
     fn intersect(&self, ray: Ray) -> Intersections;
     fn lighting(
@@ -45,6 +46,10 @@ impl PartialEq<Shape> for Sphere {
 
 impl Shape for Sphere {
     fn as_any(&self) -> &Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut Any {
         self
     }
 

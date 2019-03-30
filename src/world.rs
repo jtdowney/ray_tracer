@@ -128,14 +128,18 @@ mod tests {
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), w.color_at(r));
     }
 
-    // #[test]
-    // fn test_color_with_intersection_behind_ray() {
-    //     let mut w = World::default();
-    //     w.objects[0].material.ambient = 1.0;
-    //     w.objects[1].material.ambient = 1.0;
-    //     let r = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
-    //     assert_eq!(w.objects[1].material.color, w.color_at(r));
-    // }
+    #[test]
+    fn test_color_with_intersection_behind_ray() {
+        let mut w = World::default();
+        let mut s1 = w.objects[0].as_any_mut().downcast_mut::<Sphere>().unwrap();
+        s1.material.ambient = 1.0;
+        let mut s2 = w.objects[1].as_any_mut().downcast_mut::<Sphere>().unwrap();
+        s2.material.ambient = 1.0;
+
+        let s2 = w.objects[1].as_any().downcast_ref::<Sphere>().unwrap();
+        let r = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
+        assert_eq!(s2.material.color, w.color_at(r));
+    }
 
     #[test]
     fn test_no_shadow_with_no_collinear_objects() {
