@@ -1,6 +1,24 @@
 use crate::matrix;
-use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Vector3};
+use crate::{
+    Color, Intersection, Intersections, Material, Matrix4, Point, PointLight, Ray, Vector3,
+};
+use std::any::Any;
+use std::fmt::Debug;
 use std::vec;
+
+pub trait Shape: Any + Debug {
+    fn as_any(&self) -> &Any;
+    fn normal_at(&self, world_point: Point) -> Result<Vector3, matrix::NotInvertableError>;
+    fn intersect(&self, ray: Ray) -> Result<Intersections, matrix::NotInvertableError>;
+    fn lighting(
+        &self,
+        light: PointLight,
+        position: Point,
+        eye_vector: Vector3,
+        normal_vector: Vector3,
+        in_shadow: bool,
+    ) -> Color;
+}
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Sphere {
@@ -17,15 +35,28 @@ impl Default for Sphere {
     }
 }
 
-impl Sphere {
-    pub fn normal_at(&self, world_point: Point) -> Result<Vector3, matrix::NotInvertableError> {
+impl PartialEq<Shape> for Sphere {
+    fn eq(&self, other: &Shape) -> bool {
+        other
+            .as_any()
+            .downcast_ref::<Self>()
+            .map_or(false, |x| x == self)
+    }
+}
+
+impl Shape for Sphere {
+    fn as_any(&self) -> &Any {
+        self
+    }
+
+    fn normal_at(&self, world_point: Point) -> Result<Vector3, matrix::NotInvertableError> {
         let object_point = self.transform.inverse()? * world_point;
         let object_normal = object_point - Point::default();
         let world_normal = self.transform.inverse()?.transpose() * object_normal;
         Ok(world_normal.normalize())
     }
 
-    pub fn intersect(&self, ray: Ray) -> Result<Intersections, matrix::NotInvertableError> {
+    fn intersect(&self, ray: Ray) -> Result<Intersections, matrix::NotInvertableError> {
         let ray = ray.transform(self.transform.inverse()?);
         let object_to_ray = ray.origin - Point::default();
         let a = ray.direction.dot(ray.direction);
@@ -48,7 +79,19 @@ impl Sphere {
             });
         }
 
-        Ok(Intersections { intersections })
+        Ok(Intersections(intersections))
+    }
+
+    fn lighting(
+        &self,
+        light: PointLight,
+        position: Point,
+        eye_vector: Vector3,
+        normal_vector: Vector3,
+        in_shadow: bool,
+    ) -> Color {
+        self.material
+            .lighting(light, position, eye_vector, normal_vector, in_shadow)
     }
 }
 
@@ -57,6 +100,7 @@ mod tests {
     use super::*;
     use crate::transforms;
     use std::f64::consts::PI;
+    use std::ptr;
 
     #[test]
     fn test_spheres_default_transformation() {
@@ -200,7 +244,7 @@ mod tests {
         };
 
         assert_eq!(3.5, i.time);
-        assert_eq!(&s, i.object);
+        assert!(ptr::eq(&s as &Shape, i.object));
     }
 
     #[test]

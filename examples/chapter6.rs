@@ -1,4 +1,4 @@
-use ray_tracer::{Canvas, Color, Point, PointLight, Ray, Sphere};
+use ray_tracer::{Canvas, Color, Point, PointLight, Ray, Shape, Sphere};
 use std::error;
 use std::fmt::Display;
 
@@ -44,10 +44,7 @@ fn main() -> Result<(), Error> {
                     let point = ray.position(hit.time);
                     let normal = hit.object.normal_at(point).unwrap();
                     let eye = -ray.direction;
-                    let color = hit
-                        .object
-                        .material
-                        .lighting(light, point, eye, normal, false);
+                    let color = hit.object.lighting(light, point, eye, normal, false);
                     canvas.write_pixel(x, y, color);
                 }
             }

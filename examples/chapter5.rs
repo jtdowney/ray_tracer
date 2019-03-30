@@ -1,4 +1,4 @@
-use ray_tracer::{Canvas, Color, Point, Ray, Sphere};
+use ray_tracer::{Canvas, Color, Point, Ray, Shape, Sphere};
 use std::fmt;
 
 fn main() -> Result<(), fmt::Error> {

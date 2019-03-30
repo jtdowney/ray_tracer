@@ -20,7 +20,7 @@ pub use crate::intersection::{Intersection, Intersections};
 pub use crate::light::PointLight;
 pub use crate::material::Material;
 pub use crate::matrix::{Matrix, Matrix2, Matrix3, Matrix4};
-pub use crate::objects::Sphere;
+pub use crate::objects::{Shape, Sphere};
 pub use crate::point::Point;
 pub use crate::ray::Ray;
 pub use crate::render::render;

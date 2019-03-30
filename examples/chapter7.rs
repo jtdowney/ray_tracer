@@ -1,4 +1,4 @@
-use ray_tracer::{transforms, Camera, Color, Point, PointLight, Sphere, Vector3, World};
+use ray_tracer::{transforms, Camera, Color, Point, PointLight, Shape, Sphere, Vector3, World};
 use std::error;
 use std::f64::consts::PI;
 use std::fmt::Display;
@@ -55,8 +55,12 @@ fn main() -> Result<(), Error> {
     left.material.diffuse = 0.7;
     left.material.specular = 0.3;
 
-    let objects = vec![floor, left_wall, right_wall, left, middle, right];
     let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+    let objects = [floor, left_wall, right_wall, left, middle, right]
+        .iter()
+        .cloned()
+        .map(|s| Box::new(s) as Box<Shape>)
+        .collect::<Vec<Box<Shape>>>();
     let world = World::new(light, objects);
 
     let mut camera = Camera::new(1000, 500, PI / 3.0);

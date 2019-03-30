@@ -1,10 +1,10 @@
-use crate::{matrix, Point, Ray, Sphere, Vector3, EPSILON};
+use crate::{matrix, Point, Ray, Shape, Vector3, EPSILON};
 use std::vec;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug)]
 pub struct Computations<'a> {
     pub time: f64,
-    pub object: &'a Sphere,
+    pub object: &'a Shape,
     pub point: Point,
     pub over_point: Point,
     pub eye_vector: Vector3,
@@ -12,10 +12,10 @@ pub struct Computations<'a> {
     pub inside: bool,
 }
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug)]
 pub struct Intersection<'a> {
     pub time: f64,
-    pub object: &'a Sphere,
+    pub object: &'a Shape,
 }
 
 impl<'a> Intersection<'a> {
@@ -49,17 +49,21 @@ impl<'a> Intersection<'a> {
     }
 }
 
-#[derive(Debug)]
-pub struct Intersections<'a> {
-    pub intersections: Vec<Intersection<'a>>,
+impl<'a> PartialEq for Intersection<'a> {
+    fn eq(&self, other: &Intersection<'a>) -> bool {
+        use std::ptr;
+        self.time == other.time && ptr::eq(self.object, other.object)
+    }
 }
+
+pub struct Intersections<'a>(pub Vec<Intersection<'a>>);
 
 impl<'a> IntoIterator for Intersections<'a> {
     type Item = Intersection<'a>;
     type IntoIter = vec::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.intersections.into_iter()
+        self.0.into_iter()
     }
 }
 
@@ -74,7 +78,8 @@ impl<'a> Intersections<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::transforms;
+    use crate::{transforms, Sphere};
+    use std::ptr;
 
     #[test]
     fn test_hit_with_all_positive_times() {
@@ -87,9 +92,7 @@ mod tests {
             time: 2.0,
             object: &s,
         };
-        let xs = Intersections {
-            intersections: vec![i1, i2],
-        };
+        let xs = Intersections(vec![i1, i2]);
         let i = xs.hit().unwrap();
         assert_eq!(i1, i);
     }
@@ -105,9 +108,7 @@ mod tests {
             time: 1.0,
             object: &s,
         };
-        let xs = Intersections {
-            intersections: vec![i2, i1],
-        };
+        let xs = Intersections(vec![i2, i1]);
         let i = xs.hit().unwrap();
         assert_eq!(i2, i);
     }
@@ -123,9 +124,7 @@ mod tests {
             time: -1.0,
             object: &s,
         };
-        let xs = Intersections {
-            intersections: vec![i2, i1],
-        };
+        let xs = Intersections(vec![i2, i1]);
         assert!(xs.hit().is_none());
     }
 
@@ -148,9 +147,7 @@ mod tests {
             time: 2.0,
             object: &s,
         };
-        let xs = Intersections {
-            intersections: vec![i1, i2, i3, i4],
-        };
+        let xs = Intersections(vec![i1, i2, i3, i4]);
         let i = xs.hit().unwrap();
         assert_eq!(i4, i);
     }
@@ -165,7 +162,7 @@ mod tests {
         };
         let comps = i.prepare_computations(r).unwrap();
         assert_eq!(4.0, comps.time);
-        assert_eq!(&shape, comps.object);
+        assert!(ptr::eq(&shape as &Shape, comps.object));
         assert_eq!(Point::new(0.0, 0.0, -1.0), comps.point);
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), comps.eye_vector);
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), comps.normal_vector);
