@@ -60,7 +60,7 @@ impl World {
 
     pub fn shade_hit(&self, comps: intersection::Computations) -> Color {
         let shadowed = self.is_shadowed(comps.over_point);
-        comps.object.lighting(
+        comps.object.material().lighting(
             self.light,
             comps.over_point,
             comps.eye_vector,
