@@ -1,4 +1,4 @@
-use crate::Color;
+use crate::{color, Color};
 use std::fmt::{self, Write};
 use std::iter;
 
@@ -23,7 +23,7 @@ impl Canvas {
     }
 
     pub fn new(width: u16, height: u16) -> Self {
-        Canvas::from_pixels(width, height, iter::repeat(Color::default()))
+        Canvas::from_pixels(width, height, iter::repeat(color::BLACK))
     }
 
     pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color) {
@@ -72,6 +72,7 @@ impl Canvas {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::color;
 
     #[test]
     fn test_creating_canvas() {
@@ -79,7 +80,7 @@ mod tests {
         assert_eq!(10, canvas.width);
         assert_eq!(20, canvas.height);
         for pixel in canvas.pixels {
-            assert_eq!(Color::new(0.0, 0.0, 0.0), pixel);
+            assert_eq!(color::BLACK, pixel);
         }
     }
 

@@ -1,6 +1,6 @@
 use crate::{
-    intersection, transforms, Color, Intersection, Intersections, Point, PointLight, Ray, Shape,
-    Sphere,
+    color, intersection, transforms, Color, Intersection, Intersections, Point, PointLight, Ray,
+    Shape, Sphere,
 };
 
 pub struct World {
@@ -18,7 +18,7 @@ impl Default for World {
         let mut s2 = Sphere::default();
         s2.transform = transforms::scaling(0.5, 0.5, 0.5);
 
-        let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), color::WHITE);
         let objects = [s1, s2]
             .iter()
             .cloned()
@@ -54,7 +54,7 @@ impl World {
             let comps = hit.prepare_computations(ray);
             self.shade_hit(comps)
         } else {
-            Color::default()
+            color::BLACK
         }
     }
 
@@ -167,7 +167,7 @@ mod tests {
 
     #[test]
     fn test_shade_hit_when_in_shadow() {
-        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         let s1 = Sphere::default();
         let mut s2 = Sphere::default();
         s2.transform = transforms::translation(0.0, 0.0, 10.0);

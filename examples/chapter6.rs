@@ -1,4 +1,4 @@
-use ray_tracer::{Canvas, Color, Point, PointLight, Ray, Shape, Sphere};
+use ray_tracer::{color, Canvas, Color, Point, PointLight, Ray, Shape, Sphere};
 use std::error;
 use std::fmt::Display;
 
@@ -28,7 +28,7 @@ fn main() -> Result<(), Error> {
     shape.material.color = Color::new(1.0, 0.2, 1.0);
 
     let light_position = Point::new(-10.0, 10.0, -10.0);
-    let light_color = Color::new(1.0, 1.0, 1.0);
+    let light_color = color::WHITE;
     let light = PointLight::new(light_position, light_color);
 
     for y in 0..canvas_pixels {

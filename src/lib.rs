@@ -1,6 +1,6 @@
 mod camera;
 mod canvas;
-mod color;
+pub mod color;
 mod intersection;
 mod light;
 mod material;

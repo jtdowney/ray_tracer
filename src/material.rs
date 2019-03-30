@@ -1,4 +1,4 @@
-use crate::{Color, Point, PointLight, Vector3};
+use crate::{color, Color, Point, PointLight, Vector3};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Material {
@@ -12,7 +12,7 @@ pub struct Material {
 impl Default for Material {
     fn default() -> Self {
         Material {
-            color: Color::new(1.0, 1.0, 1.0),
+            color: color::WHITE,
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
@@ -38,15 +38,15 @@ impl Material {
         let diffuse: Color;
         let specular: Color;
         if light_dot_normal < 0.0 {
-            diffuse = Color::default();
-            specular = Color::default();
+            diffuse = color::BLACK;
+            specular = color::BLACK;
         } else {
             diffuse = effective_color * self.diffuse * light_dot_normal;
             let reflect_vector = (-light_vector).reflect(normal_vector);
             let reflect_dot_eye = reflect_vector.dot(eye_vector);
 
             if reflect_dot_eye <= 0.0 {
-                specular = Color::default();
+                specular = color::BLACK;
             } else {
                 let factor = reflect_dot_eye.powf(self.shininess);
                 specular = light.intensity * self.specular * factor;
@@ -71,7 +71,7 @@ mod tests {
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
-        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(1.9, 1.9, 1.9),
             m.lighting(light, position, eyev, normalv, false)
@@ -84,9 +84,9 @@ mod tests {
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
-        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
-            Color::new(1.0, 1.0, 1.0),
+            color::WHITE,
             m.lighting(light, position, eyev, normalv, false)
         );
     }
@@ -97,7 +97,7 @@ mod tests {
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
-        let light = PointLight::new(Point::new(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(0.7364, 0.7364, 0.7364),
             m.lighting(light, position, eyev, normalv, false)
@@ -110,7 +110,7 @@ mod tests {
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
-        let light = PointLight::new(Point::new(0.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(1.63638, 1.63638, 1.63638),
             m.lighting(light, position, eyev, normalv, false)
@@ -123,7 +123,7 @@ mod tests {
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
-        let light = PointLight::new(Point::new(0.0, 0.0, 10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 0.0, 10.0), color::WHITE);
         assert_eq!(
             Color::new(0.1, 0.1, 0.1),
             m.lighting(light, position, eyev, normalv, false)
@@ -136,7 +136,7 @@ mod tests {
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
-        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), Color::new(1.0, 1.0, 1.0));
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         let in_shadow = true;
         assert_eq!(
             Color::new(0.1, 0.1, 0.1),

@@ -1,4 +1,6 @@
-use ray_tracer::{transforms, Camera, Color, Point, PointLight, Shape, Sphere, Vector3, World};
+use ray_tracer::{
+    color, transforms, Camera, Color, Point, PointLight, Shape, Sphere, Vector3, World,
+};
 use std::f64::consts::PI;
 use std::fmt;
 
@@ -41,7 +43,7 @@ fn main() -> Result<(), fmt::Error> {
     left.material.diffuse = 0.7;
     left.material.specular = 0.3;
 
-    let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), Color::new(1.0, 1.0, 1.0));
+    let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), color::WHITE);
     let objects = [floor, left_wall, right_wall, left, middle, right]
         .iter()
         .cloned()
