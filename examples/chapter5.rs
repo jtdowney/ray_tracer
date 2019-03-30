@@ -20,11 +20,9 @@ fn main() -> Result<(), fmt::Error> {
             let world_x = -half + pixel_size * f64::from(x);
             let position = Point::new(world_x, world_y, wall_z);
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
-
-            if let Ok(xs) = shape.intersect(ray) {
-                if xs.hit().is_some() {
-                    canvas.write_pixel(x, y, color);
-                }
+            let xs = shape.intersect(ray);
+            if xs.hit().is_some() {
+                canvas.write_pixel(x, y, color);
             }
         }
     }

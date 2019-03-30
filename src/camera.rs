@@ -1,4 +1,4 @@
-use crate::{matrix, Matrix4, Point, Ray};
+use crate::{Matrix4, Point, Ray};
 
 pub struct Camera {
     pub horizontal_size: u16,
@@ -38,18 +38,18 @@ impl Camera {
         }
     }
 
-    pub fn ray_for_pixel(&self, px: u16, py: u16) -> Result<Ray, matrix::NotInvertableError> {
+    pub fn ray_for_pixel(&self, px: u16, py: u16) -> Ray {
         let x_offset = (f64::from(px) + 0.5) * self.pixel_size;
         let y_offset = (f64::from(py) + 0.5) * self.pixel_size;
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
 
-        let transform_inverse = self.transform.inverse()?;
+        let transform_inverse = self.transform.inverse();
         let pixel = transform_inverse * Point::new(world_x, world_y, -1.0);
         let origin = transform_inverse * Point::default();
         let direction = (pixel - origin).normalize();
 
-        Ok(Ray::new(origin, direction))
+        Ray::new(origin, direction)
     }
 
     pub fn pixels(&self) -> PixelsIter {
@@ -110,7 +110,7 @@ mod tests {
     #[test]
     fn test_ray_for_pixel_at_center() {
         let c = Camera::new(201, 101, PI / 2.0);
-        let r = c.ray_for_pixel(100, 50).unwrap();
+        let r = c.ray_for_pixel(100, 50);
         assert_eq!(Point::new(0.0, 0.0, 0.0), r.origin);
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), r.direction);
     }
@@ -118,7 +118,7 @@ mod tests {
     #[test]
     fn test_ray_for_pixel_at_corner() {
         let c = Camera::new(201, 101, PI / 2.0);
-        let r = c.ray_for_pixel(0, 0).unwrap();
+        let r = c.ray_for_pixel(0, 0);
         assert_eq!(Point::new(0.0, 0.0, 0.0), r.origin);
         assert_eq!(Vector3::new(0.66519, 0.33259, -0.66851), r.direction);
     }
@@ -127,7 +127,7 @@ mod tests {
     fn test_ray_for_transformed_camera() {
         let mut c = Camera::new(201, 101, PI / 2.0);
         c.transform = transforms::rotation_y(PI / 4.0) * transforms::translation(0.0, -2.0, 5.0);
-        let r = c.ray_for_pixel(100, 50).unwrap();
+        let r = c.ray_for_pixel(100, 50);
         assert_eq!(Point::new(0.0, 2.0, -5.0), r.origin);
         assert_eq!(
             Vector3::new(f64::sqrt(2.0) / 2.0, 0.0, -f64::sqrt(2.0) / 2.0),

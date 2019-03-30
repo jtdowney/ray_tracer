@@ -1,22 +1,9 @@
 use crate::{Point, Vector, Vector3, EPSILON};
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
-use std::error::Error;
-use std::fmt::{self, Display};
 use std::iter::FromIterator;
 use std::marker::PhantomData;
 use std::ops::{Index, IndexMut, Mul};
 use typenum::{Prod, U2, U3, U4};
-
-#[derive(Debug)]
-pub struct NotInvertableError;
-
-impl Error for NotInvertableError {}
-
-impl Display for NotInvertableError {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "Matrix cannot be inverted")
-    }
-}
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Matrix<N, S = Prod<N, N>>
@@ -294,10 +281,10 @@ impl Matrix4 {
         (0..4).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }
 
-    pub fn inverse(&self) -> Result<Self, NotInvertableError> {
+    pub fn inverse(&self) -> Self {
         let determinant = self.determinant();
         if determinant == 0.0 {
-            return Err(NotInvertableError);
+            panic!("Matrix not invertable: {:?}", self);
         }
 
         let mut output = Matrix4::default();
@@ -308,7 +295,7 @@ impl Matrix4 {
             }
         }
 
-        Ok(output)
+        output
     }
 }
 
@@ -526,16 +513,17 @@ mod tests {
             6.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 6.0, 4.0, -9.0, 3.0, -7.0, 9.0, 1.0, 7.0, -6.0,
         ]);
         assert_eq!(-2120.0, m.determinant());
-        assert!(m.inverse().is_ok());
+        m.inverse();
     }
 
     #[test]
+    #[should_panic]
     fn test_noninvertable_matrix() {
         let m = Matrix4::new(&[
             -4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0,
         ]);
         assert_eq!(0.0, m.determinant());
-        assert!(m.inverse().is_err());
+        m.inverse();
     }
 
     #[test]
@@ -547,7 +535,7 @@ mod tests {
         assert_eq!(-160.0, a.cofactor(2, 3));
         assert_eq!(105.0, a.cofactor(3, 2));
 
-        let b = a.inverse().unwrap();
+        let b = a.inverse();
         assert_eq!(-160.0 / 532.0, b[(3, 2)]);
         assert_eq!(105.0 / 532.0, b[(2, 3)]);
         assert_eq!(
@@ -568,7 +556,7 @@ mod tests {
                 0.030769, 0.358974, 0.358974, 0.435897, 0.923077, -0.692308, -0.692308, -0.769231,
                 -1.923077,
             ]),
-            m.inverse().unwrap()
+            m.inverse()
         );
 
         let m = Matrix4::new(&[
@@ -580,7 +568,7 @@ mod tests {
                 -0.333333, -0.029012, -0.146296, -0.109259, 0.129630, 0.177778, 0.066667,
                 -0.266667, 0.333333,
             ]),
-            m.inverse().unwrap()
+            m.inverse()
         );
     }
 
@@ -593,6 +581,6 @@ mod tests {
             8.0, 2.0, 2.0, 2.0, 3.0, -1.0, 7.0, 0.0, 7.0, 0.0, 5.0, 4.0, 6.0, -2.0, 0.0, 5.0,
         ]);
         let c = a * b;
-        assert_eq!(a, c * b.inverse().unwrap());
+        assert_eq!(a, c * b.inverse());
     }
 }

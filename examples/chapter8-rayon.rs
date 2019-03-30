@@ -2,24 +2,10 @@ use ray_tracer::{
     transforms, Camera, Canvas, Color, Point, PointLight, Shape, Sphere, Vector3, World,
 };
 use rayon::prelude::*;
-use std::error;
 use std::f64::consts::PI;
-use std::fmt::Display;
+use std::fmt;
 
-#[derive(Debug)]
-struct Error {
-    error: String,
-}
-
-impl<T: Display + error::Error> From<T> for Error {
-    fn from(error: T) -> Self {
-        Error {
-            error: format!("Error: {}", error),
-        }
-    }
-}
-
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), fmt::Error> {
     let mut floor = Sphere::default();
     floor.transform = transforms::scaling(10.0, 0.01, 10.0);
     floor.material.color = Color::new(1.0, 0.9, 0.9);
@@ -77,11 +63,10 @@ fn main() -> Result<(), Error> {
     let pixels = pixels
         .into_par_iter()
         .map(|(x, y)| {
-            camera
-                .ray_for_pixel(x, y)
-                .and_then(|ray| world.color_at(ray))
+            let ray = camera.ray_for_pixel(x, y);
+            world.color_at(ray)
         })
-        .collect::<Result<Vec<Color>, _>>()?;
+        .collect::<Vec<Color>>();
 
     let canvas = Canvas::from_pixels(camera.horizontal_size, camera.vertical_size, pixels);
     print!("{}", canvas.to_ppm()?);

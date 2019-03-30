@@ -1,4 +1,3 @@
-use crate::matrix;
 use crate::{
     Color, Intersection, Intersections, Material, Matrix4, Point, PointLight, Ray, Vector3,
 };
@@ -8,8 +7,8 @@ use std::vec;
 
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
-    fn normal_at(&self, world_point: Point) -> Result<Vector3, matrix::NotInvertableError>;
-    fn intersect(&self, ray: Ray) -> Result<Intersections, matrix::NotInvertableError>;
+    fn normal_at(&self, world_point: Point) -> Vector3;
+    fn intersect(&self, ray: Ray) -> Intersections;
     fn lighting(
         &self,
         light: PointLight,
@@ -49,15 +48,15 @@ impl Shape for Sphere {
         self
     }
 
-    fn normal_at(&self, world_point: Point) -> Result<Vector3, matrix::NotInvertableError> {
-        let object_point = self.transform.inverse()? * world_point;
+    fn normal_at(&self, world_point: Point) -> Vector3 {
+        let object_point = self.transform.inverse() * world_point;
         let object_normal = object_point - Point::default();
-        let world_normal = self.transform.inverse()?.transpose() * object_normal;
-        Ok(world_normal.normalize())
+        let world_normal = self.transform.inverse().transpose() * object_normal;
+        world_normal.normalize()
     }
 
-    fn intersect(&self, ray: Ray) -> Result<Intersections, matrix::NotInvertableError> {
-        let ray = ray.transform(self.transform.inverse()?);
+    fn intersect(&self, ray: Ray) -> Intersections {
+        let ray = ray.transform(self.transform.inverse());
         let object_to_ray = ray.origin - Point::default();
         let a = ray.direction.dot(ray.direction);
         let b = 2.0 * ray.direction.dot(object_to_ray);
@@ -65,7 +64,6 @@ impl Shape for Sphere {
         let discriminant = b.powi(2) - 4.0 * a * c;
 
         let mut intersections = vec![];
-
         if discriminant >= 0.0 {
             let t1 = (-b - discriminant.sqrt()) / (2.0 * a);
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
@@ -79,7 +77,7 @@ impl Shape for Sphere {
             });
         }
 
-        Ok(Intersections(intersections))
+        Intersections(intersections)
     }
 
     fn lighting(
@@ -113,7 +111,7 @@ mod tests {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(1.0, 0.0, 0.0),
-            s.normal_at(Point::new(1.0, 0.0, 0.0)).unwrap()
+            s.normal_at(Point::new(1.0, 0.0, 0.0))
         );
     }
 
@@ -122,7 +120,7 @@ mod tests {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(0.0, 1.0, 0.0),
-            s.normal_at(Point::new(0.0, 1.0, 0.0)).unwrap()
+            s.normal_at(Point::new(0.0, 1.0, 0.0))
         );
     }
 
@@ -131,7 +129,7 @@ mod tests {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(0.0, 0.0, 1.0),
-            s.normal_at(Point::new(0.0, 0.0, 1.0)).unwrap()
+            s.normal_at(Point::new(0.0, 0.0, 1.0))
         );
     }
 
@@ -149,20 +147,17 @@ mod tests {
                 f64::sqrt(3.0) / 3.0,
                 f64::sqrt(3.0) / 3.0
             ))
-            .unwrap()
         );
     }
 
     #[test]
     fn test_normal_is_a_normalized_vector() {
         let s = Sphere::default();
-        let n = s
-            .normal_at(Point::new(
-                f64::sqrt(3.0) / 3.0,
-                f64::sqrt(3.0) / 3.0,
-                f64::sqrt(3.0) / 3.0,
-            ))
-            .unwrap();
+        let n = s.normal_at(Point::new(
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+            f64::sqrt(3.0) / 3.0,
+        ));
         assert_eq!(n, n.normalize());
     }
 
@@ -172,7 +167,7 @@ mod tests {
         s.transform = transforms::translation(0.0, 1.0, 0.0);
         assert_eq!(
             Vector3::new(0.0, 0.70711, -0.70711),
-            s.normal_at(Point::new(0.0, 1.70711, -0.70711)).unwrap()
+            s.normal_at(Point::new(0.0, 1.70711, -0.70711))
         );
     }
 
@@ -183,7 +178,6 @@ mod tests {
         assert_eq!(
             Vector3::new(0.0, 0.97014, -0.24254),
             s.normal_at(Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0))
-                .unwrap()
         );
     }
 
@@ -191,7 +185,7 @@ mod tests {
     fn test_ray_intersects_sphere_at_two_points() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert_eq!(4.0, xs.next().unwrap().time);
         assert_eq!(6.0, xs.next().unwrap().time);
         assert!(xs.next().is_none());
@@ -201,7 +195,7 @@ mod tests {
     fn test_ray_intersects_sphere_at_tangent() {
         let r = Ray::new(Point::new(0.0, 1.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert_eq!(5.0, xs.next().unwrap().time);
         assert_eq!(5.0, xs.next().unwrap().time);
         assert!(xs.next().is_none());
@@ -211,7 +205,7 @@ mod tests {
     fn test_ray_misses_sphere() {
         let r = Ray::new(Point::new(0.0, 2.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
-        let xs = s.intersect(r).unwrap().into_iter();
+        let xs = s.intersect(r).into_iter();
         assert_eq!(0, xs.count());
     }
 
@@ -219,7 +213,7 @@ mod tests {
     fn test_ray_originates_inside_sphere() {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert_eq!(-1.0, xs.next().unwrap().time);
         assert_eq!(1.0, xs.next().unwrap().time);
         assert!(xs.next().is_none());
@@ -229,7 +223,7 @@ mod tests {
     fn test_sphere_behind_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert_eq!(-6.0, xs.next().unwrap().time);
         assert_eq!(-4.0, xs.next().unwrap().time);
         assert!(xs.next().is_none());
@@ -251,7 +245,7 @@ mod tests {
     fn test_intersect_sets_objects() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert_eq!(&s, xs.next().unwrap().object);
         assert_eq!(&s, xs.next().unwrap().object);
         assert!(xs.next().is_none());
@@ -262,7 +256,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut s = Sphere::default();
         s.transform = transforms::scaling(2.0, 2.0, 2.0);
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert_eq!(3.0, xs.next().unwrap().time);
         assert_eq!(7.0, xs.next().unwrap().time);
         assert!(xs.next().is_none());
@@ -273,7 +267,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut s = Sphere::default();
         s.transform = transforms::translation(5.0, 0.0, 0.0);
-        let mut xs = s.intersect(r).unwrap().into_iter();
+        let mut xs = s.intersect(r).into_iter();
         assert!(xs.next().is_none());
     }
 }

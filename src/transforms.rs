@@ -106,7 +106,7 @@ mod tests {
     #[test]
     fn test_multiplying_by_inverse_translation_matrix() {
         let transform = translation(5.0, -3.0, 2.0);
-        let inv = transform.inverse().unwrap();
+        let inv = transform.inverse();
         let p = Point::new(-3.0, 4.0, 5.0);
         assert_eq!(Point::new(-8.0, 7.0, 3.0), inv * p);
     }
@@ -135,7 +135,7 @@ mod tests {
     #[test]
     fn test_inverse_scaling_matrix_with() {
         let transform = scaling(2.0, 3.0, 4.0);
-        let inv = transform.inverse().unwrap();
+        let inv = transform.inverse();
         let v = Vector3::new(-4.0, 6.0, 8.0);
         assert_eq!(Vector3::new(-2.0, 2.0, 2.0), inv * v);
     }
@@ -164,7 +164,7 @@ mod tests {
     fn test_inverse_rotating_point_around_x_axis() {
         let p = Point::new(0.0, 1.0, 0.0);
         let half_quarter = rotation_x(PI / 4.0);
-        let inv = half_quarter.inverse().unwrap();
+        let inv = half_quarter.inverse();
         assert_eq!(
             Point::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0),
             inv * p

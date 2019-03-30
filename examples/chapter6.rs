@@ -38,15 +38,13 @@ fn main() -> Result<(), Error> {
             let world_x = -half + pixel_size * f64::from(x);
             let position = Point::new(world_x, world_y, wall_z);
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
-
-            if let Ok(xs) = shape.intersect(ray) {
-                if let Some(hit) = xs.hit() {
-                    let point = ray.position(hit.time);
-                    let normal = hit.object.normal_at(point).unwrap();
-                    let eye = -ray.direction;
-                    let color = hit.object.lighting(light, point, eye, normal, false);
-                    canvas.write_pixel(x, y, color);
-                }
+            let xs = shape.intersect(ray);
+            if let Some(hit) = xs.hit() {
+                let point = ray.position(hit.time);
+                let normal = hit.object.normal_at(point);
+                let eye = -ray.direction;
+                let color = hit.object.lighting(light, point, eye, normal, false);
+                canvas.write_pixel(x, y, color);
             }
         }
     }

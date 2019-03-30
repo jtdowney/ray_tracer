@@ -1,15 +1,15 @@
-use crate::{matrix, Camera, Canvas, World};
+use crate::{Camera, Canvas, World};
 
-pub fn render(camera: Camera, world: World) -> Result<Canvas, matrix::NotInvertableError> {
+pub fn render(camera: Camera, world: World) -> Canvas {
     let mut canvas = Canvas::new(camera.horizontal_size, camera.vertical_size);
 
     for (x, y) in camera.pixels() {
-        let ray = camera.ray_for_pixel(x, y)?;
-        let color = world.color_at(ray)?;
+        let ray = camera.ray_for_pixel(x, y);
+        let color = world.color_at(ray);
         canvas.write_pixel(x, y, color);
     }
 
-    Ok(canvas)
+    canvas
 }
 
 #[cfg(test)]
@@ -28,7 +28,7 @@ mod tests {
         let mut c = Camera::new(11, 11, PI / 2.0);
         c.transform = transforms::view(from, to, up);
 
-        let image = render(c, w).unwrap();
+        let image = render(c, w);
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), image.pixel_at(5, 5));
     }
 }

@@ -1,4 +1,4 @@
-use crate::{matrix, Point, Ray, Shape, Vector3, EPSILON};
+use crate::{Point, Ray, Shape, Vector3, EPSILON};
 use std::vec;
 
 #[derive(Copy, Clone, Debug)]
@@ -19,13 +19,10 @@ pub struct Intersection<'a> {
 }
 
 impl<'a> Intersection<'a> {
-    pub fn prepare_computations(
-        &self,
-        ray: Ray,
-    ) -> Result<Computations, matrix::NotInvertableError> {
+    pub fn prepare_computations(&self, ray: Ray) -> Computations {
         let point = ray.position(self.time);
         let eye_vector = -ray.direction;
-        let mut normal_vector = self.object.normal_at(point)?;
+        let mut normal_vector = self.object.normal_at(point);
         let inside: bool;
 
         if normal_vector.dot(eye_vector) < 0.0 {
@@ -37,7 +34,7 @@ impl<'a> Intersection<'a> {
 
         let over_point = point + normal_vector * EPSILON;
 
-        Ok(Computations {
+        Computations {
             time: self.time,
             object: self.object,
             over_point,
@@ -45,7 +42,7 @@ impl<'a> Intersection<'a> {
             eye_vector,
             normal_vector,
             inside,
-        })
+        }
     }
 }
 
@@ -160,7 +157,7 @@ mod tests {
             time: 4.0,
             object: &shape,
         };
-        let comps = i.prepare_computations(r).unwrap();
+        let comps = i.prepare_computations(r);
         assert_eq!(4.0, comps.time);
         assert!(ptr::eq(&shape as &Shape, comps.object));
         assert_eq!(Point::new(0.0, 0.0, -1.0), comps.point);
@@ -177,7 +174,7 @@ mod tests {
             time: 1.0,
             object: &shape,
         };
-        let comps = i.prepare_computations(r).unwrap();
+        let comps = i.prepare_computations(r);
         assert_eq!(Point::new(0.0, 0.0, 1.0), comps.point);
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), comps.eye_vector);
         assert_eq!(Vector3::new(0.0, 0.0, -1.0), comps.normal_vector);
@@ -193,7 +190,7 @@ mod tests {
             time: 5.0,
             object: &shape,
         };
-        let comps = i.prepare_computations(r).unwrap();
+        let comps = i.prepare_computations(r);
         assert!(comps.over_point.z < -(EPSILON / 2.0));
         assert!(comps.point.z > comps.over_point.z);
     }

@@ -1,22 +1,8 @@
 use ray_tracer::{transforms, Camera, Color, Point, PointLight, Shape, Sphere, Vector3, World};
-use std::error;
 use std::f64::consts::PI;
-use std::fmt::Display;
+use std::fmt;
 
-#[derive(Debug)]
-struct Error {
-    error: String,
-}
-
-impl<T: Display + error::Error> From<T> for Error {
-    fn from(error: T) -> Self {
-        Error {
-            error: format!("Error: {}", error),
-        }
-    }
-}
-
-fn main() -> Result<(), Error> {
+fn main() -> Result<(), fmt::Error> {
     let mut floor = Sphere::default();
     floor.transform = transforms::scaling(10.0, 0.01, 10.0);
     floor.material.color = Color::new(1.0, 0.9, 0.9);
@@ -70,7 +56,7 @@ fn main() -> Result<(), Error> {
         Vector3::new(0.0, 1.0, 0.0),
     );
 
-    let canvas = ray_tracer::render(camera, world)?;
+    let canvas = ray_tracer::render(camera, world);
     print!("{}", canvas.to_ppm()?);
 
     Ok(())
