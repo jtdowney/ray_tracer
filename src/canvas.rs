@@ -1,5 +1,6 @@
 use crate::Color;
 use std::fmt::{self, Write};
+use std::iter;
 
 #[derive(Debug)]
 pub struct Canvas {
@@ -9,12 +10,20 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    pub fn new(width: u16, height: u16) -> Canvas {
+    pub fn from_pixels<I>(width: u16, height: u16, pixels: I) -> Self
+    where
+        I: IntoIterator<Item = Color>,
+    {
+        let length = width as usize * height as usize;
         Canvas {
             width,
             height,
-            pixels: vec![Color::default(); width as usize * height as usize],
+            pixels: pixels.into_iter().take(length).collect(),
         }
+    }
+
+    pub fn new(width: u16, height: u16) -> Self {
+        Canvas::from_pixels(width, height, iter::repeat(Color::default()))
     }
 
     pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color) {

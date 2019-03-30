@@ -3,12 +3,10 @@ use crate::{matrix, Camera, Canvas, World};
 pub fn render(camera: Camera, world: World) -> Result<Canvas, matrix::NotInvertableError> {
     let mut canvas = Canvas::new(camera.horizontal_size, camera.vertical_size);
 
-    for y in 0..camera.vertical_size {
-        for x in 0..camera.horizontal_size {
-            let ray = camera.ray_for_pixel(x, y)?;
-            let color = world.color_at(ray)?;
-            canvas.write_pixel(x, y, color);
-        }
+    for (x, y) in camera.pixels() {
+        let ray = camera.ray_for_pixel(x, y)?;
+        let color = world.color_at(ray)?;
+        canvas.write_pixel(x, y, color);
     }
 
     Ok(canvas)

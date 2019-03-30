@@ -4,7 +4,7 @@ use crate::{
 };
 
 pub struct World {
-    objects: Vec<Box<Shape>>,
+    objects: Vec<Box<Shape + Send + Sync>>,
     light: PointLight,
 }
 
@@ -22,7 +22,7 @@ impl Default for World {
         let objects = [s1, s2]
             .iter()
             .cloned()
-            .map(|s| Box::new(s) as Box<Shape>)
+            .map(|s| Box::new(s) as Box<Shape + Send + Sync>)
             .collect();
 
         World { objects, light }
@@ -32,7 +32,7 @@ impl Default for World {
 impl World {
     pub fn new<I>(light: PointLight, objects: I) -> Self
     where
-        I: IntoIterator<Item = Box<Shape>>,
+        I: IntoIterator<Item = Box<Shape + Send + Sync>>,
     {
         let objects = objects.into_iter().collect();
         World { objects, light }
@@ -174,7 +174,10 @@ mod tests {
 
         let w = World::new(
             light,
-            vec![Box::new(s1) as Box<Shape>, Box::new(s2) as Box<Shape>],
+            vec![
+                Box::new(s1) as Box<Shape + Send + Sync>,
+                Box::new(s2) as Box<Shape + Send + Sync>,
+            ],
         );
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {

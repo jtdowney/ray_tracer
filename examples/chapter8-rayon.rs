@@ -1,4 +1,7 @@
-use ray_tracer::{transforms, Camera, Color, Point, PointLight, Shape, Sphere, Vector3, World};
+use ray_tracer::{
+    transforms, Camera, Canvas, Color, Point, PointLight, Shape, Sphere, Vector3, World,
+};
+use rayon::prelude::*;
 use std::error;
 use std::f64::consts::PI;
 use std::fmt::Display;
@@ -60,7 +63,7 @@ fn main() -> Result<(), Error> {
         .iter()
         .cloned()
         .map(|s| Box::new(s) as Box<Shape + Send + Sync>)
-        .collect::<Vec<Box<Shape + Send + Sync>>>();
+        .collect::<Vec<_>>();
     let world = World::new(light, objects);
 
     let mut camera = Camera::new(1000, 500, PI / 3.0);
@@ -70,7 +73,17 @@ fn main() -> Result<(), Error> {
         Vector3::new(0.0, 1.0, 0.0),
     );
 
-    let canvas = ray_tracer::render(camera, world)?;
+    let pixels = camera.pixels().collect::<Vec<_>>();
+    let pixels = pixels
+        .into_par_iter()
+        .map(|(x, y)| {
+            camera
+                .ray_for_pixel(x, y)
+                .and_then(|ray| world.color_at(ray))
+        })
+        .collect::<Result<Vec<Color>, _>>()?;
+
+    let canvas = Canvas::from_pixels(camera.horizontal_size, camera.vertical_size, pixels);
     print!("{}", canvas.to_ppm()?);
 
     Ok(())

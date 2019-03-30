@@ -51,6 +51,42 @@ impl Camera {
 
         Ok(Ray::new(origin, direction))
     }
+
+    pub fn pixels(&self) -> PixelsIter {
+        PixelsIter {
+            width: self.horizontal_size,
+            height: self.vertical_size,
+            x: 0,
+            y: 0,
+        }
+    }
+}
+
+pub struct PixelsIter {
+    width: u16,
+    height: u16,
+    x: u16,
+    y: u16,
+}
+
+impl Iterator for PixelsIter {
+    type Item = (u16, u16);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.x >= self.width {
+            self.x = 0;
+            self.y += 1;
+        }
+
+        if self.y >= self.height {
+            return None;
+        }
+
+        let pixel = (self.x, self.y);
+        self.x += 1;
+
+        Some(pixel)
+    }
 }
 
 #[cfg(test)]
@@ -97,5 +133,18 @@ mod tests {
             Vector3::new(f64::sqrt(2.0) / 2.0, 0.0, -f64::sqrt(2.0) / 2.0),
             r.direction
         );
+    }
+
+    #[test]
+    fn test_pixels_iterator() {
+        let c = Camera::new(3, 2, PI / 2.0);
+        let mut pixels = c.pixels();
+        assert_eq!(Some((0, 0)), pixels.next());
+        assert_eq!(Some((1, 0)), pixels.next());
+        assert_eq!(Some((2, 0)), pixels.next());
+        assert_eq!(Some((0, 1)), pixels.next());
+        assert_eq!(Some((1, 1)), pixels.next());
+        assert_eq!(Some((2, 1)), pixels.next());
+        assert_eq!(None, pixels.next());
     }
 }

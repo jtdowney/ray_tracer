@@ -59,8 +59,8 @@ fn main() -> Result<(), Error> {
     let objects = [floor, left_wall, right_wall, left, middle, right]
         .iter()
         .cloned()
-        .map(|s| Box::new(s) as Box<Shape>)
-        .collect::<Vec<Box<Shape>>>();
+        .map(|s| Box::new(s) as Box<Shape + Send + Sync>)
+        .collect::<Vec<_>>();
     let world = World::new(light, objects);
 
     let mut camera = Camera::new(1000, 500, PI / 3.0);
