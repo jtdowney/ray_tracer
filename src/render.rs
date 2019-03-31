@@ -5,7 +5,7 @@ pub fn render(camera: Camera, world: World) -> Canvas {
 
     for (x, y) in camera.pixels() {
         let ray = camera.ray_for_pixel(x, y);
-        let color = world.color_at(ray);
+        let color = world.color_at(ray, 5);
         canvas.write_pixel(x, y, color);
     }
 

@@ -9,6 +9,7 @@ pub struct Computations<'a> {
     pub over_point: Point,
     pub eye_vector: Vector3,
     pub normal_vector: Vector3,
+    pub reflect_vector: Vector3,
     pub inside: bool,
 }
 
@@ -32,6 +33,7 @@ impl<'a> Intersection<'a> {
             inside = false;
         }
 
+        let reflect_vector = ray.direction.reflect(normal_vector);
         let over_point = point + normal_vector * EPSILON;
 
         Computations {
@@ -41,6 +43,7 @@ impl<'a> Intersection<'a> {
             point,
             eye_vector,
             normal_vector,
+            reflect_vector,
             inside,
         }
     }
@@ -75,7 +78,7 @@ impl<'a> Intersections<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{transforms, Sphere};
+    use crate::{transforms, Plane, Sphere};
     use std::ptr;
 
     #[test]
@@ -193,5 +196,23 @@ mod tests {
         let comps = i.prepare_computations(r);
         assert!(comps.over_point.z < -(EPSILON / 2.0));
         assert!(comps.point.z > comps.over_point.z);
+    }
+
+    #[test]
+    fn test_precomputing_reflection_vector() {
+        let shape = Plane::default();
+        let r = Ray::new(
+            Point::new(0.0, 1.0, -1.0),
+            Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+        );
+        let i = Intersection {
+            time: f64::sqrt(2.0),
+            object: &shape,
+        };
+        let comps = i.prepare_computations(r);
+        assert_eq!(
+            Vector3::new(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
+            comps.reflect_vector
+        );
     }
 }
