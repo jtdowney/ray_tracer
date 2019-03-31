@@ -1,4 +1,6 @@
-use ray_tracer::{color, Canvas, Color, Point, PointLight, Ray, Shape, Sphere};
+use ray_tracer::{
+    color, Canvas, Color, Pattern, Point, PointLight, Ray, Shape, SolidPattern, Sphere,
+};
 use std::error;
 use std::fmt::Display;
 
@@ -25,7 +27,8 @@ fn main() -> Result<(), Error> {
 
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
     let mut shape = Sphere::default();
-    shape.material.color = Color::new(1.0, 0.2, 1.0);
+    shape.material.pattern =
+        Box::new(SolidPattern::new(Color::new(1.0, 0.2, 1.0))) as Box<Pattern + Send + Sync>;
 
     let light_position = Point::new(-10.0, 10.0, -10.0);
     let light_color = color::WHITE;
@@ -46,7 +49,7 @@ fn main() -> Result<(), Error> {
                 let color = hit
                     .object
                     .material()
-                    .lighting(light, point, eye, normal, false);
+                    .lighting(hit.object, light, point, eye, normal, false);
                 canvas.write_pixel(x, y, color);
             }
         }

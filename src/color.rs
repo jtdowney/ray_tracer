@@ -1,5 +1,5 @@
 use crate::EPSILON;
-use std::ops::{Add, Mul};
+use std::ops::{Add, Mul, Sub};
 
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0);
 pub const WHITE: Color = Color::new(1.0, 1.0, 1.0);
@@ -46,6 +46,18 @@ impl Mul<f64> for Color {
 
     fn mul(self, other: f64) -> Self::Output {
         Color::new(self.red * other, self.green * other, self.blue * other)
+    }
+}
+
+impl Sub<Color> for Color {
+    type Output = Color;
+
+    fn sub(self, other: Color) -> Self::Output {
+        Color::new(
+            self.red - other.red,
+            self.green - other.green,
+            self.blue - other.blue,
+        )
     }
 }
 

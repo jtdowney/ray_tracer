@@ -1,6 +1,6 @@
 use ray_tracer::{
-    color, transforms, Camera, Color, Pattern, Plane, Point, PointLight, Shape, SolidPattern,
-    Sphere, Vector3, World,
+    color, transforms, Camera, CheckersPattern, Color, Pattern, Plane, Point, PointLight, Shape,
+    SolidPattern, Sphere, Vector3, World,
 };
 use std::f64::consts::PI;
 use std::fmt;
@@ -8,7 +8,7 @@ use std::fmt;
 fn main() -> Result<(), fmt::Error> {
     let mut floor = Plane::default();
     floor.material.pattern =
-        Box::new(SolidPattern::new(Color::new(1.0, 0.9, 0.9))) as Box<Pattern + Send + Sync>;
+        Box::new(CheckersPattern::new(color::WHITE, color::BLACK)) as Box<Pattern + Send + Sync>;
     floor.material.specular = 0.0;
 
     let mut middle = Sphere::default();

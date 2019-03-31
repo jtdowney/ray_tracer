@@ -2,7 +2,7 @@ use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, V
 use std::any::Any;
 use std::vec;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Sphere {
     pub transform: Matrix4,
     pub material: Material,

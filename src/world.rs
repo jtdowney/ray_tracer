@@ -1,6 +1,6 @@
 use crate::{
-    color, intersection, transforms, Color, Intersection, Intersections, Point, PointLight, Ray,
-    Shape, Sphere,
+    color, intersection, transforms, Color, Intersection, Intersections, Pattern, Point,
+    PointLight, Ray, Shape, SolidPattern, Sphere,
 };
 
 pub struct World {
@@ -11,7 +11,8 @@ pub struct World {
 impl Default for World {
     fn default() -> Self {
         let mut s1 = Sphere::default();
-        s1.material.color = Color::new(0.8, 1.0, 0.6);
+        s1.material.pattern =
+            Box::new(SolidPattern::new(Color::new(0.8, 1.0, 0.6))) as Box<Pattern + Send + Sync>;
         s1.material.diffuse = 0.7;
         s1.material.specular = 0.2;
 
@@ -19,9 +20,8 @@ impl Default for World {
         s2.transform = transforms::scaling(0.5, 0.5, 0.5);
 
         let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), color::WHITE);
-        let objects = [s1, s2]
-            .iter()
-            .cloned()
+        let objects = vec![s1, s2]
+            .into_iter()
             .map(|s| Box::new(s) as Box<Shape + Send + Sync>)
             .collect();
 
@@ -61,6 +61,7 @@ impl World {
     pub fn shade_hit(&self, comps: intersection::Computations) -> Color {
         let shadowed = self.is_shadowed(comps.over_point);
         comps.object.material().lighting(
+            comps.object,
             self.light,
             comps.over_point,
             comps.eye_vector,
@@ -136,9 +137,8 @@ mod tests {
         let mut s2 = w.objects[1].as_any_mut().downcast_mut::<Sphere>().unwrap();
         s2.material.ambient = 1.0;
 
-        let s2 = w.objects[1].as_any().downcast_ref::<Sphere>().unwrap();
         let r = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
-        assert_eq!(s2.material.color, w.color_at(r));
+        assert_eq!(color::WHITE, w.color_at(r));
     }
 
     #[test]
@@ -179,10 +179,11 @@ mod tests {
                 Box::new(s2) as Box<Shape + Send + Sync>,
             ],
         );
+
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {
             time: 4.0,
-            object: &s2,
+            object: w.objects[1].as_ref(),
         };
         let comps = i.prepare_computations(r);
         assert_eq!(Color::new(0.1, 0.1, 0.1), w.shade_hit(comps));

@@ -1,36 +1,47 @@
-use crate::{color, Color, Point, PointLight, Vector3};
+use crate::{color, Color, Pattern, Point, PointLight, Shape, SolidPattern, Vector3};
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Material {
-    pub color: Color,
     pub ambient: f64,
     pub diffuse: f64,
     pub specular: f64,
     pub shininess: f64,
+    pub pattern: Box<Pattern + Send + Sync>,
 }
 
 impl Default for Material {
     fn default() -> Self {
         Material {
-            color: color::WHITE,
             ambient: 0.1,
             diffuse: 0.9,
             specular: 0.9,
             shininess: 200.0,
+            pattern: Box::new(SolidPattern::new(color::WHITE)) as Box<Pattern + Send + Sync>,
         }
+    }
+}
+
+impl PartialEq for Material {
+    fn eq(&self, other: &Material) -> bool {
+        self.ambient == other.ambient
+            && self.diffuse == other.diffuse
+            && self.specular == other.specular
+            && self.shininess == other.shininess
     }
 }
 
 impl Material {
     pub fn lighting(
         &self,
+        object: &Shape,
         light: PointLight,
         position: Point,
         eye_vector: Vector3,
         normal_vector: Vector3,
         in_shadow: bool,
     ) -> Color {
-        let effective_color = self.color * light.intensity;
+        let color = self.pattern.pattern_at_object(object, position);
+        let effective_color = color * light.intensity;
         let light_vector = (light.position - position).normalize();
         let ambient = effective_color * self.ambient;
         let light_dot_normal = light_vector.dot(normal_vector);
@@ -64,6 +75,7 @@ impl Material {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{Sphere, StripePattern};
 
     #[test]
     fn test_lighting_with_eye_between_light_and_surface() {
@@ -74,7 +86,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(1.9, 1.9, 1.9),
-            m.lighting(light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
         );
     }
 
@@ -87,7 +99,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             color::WHITE,
-            m.lighting(light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
         );
     }
 
@@ -100,7 +112,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(0.7364, 0.7364, 0.7364),
-            m.lighting(light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
         );
     }
 
@@ -113,7 +125,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(1.63638, 1.63638, 1.63638),
-            m.lighting(light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
         );
     }
 
@@ -126,7 +138,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, 10.0), color::WHITE);
         assert_eq!(
             Color::new(0.1, 0.1, 0.1),
-            m.lighting(light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
         );
     }
 
@@ -140,7 +152,45 @@ mod tests {
         let in_shadow = true;
         assert_eq!(
             Color::new(0.1, 0.1, 0.1),
-            m.lighting(light, position, eyev, normalv, in_shadow)
+            m.lighting(
+                &Sphere::default(),
+                light,
+                position,
+                eyev,
+                normalv,
+                in_shadow
+            )
         );
+    }
+
+    #[test]
+    fn test_lighting_with_pattern() {
+        let mut m = Material::default();
+        m.pattern =
+            Box::new(StripePattern::new(color::WHITE, color::BLACK)) as Box<Pattern + Send + Sync>;
+        m.ambient = 1.0;
+        m.diffuse = 0.0;
+        m.specular = 0.0;
+        let eyev = Vector3::new(0.0, 0.0, -1.0);
+        let normalv = Vector3::new(0.0, 0.0, -1.0);
+        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
+        let c1 = m.lighting(
+            &Sphere::default(),
+            light,
+            Point::new(0.9, 0.0, 0.0),
+            eyev,
+            normalv,
+            false,
+        );
+        let c2 = m.lighting(
+            &Sphere::default(),
+            light,
+            Point::new(1.1, 0.0, 0.0),
+            eyev,
+            normalv,
+            false,
+        );
+        assert_eq!(color::WHITE, c1);
+        assert_eq!(color::BLACK, c2);
     }
 }
