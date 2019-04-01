@@ -1,5 +1,4 @@
 use crate::{Color, Matrix4, Point, Shape};
-use std::any::Any;
 use std::fmt::Debug;
 
 mod checkers_pattern;
@@ -14,8 +13,7 @@ pub use self::ring_pattern::RingPattern;
 pub use self::solid_pattern::SolidPattern;
 pub use self::stripe_pattern::StripePattern;
 
-pub trait Pattern: Any + Debug {
-    fn as_any(&self) -> &Any;
+pub trait Pattern: Debug {
     fn box_clone(&self) -> Box<Pattern>;
     fn pattern_at(&self, point: Point) -> Color;
     fn transform(&self) -> Matrix4;
@@ -52,10 +50,6 @@ mod tests {
     }
 
     impl Pattern for TestPattern {
-        fn as_any(&self) -> &Any {
-            self
-        }
-
         fn box_clone(&self) -> Box<Pattern> {
             Box::new((*self).clone())
         }

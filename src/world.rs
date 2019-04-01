@@ -1,6 +1,6 @@
 use crate::{
     color, intersection, transforms, Color, Intersection, Intersections, MaterialBuilder, Point,
-    PointLight, Ray, Shape, SolidPattern, SphereBuilder,
+    PointLight, Ray, Shape, SphereBuilder,
 };
 
 pub struct World {

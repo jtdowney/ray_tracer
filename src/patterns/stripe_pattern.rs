@@ -1,5 +1,4 @@
 use crate::{Color, Matrix4, Pattern, Point};
-use std::any::Any;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct StripePattern {
@@ -18,20 +17,7 @@ impl StripePattern {
     }
 }
 
-impl PartialEq<Pattern> for StripePattern {
-    fn eq(&self, other: &Pattern) -> bool {
-        other
-            .as_any()
-            .downcast_ref::<Self>()
-            .map_or(false, |x| self == x)
-    }
-}
-
 impl Pattern for StripePattern {
-    fn as_any(&self) -> &Any {
-        self
-    }
-
     fn box_clone(&self) -> Box<Pattern> {
         Box::new((*self).clone())
     }
