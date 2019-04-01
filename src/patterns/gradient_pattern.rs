@@ -19,7 +19,7 @@ impl GradientPattern {
 
 impl Pattern for GradientPattern {
     fn box_clone(&self) -> Box<Pattern> {
-        Box::new((*self).clone())
+        Box::new(*self)
     }
 
     fn transform(&self) -> Matrix4 {

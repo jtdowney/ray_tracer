@@ -19,7 +19,7 @@ impl CheckersPattern {
 
 impl Pattern for CheckersPattern {
     fn box_clone(&self) -> Box<Pattern> {
-        Box::new((*self).clone())
+        Box::new(*self)
     }
 
     fn transform(&self) -> Matrix4 {

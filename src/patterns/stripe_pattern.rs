@@ -19,7 +19,7 @@ impl StripePattern {
 
 impl Pattern for StripePattern {
     fn box_clone(&self) -> Box<Pattern> {
-        Box::new((*self).clone())
+        Box::new(*self)
     }
 
     fn transform(&self) -> Matrix4 {

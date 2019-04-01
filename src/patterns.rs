@@ -51,7 +51,7 @@ mod tests {
 
     impl Pattern for TestPattern {
         fn box_clone(&self) -> Box<Pattern> {
-            Box::new((*self).clone())
+            Box::new(*self)
         }
 
         fn pattern_at(&self, Point { x, y, z }: Point) -> Color {
