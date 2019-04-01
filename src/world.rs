@@ -13,7 +13,7 @@ impl Default for World {
         let s1 = SphereBuilder::default()
             .material(
                 MaterialBuilder::default()
-                    .pattern(SolidPattern::new(Color::new(0.8, 1.0, 0.6)))
+                    .color(Color::new(0.8, 1.0, 0.6))
                     .diffuse(0.7)
                     .specular(0.2)
                     .build()

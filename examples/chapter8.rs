@@ -1,6 +1,6 @@
 use ray_tracer::{
-    color, transforms, Camera, Color, MaterialBuilder, Point, PointLight, Shape, SolidPattern,
-    SphereBuilder, Vector3, World,
+    color, transforms, Camera, Color, MaterialBuilder, Point, PointLight, Shape, SphereBuilder,
+    Vector3, World,
 };
 use std::f64::consts::PI;
 use std::fmt;
@@ -10,7 +10,7 @@ fn main() -> Result<(), fmt::Error> {
         .transform(transforms::scaling(10.0, 0.01, 10.0))
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(1.0, 0.9, 0.9)))
+                .color(Color::new(1.0, 0.9, 0.9))
                 .specular(0.0)
                 .build()
                 .unwrap(),
@@ -27,7 +27,7 @@ fn main() -> Result<(), fmt::Error> {
         )
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(1.0, 0.9, 0.9)))
+                .color(Color::new(1.0, 0.9, 0.9))
                 .specular(0.0)
                 .build()
                 .unwrap(),
@@ -44,7 +44,7 @@ fn main() -> Result<(), fmt::Error> {
         )
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(1.0, 0.9, 0.9)))
+                .color(Color::new(1.0, 0.9, 0.9))
                 .specular(0.0)
                 .build()
                 .unwrap(),
@@ -56,7 +56,7 @@ fn main() -> Result<(), fmt::Error> {
         .transform(transforms::translation(-0.5, 1.0, 0.5))
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(0.1, 1.0, 0.5)))
+                .color(Color::new(0.1, 1.0, 0.5))
                 .diffuse(0.7)
                 .specular(0.3)
                 .build()
@@ -69,7 +69,7 @@ fn main() -> Result<(), fmt::Error> {
         .transform(transforms::translation(1.5, 0.5, -0.5) * transforms::scaling(0.5, 0.5, 0.5))
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(0.5, 1.0, 0.1)))
+                .color(Color::new(0.5, 1.0, 0.1))
                 .diffuse(0.7)
                 .specular(0.3)
                 .build()
@@ -84,7 +84,7 @@ fn main() -> Result<(), fmt::Error> {
         )
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(1.0, 0.8, 0.1)))
+                .color(Color::new(1.0, 0.8, 0.1))
                 .diffuse(0.7)
                 .specular(0.3)
                 .build()

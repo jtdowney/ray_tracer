@@ -24,6 +24,10 @@ pub struct Material {
 }
 
 impl MaterialBuilder {
+    pub fn color(&mut self, value: Color) -> &mut Self {
+        self.pattern(SolidPattern::new(value))
+    }
+
     pub fn pattern<P: Pattern>(&mut self, value: P) -> &mut Self {
         self.boxed_pattern(Box::new(value))
     }

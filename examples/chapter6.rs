@@ -1,6 +1,5 @@
 use ray_tracer::{
-    color, Canvas, Color, MaterialBuilder, Point, PointLight, Ray, Shape, SolidPattern,
-    SphereBuilder,
+    color, Canvas, Color, MaterialBuilder, Point, PointLight, Ray, Shape, SphereBuilder,
 };
 use std::error;
 use std::fmt::Display;
@@ -30,7 +29,7 @@ fn main() -> Result<(), Error> {
     let shape = SphereBuilder::default()
         .material(
             MaterialBuilder::default()
-                .pattern(SolidPattern::new(Color::new(1.0, 0.2, 1.0)))
+                .color(Color::new(1.0, 0.2, 1.0))
                 .build()
                 .unwrap(),
         )
