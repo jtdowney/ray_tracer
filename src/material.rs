@@ -60,7 +60,7 @@ impl Material {
     pub fn lighting(
         &self,
         object: &Shape,
-        light: PointLight,
+        light: &PointLight,
         position: Point,
         eye_vector: Vector3,
         normal_vector: Vector3,
@@ -116,7 +116,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(1.9, 1.9, 1.9),
-            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -129,7 +129,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             color::WHITE,
-            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -142,7 +142,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(0.7364, 0.7364, 0.7364),
-            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -155,7 +155,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
             Color::new(1.63638, 1.63638, 1.63638),
-            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -168,7 +168,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, 10.0), color::WHITE);
         assert_eq!(
             Color::new(0.1, 0.1, 0.1),
-            m.lighting(&Sphere::default(), light, position, eyev, normalv, false)
+            m.lighting(&Sphere::default(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -184,7 +184,7 @@ mod tests {
             Color::new(0.1, 0.1, 0.1),
             m.lighting(
                 &Sphere::default(),
-                light,
+                &light,
                 position,
                 eyev,
                 normalv,
@@ -207,7 +207,7 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         let c1 = m.lighting(
             &Sphere::default(),
-            light,
+            &light,
             Point::new(0.9, 0.0, 0.0),
             eyev,
             normalv,
@@ -215,7 +215,7 @@ mod tests {
         );
         let c2 = m.lighting(
             &Sphere::default(),
-            light,
+            &light,
             Point::new(1.1, 0.0, 0.0),
             eyev,
             normalv,

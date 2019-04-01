@@ -29,6 +29,6 @@ pub use crate::ray::Ray;
 pub use crate::render::render;
 pub use crate::shapes::{Plane, PlaneBuilder, Shape, Sphere, SphereBuilder};
 pub use crate::vector::{Vector, Vector3, Vector4};
-pub use crate::world::World;
+pub use crate::world::{World, WorldBuilder};
 
 const EPSILON: f64 = 1e-4;

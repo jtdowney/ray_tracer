@@ -55,7 +55,7 @@ fn main() -> Result<(), Error> {
                 let color = hit
                     .object
                     .material()
-                    .lighting(hit.object, light, point, eye, normal, false);
+                    .lighting(hit.object, &light, point, eye, normal, false);
                 canvas.write_pixel(x, y, color);
             }
         }

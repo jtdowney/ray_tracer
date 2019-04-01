@@ -3,7 +3,7 @@ use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
 
-#[derive(Builder, Debug, PartialEq)]
+#[derive(Builder, Clone, Debug, PartialEq)]
 pub struct Sphere {
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
@@ -33,6 +33,10 @@ impl Shape for Sphere {
 
     fn as_any_mut(&mut self) -> &mut Any {
         self
+    }
+
+    fn box_clone(&self) -> Box<Shape> {
+        Box::new((*self).clone())
     }
 
     fn local_normal_at(&self, point: Point) -> Vector3 {

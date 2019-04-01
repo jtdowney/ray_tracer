@@ -1,4 +1,5 @@
 use crate::EPSILON;
+use std::iter::Sum;
 use std::ops::{Add, Mul, Sub};
 
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0);
@@ -58,6 +59,12 @@ impl Sub<Color> for Color {
             self.green - other.green,
             self.blue - other.blue,
         )
+    }
+}
+
+impl Sum<Color> for Color {
+    fn sum<I: Iterator<Item = Color>>(iter: I) -> Self {
+        iter.fold(Color::default(), |a, b| a + b)
     }
 }
 

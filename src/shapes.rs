@@ -11,6 +11,7 @@ pub use self::sphere::{Sphere, SphereBuilder};
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
     fn as_any_mut(&mut self) -> &mut Any;
+    fn box_clone(&self) -> Box<Shape>;
     fn local_normal_at(&self, point: Point) -> Vector3;
     fn local_intersect(&self, ray: Ray) -> Intersections;
     fn material(&self) -> &Material;
@@ -30,6 +31,12 @@ pub trait Shape: Any + Debug {
     }
 }
 
+impl Clone for Box<Shape> {
+    fn clone(&self) -> Self {
+        self.box_clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -37,7 +44,7 @@ mod tests {
     use std::cell::RefCell;
     use std::f64::consts::PI;
 
-    #[derive(Debug)]
+    #[derive(Clone, Debug)]
     struct TestShape {
         transform: Matrix4,
         material: Material,
@@ -61,6 +68,10 @@ mod tests {
 
         fn as_any_mut(&mut self) -> &mut Any {
             self
+        }
+
+        fn box_clone(&self) -> Box<Shape> {
+            Box::new((*self).clone())
         }
 
         fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {

@@ -3,49 +3,70 @@ use crate::{
     PointLight, Ray, Shape, SphereBuilder,
 };
 
+#[derive(Default)]
+pub struct WorldBuilder {
+    objects: Vec<Box<Shape>>,
+    lights: Vec<PointLight>,
+}
+
+impl WorldBuilder {
+    pub fn light(&mut self, light: PointLight) -> &mut Self {
+        self.lights.push(light);
+        self
+    }
+
+    pub fn object<T>(&mut self, object: T) -> &mut Self
+    where
+        T: Shape,
+    {
+        self.objects.push(Box::new(object) as Box<Shape>);
+        self
+    }
+
+    pub fn build(&self) -> World {
+        World {
+            objects: self.objects.clone(),
+            lights: self.lights.clone(),
+        }
+    }
+}
+
 pub struct World {
     objects: Vec<Box<Shape>>,
-    light: PointLight,
+    lights: Vec<PointLight>,
 }
 
 impl Default for World {
     fn default() -> Self {
-        let s1 = SphereBuilder::default()
-            .material(
-                MaterialBuilder::default()
-                    .color(Color::new(0.8, 1.0, 0.6))
-                    .diffuse(0.7)
-                    .specular(0.2)
+        WorldBuilder::default()
+            .object(
+                SphereBuilder::default()
+                    .material(
+                        MaterialBuilder::default()
+                            .color(Color::new(0.8, 1.0, 0.6))
+                            .diffuse(0.7)
+                            .specular(0.2)
+                            .build()
+                            .unwrap(),
+                    )
                     .build()
                     .unwrap(),
             )
+            .object(
+                SphereBuilder::default()
+                    .transform(transforms::scaling(0.5, 0.5, 0.5))
+                    .build()
+                    .unwrap(),
+            )
+            .light(PointLight::new(
+                Point::new(-10.0, 10.0, -10.0),
+                color::WHITE,
+            ))
             .build()
-            .unwrap();
-
-        let s2 = SphereBuilder::default()
-            .transform(transforms::scaling(0.5, 0.5, 0.5))
-            .build()
-            .unwrap();
-
-        let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), color::WHITE);
-        let objects = vec![s1, s2]
-            .into_iter()
-            .map(|s| Box::new(s) as Box<Shape>)
-            .collect();
-
-        World { objects, light }
     }
 }
 
 impl World {
-    pub fn new<I>(light: PointLight, objects: I) -> Self
-    where
-        I: IntoIterator<Item = Box<Shape>>,
-    {
-        let objects = objects.into_iter().collect();
-        World { objects, light }
-    }
-
     pub fn color_at(&self, ray: Ray, remaining: u8) -> Color {
         let intersections = self.intersect(ray);
         if let Some(hit) = intersections.hit() {
@@ -68,31 +89,39 @@ impl World {
 
     fn shade_hit(&self, comps: intersection::Computations, remaining: u8) -> Color {
         let shadowed = self.is_shadowed(comps.over_point);
-        let surface = comps.object.material().lighting(
-            comps.object,
-            self.light,
-            comps.over_point,
-            comps.eye_vector,
-            comps.normal_vector,
-            shadowed,
-        );
+        let surface = self
+            .lights
+            .iter()
+            .map(|light| {
+                comps.object.material().lighting(
+                    comps.object,
+                    light,
+                    comps.over_point,
+                    comps.eye_vector,
+                    comps.normal_vector,
+                    shadowed,
+                )
+            })
+            .sum::<Color>();
         let reflected = self.reflected_color(comps, remaining);
 
         surface + reflected
     }
 
     fn is_shadowed(&self, point: Point) -> bool {
-        let v = self.light.position - point;
-        let distance = v.magnitude();
-        let direction = v.normalize();
+        self.lights.iter().any(|light| {
+            let light_vector = light.position - point;
+            let distance = light_vector.magnitude();
+            let direction = light_vector.normalize();
 
-        let ray = Ray::new(point, direction);
-        let intersections = self.intersect(ray);
-        if let Some(hit) = intersections.hit() {
-            hit.time < distance
-        } else {
-            false
-        }
+            let ray = Ray::new(point, direction);
+            let intersections = self.intersect(ray);
+            if let Some(hit) = intersections.hit() {
+                hit.time < distance
+            } else {
+                false
+            }
+        })
     }
 
     fn reflected_color(&self, comps: intersection::Computations, remaining: u8) -> Color {
@@ -188,17 +217,16 @@ mod tests {
 
     #[test]
     fn test_shade_hit_when_in_shadow() {
-        let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
-        let s1 = Sphere::default();
-        let s2 = SphereBuilder::default()
-            .transform(transforms::translation(0.0, 0.0, 10.0))
-            .build()
-            .unwrap();
-
-        let w = World::new(
-            light,
-            vec![Box::new(s1) as Box<Shape>, Box::new(s2) as Box<Shape>],
-        );
+        let w = WorldBuilder::default()
+            .light(PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE))
+            .object(Sphere::default())
+            .object(
+                SphereBuilder::default()
+                    .transform(transforms::translation(0.0, 0.0, 10.0))
+                    .build()
+                    .unwrap(),
+            )
+            .build();
 
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {
@@ -273,23 +301,23 @@ mod tests {
 
     #[test]
     fn test_color_at_with_mutually_reflective_surfaces() {
-        let light = PointLight::new(Point::new(0.0, 0.0, 0.0), color::WHITE);
-        let mut w = World::new(light, vec![]);
-
-        let lower = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, -1.0, 0.0))
-            .material(MaterialBuilder::default().reflective(1.0).build().unwrap())
-            .build()
-            .unwrap();
-
-        let upper = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, 1.0, 0.0))
-            .material(MaterialBuilder::default().reflective(1.0).build().unwrap())
-            .build()
-            .unwrap();
-
-        w.objects.push(Box::new(lower) as Box<Shape>);
-        w.objects.push(Box::new(upper) as Box<Shape>);
+        let w = WorldBuilder::default()
+            .light(PointLight::new(Point::new(0.0, 0.0, 0.0), color::WHITE))
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, -1.0, 0.0))
+                    .material(MaterialBuilder::default().reflective(1.0).build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, 1.0, 0.0))
+                    .material(MaterialBuilder::default().reflective(1.0).build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .build();
 
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
         w.color_at(r, 5);
