@@ -1,5 +1,6 @@
 use ray_tracer::{
-    color, Canvas, Color, Pattern, Point, PointLight, Ray, Shape, SolidPattern, Sphere,
+    color, Canvas, Color, MaterialBuilder, Point, PointLight, Ray, Shape, SolidPattern,
+    SphereBuilder,
 };
 use std::error;
 use std::fmt::Display;
@@ -26,9 +27,15 @@ fn main() -> Result<(), Error> {
     let half = wall_size / 2.0;
 
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
-    let mut shape = Sphere::default();
-    shape.material.pattern =
-        Box::new(SolidPattern::new(Color::new(1.0, 0.2, 1.0))) as Box<Pattern + Send + Sync>;
+    let shape = SphereBuilder::default()
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(1.0, 0.2, 1.0)))
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
     let light_position = Point::new(-10.0, 10.0, -10.0);
     let light_color = color::WHITE;

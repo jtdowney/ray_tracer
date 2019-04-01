@@ -78,7 +78,7 @@ impl<'a> Intersections<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{transforms, Plane, Sphere};
+    use crate::{transforms, Plane, Sphere, SphereBuilder};
     use std::ptr;
 
     #[test]
@@ -187,8 +187,10 @@ mod tests {
     #[test]
     fn test_hit_should_offset_point() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let mut shape = Sphere::default();
-        shape.transform = transforms::translation(0.0, 0.0, 1.0);
+        let shape = SphereBuilder::default()
+            .transform(transforms::translation(0.0, 0.0, 1.0))
+            .build()
+            .unwrap();
         let i = Intersection {
             time: 5.0,
             object: &shape,

@@ -1,19 +1,19 @@
 use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3};
+use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
 
-#[derive(Debug, PartialEq)]
+#[derive(Builder, Debug, PartialEq)]
 pub struct Sphere {
+    #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
+    #[builder(default)]
     pub material: Material,
 }
 
 impl Default for Sphere {
     fn default() -> Self {
-        Sphere {
-            transform: Matrix4::identity(),
-            material: Material::default(),
-        }
+        SphereBuilder::default().build().unwrap()
     }
 }
 

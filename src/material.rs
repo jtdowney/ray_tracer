@@ -1,29 +1,41 @@
 use crate::{color, Color, Pattern, Point, PointLight, Shape, SolidPattern, Vector3};
+use derive_builder::Builder;
+use std::ptr;
 
-#[derive(Debug)]
+#[derive(Builder, Clone, Debug)]
 pub struct Material {
+    #[builder(default = "0.1")]
     pub ambient: f64,
+    #[builder(default = "0.9")]
     pub diffuse: f64,
+    #[builder(default = "0.9")]
     pub specular: f64,
+    #[builder(default = "200.0")]
     pub shininess: f64,
+    #[builder(default = "0.0")]
     pub reflective: f64,
+    #[builder(default = "0.0")]
     pub transparency: f64,
+    #[builder(default = "1.0")]
     pub refractive_index: f64,
-    pub pattern: Box<Pattern + Send + Sync>,
+    #[builder(setter(prefix = "boxed"))]
+    #[builder(default = "Self::default_pattern()")]
+    pub pattern: Box<Pattern>,
+}
+
+impl MaterialBuilder {
+    pub fn pattern<P: Pattern>(&mut self, value: P) -> &mut Self {
+        self.boxed_pattern(Box::new(value))
+    }
+
+    fn default_pattern() -> Box<Pattern> {
+        Box::new(SolidPattern::new(color::WHITE)) as Box<Pattern>
+    }
 }
 
 impl Default for Material {
     fn default() -> Self {
-        Material {
-            pattern: Box::new(SolidPattern::new(color::WHITE)) as Box<Pattern + Send + Sync>,
-            ambient: 0.1,
-            diffuse: 0.9,
-            specular: 0.9,
-            shininess: 200.0,
-            reflective: 0.0,
-            transparency: 0.0,
-            refractive_index: 1.0,
-        }
+        MaterialBuilder::default().build().unwrap()
     }
 }
 
@@ -36,6 +48,7 @@ impl PartialEq for Material {
             && self.reflective == other.reflective
             && self.transparency == other.transparency
             && self.refractive_index == other.refractive_index
+            && ptr::eq(self.pattern.as_ref(), other.pattern.as_ref())
     }
 }
 
@@ -78,6 +91,10 @@ impl Material {
         } else {
             ambient + diffuse + specular
         }
+    }
+
+    pub fn is_reflective(&self) -> bool {
+        self.reflective > 0.0
     }
 }
 
@@ -174,12 +191,13 @@ mod tests {
 
     #[test]
     fn test_lighting_with_pattern() {
-        let mut m = Material::default();
-        m.pattern =
-            Box::new(StripePattern::new(color::WHITE, color::BLACK)) as Box<Pattern + Send + Sync>;
-        m.ambient = 1.0;
-        m.diffuse = 0.0;
-        m.specular = 0.0;
+        let m = MaterialBuilder::default()
+            .pattern(StripePattern::new(color::WHITE, color::BLACK))
+            .ambient(1.0)
+            .diffuse(0.0)
+            .specular(0.0)
+            .build()
+            .unwrap();
         let eyev = Vector3::new(0.0, 0.0, -1.0);
         let normalv = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);

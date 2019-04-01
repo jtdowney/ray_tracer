@@ -36,6 +36,10 @@ impl Pattern for SolidPattern {
         self
     }
 
+    fn box_clone(&self) -> Box<Pattern> {
+        Box::new((*self).clone())
+    }
+
     fn transform(&self) -> Matrix4 {
         self.transform
     }

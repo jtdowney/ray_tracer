@@ -16,6 +16,7 @@ pub use self::stripe_pattern::StripePattern;
 
 pub trait Pattern: Any + Debug {
     fn as_any(&self) -> &Any;
+    fn box_clone(&self) -> Box<Pattern>;
     fn pattern_at(&self, point: Point) -> Color;
     fn transform(&self) -> Matrix4;
 
@@ -26,12 +27,18 @@ pub trait Pattern: Any + Debug {
     }
 }
 
+impl Clone for Box<Pattern> {
+    fn clone(&self) -> Self {
+        self.box_clone()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{transforms, Sphere};
+    use crate::{transforms, Sphere, SphereBuilder};
 
-    #[derive(Debug)]
+    #[derive(Copy, Clone, Debug)]
     struct TestPattern {
         transform: Matrix4,
     }
@@ -48,9 +55,15 @@ mod tests {
         fn as_any(&self) -> &Any {
             self
         }
+
+        fn box_clone(&self) -> Box<Pattern> {
+            Box::new((*self).clone())
+        }
+
         fn pattern_at(&self, Point { x, y, z }: Point) -> Color {
             Color::new(x, y, z)
         }
+
         fn transform(&self) -> Matrix4 {
             self.transform
         }
@@ -58,8 +71,10 @@ mod tests {
 
     #[test]
     fn test_pattern_with_object_transformation() {
-        let mut object = Sphere::default();
-        object.transform = transforms::scaling(2.0, 2.0, 2.0);
+        let object = SphereBuilder::default()
+            .transform(transforms::scaling(2.0, 2.0, 2.0))
+            .build()
+            .unwrap();
         let pattern = TestPattern::default();
 
         assert_eq!(
@@ -82,8 +97,10 @@ mod tests {
 
     #[test]
     fn test_pattern_with_object_and_pattern_transformation() {
-        let mut object = Sphere::default();
-        object.transform = transforms::scaling(2.0, 2.0, 2.0);
+        let object = SphereBuilder::default()
+            .transform(transforms::scaling(2.0, 2.0, 2.0))
+            .build()
+            .unwrap();
         let mut pattern = TestPattern::default();
         pattern.transform = transforms::translation(0.5, 1.0, 1.5);
 

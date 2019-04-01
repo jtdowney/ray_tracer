@@ -19,7 +19,7 @@ pub use crate::canvas::Canvas;
 pub use crate::color::Color;
 pub use crate::intersection::{Intersection, Intersections};
 pub use crate::light::PointLight;
-pub use crate::material::Material;
+pub use crate::material::{Material, MaterialBuilder};
 pub use crate::matrix::{Matrix, Matrix2, Matrix3, Matrix4};
 pub use crate::patterns::{
     CheckersPattern, GradientPattern, Pattern, RingPattern, SolidPattern, StripePattern,
@@ -27,7 +27,7 @@ pub use crate::patterns::{
 pub use crate::point::Point;
 pub use crate::ray::Ray;
 pub use crate::render::render;
-pub use crate::shapes::{Plane, Shape, Sphere};
+pub use crate::shapes::{Plane, PlaneBuilder, Shape, Sphere, SphereBuilder};
 pub use crate::vector::{Vector, Vector3, Vector4};
 pub use crate::world::World;
 

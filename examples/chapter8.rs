@@ -1,61 +1,102 @@
 use ray_tracer::{
-    color, transforms, Camera, Color, Pattern, Point, PointLight, Shape, SolidPattern, Sphere,
-    Vector3, World,
+    color, transforms, Camera, Color, MaterialBuilder, Point, PointLight, Shape, SolidPattern,
+    SphereBuilder, Vector3, World,
 };
 use std::f64::consts::PI;
 use std::fmt;
 
 fn main() -> Result<(), fmt::Error> {
-    let mut floor = Sphere::default();
-    floor.transform = transforms::scaling(10.0, 0.01, 10.0);
-    floor.material.pattern =
-        Box::new(SolidPattern::new(Color::new(1.0, 0.9, 0.9))) as Box<Pattern + Send + Sync>;
-    floor.material.specular = 0.0;
+    let floor = SphereBuilder::default()
+        .transform(transforms::scaling(10.0, 0.01, 10.0))
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(1.0, 0.9, 0.9)))
+                .specular(0.0)
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
-    let mut left_wall = Sphere::default();
-    left_wall.transform = transforms::translation(0.0, 0.0, 5.0)
-        * transforms::rotation_y(-PI / 4.0)
-        * transforms::rotation_x(PI / 2.0)
-        * transforms::scaling(10.0, 0.01, 10.0);
-    left_wall.material.pattern =
-        Box::new(SolidPattern::new(Color::new(1.0, 0.9, 0.9))) as Box<Pattern + Send + Sync>;
-    left_wall.material.specular = 0.0;
+    let left_wall = SphereBuilder::default()
+        .transform(
+            transforms::translation(0.0, 0.0, 5.0)
+                * transforms::rotation_y(-PI / 4.0)
+                * transforms::rotation_x(PI / 2.0)
+                * transforms::scaling(10.0, 0.01, 10.0),
+        )
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(1.0, 0.9, 0.9)))
+                .specular(0.0)
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
-    let mut right_wall = Sphere::default();
-    right_wall.transform = transforms::translation(0.0, 0.0, 5.0)
-        * transforms::rotation_y(PI / 4.0)
-        * transforms::rotation_x(PI / 2.0)
-        * transforms::scaling(10.0, 0.01, 10.0);
-    right_wall.material.pattern =
-        Box::new(SolidPattern::new(Color::new(1.0, 0.9, 0.9))) as Box<Pattern + Send + Sync>;
-    right_wall.material.specular = 0.0;
+    let right_wall = SphereBuilder::default()
+        .transform(
+            transforms::translation(0.0, 0.0, 5.0)
+                * transforms::rotation_y(PI / 4.0)
+                * transforms::rotation_x(PI / 2.0)
+                * transforms::scaling(10.0, 0.01, 10.0),
+        )
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(1.0, 0.9, 0.9)))
+                .specular(0.0)
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
-    let mut middle = Sphere::default();
-    middle.transform = transforms::translation(-0.5, 1.0, 0.5);
-    middle.material.pattern =
-        Box::new(SolidPattern::new(Color::new(0.1, 1.0, 0.5))) as Box<Pattern + Send + Sync>;
-    middle.material.diffuse = 0.7;
-    middle.material.specular = 0.3;
+    let middle = SphereBuilder::default()
+        .transform(transforms::translation(-0.5, 1.0, 0.5))
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(0.1, 1.0, 0.5)))
+                .diffuse(0.7)
+                .specular(0.3)
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
-    let mut right = Sphere::default();
-    right.transform = transforms::translation(1.5, 0.5, -0.5) * transforms::scaling(0.5, 0.5, 0.5);
-    right.material.pattern =
-        Box::new(SolidPattern::new(Color::new(0.5, 1.0, 0.1))) as Box<Pattern + Send + Sync>;
-    right.material.diffuse = 0.7;
-    right.material.specular = 0.3;
+    let right = SphereBuilder::default()
+        .transform(transforms::translation(1.5, 0.5, -0.5) * transforms::scaling(0.5, 0.5, 0.5))
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(0.5, 1.0, 0.1)))
+                .diffuse(0.7)
+                .specular(0.3)
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
-    let mut left = Sphere::default();
-    left.transform =
-        transforms::translation(-1.5, 0.33, -0.75) * transforms::scaling(0.33, 0.33, 0.33);
-    left.material.pattern =
-        Box::new(SolidPattern::new(Color::new(1.0, 0.8, 0.1))) as Box<Pattern + Send + Sync>;
-    left.material.diffuse = 0.7;
-    left.material.specular = 0.3;
+    let left = SphereBuilder::default()
+        .transform(
+            transforms::translation(-1.5, 0.33, -0.75) * transforms::scaling(0.33, 0.33, 0.33),
+        )
+        .material(
+            MaterialBuilder::default()
+                .pattern(SolidPattern::new(Color::new(1.0, 0.8, 0.1)))
+                .diffuse(0.7)
+                .specular(0.3)
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
 
     let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), color::WHITE);
     let objects = vec![floor, left_wall, right_wall, left, middle, right]
         .into_iter()
-        .map(|s| Box::new(s) as Box<Shape + Send + Sync>)
+        .map(|s| Box::new(s) as Box<Shape>)
         .collect::<Vec<_>>();
     let world = World::new(light, objects);
 

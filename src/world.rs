@@ -1,28 +1,36 @@
 use crate::{
-    color, intersection, transforms, Color, Intersection, Intersections, Pattern, Point,
-    PointLight, Ray, Shape, SolidPattern, Sphere,
+    color, intersection, transforms, Color, Intersection, Intersections, MaterialBuilder, Point,
+    PointLight, Ray, Shape, SolidPattern, SphereBuilder,
 };
 
 pub struct World {
-    objects: Vec<Box<Shape + Send + Sync>>,
+    objects: Vec<Box<Shape>>,
     light: PointLight,
 }
 
 impl Default for World {
     fn default() -> Self {
-        let mut s1 = Sphere::default();
-        s1.material.pattern =
-            Box::new(SolidPattern::new(Color::new(0.8, 1.0, 0.6))) as Box<Pattern + Send + Sync>;
-        s1.material.diffuse = 0.7;
-        s1.material.specular = 0.2;
+        let s1 = SphereBuilder::default()
+            .material(
+                MaterialBuilder::default()
+                    .pattern(SolidPattern::new(Color::new(0.8, 1.0, 0.6)))
+                    .diffuse(0.7)
+                    .specular(0.2)
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
 
-        let mut s2 = Sphere::default();
-        s2.transform = transforms::scaling(0.5, 0.5, 0.5);
+        let s2 = SphereBuilder::default()
+            .transform(transforms::scaling(0.5, 0.5, 0.5))
+            .build()
+            .unwrap();
 
         let light = PointLight::new(Point::new(-10.0, 10.0, -10.0), color::WHITE);
         let objects = vec![s1, s2]
             .into_iter()
-            .map(|s| Box::new(s) as Box<Shape + Send + Sync>)
+            .map(|s| Box::new(s) as Box<Shape>)
             .collect();
 
         World { objects, light }
@@ -32,7 +40,7 @@ impl Default for World {
 impl World {
     pub fn new<I>(light: PointLight, objects: I) -> Self
     where
-        I: IntoIterator<Item = Box<Shape + Send + Sync>>,
+        I: IntoIterator<Item = Box<Shape>>,
     {
         let objects = objects.into_iter().collect();
         World { objects, light }
@@ -88,7 +96,7 @@ impl World {
     }
 
     fn reflected_color(&self, comps: intersection::Computations, remaining: u8) -> Color {
-        if remaining == 0 || comps.object.material().reflective == 0.0 {
+        if remaining == 0 || !comps.object.material().is_reflective() {
             color::BLACK
         } else {
             let reflect_ray = Ray::new(comps.over_point, comps.reflect_vector);
@@ -101,7 +109,7 @@ impl World {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Plane, Vector3};
+    use crate::{PlaneBuilder, Sphere, Vector3};
 
     #[test]
     fn test_intersect_world_with_ray() {
@@ -182,15 +190,14 @@ mod tests {
     fn test_shade_hit_when_in_shadow() {
         let light = PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE);
         let s1 = Sphere::default();
-        let mut s2 = Sphere::default();
-        s2.transform = transforms::translation(0.0, 0.0, 10.0);
+        let s2 = SphereBuilder::default()
+            .transform(transforms::translation(0.0, 0.0, 10.0))
+            .build()
+            .unwrap();
 
         let w = World::new(
             light,
-            vec![
-                Box::new(s1) as Box<Shape + Send + Sync>,
-                Box::new(s2) as Box<Shape + Send + Sync>,
-            ],
+            vec![Box::new(s1) as Box<Shape>, Box::new(s2) as Box<Shape>],
         );
 
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
@@ -220,10 +227,12 @@ mod tests {
     #[test]
     fn test_reflected_color_for_reflective_material() {
         let mut w = World::default();
-        let mut shape = Plane::default();
-        shape.material.reflective = 0.5;
-        shape.transform = transforms::translation(0.0, -1.0, 0.0);
-        w.objects.push(Box::new(shape) as Box<Shape + Send + Sync>);
+        let shape = PlaneBuilder::default()
+            .transform(transforms::translation(0.0, -1.0, 0.0))
+            .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
+            .build()
+            .unwrap();
+        w.objects.push(Box::new(shape) as Box<Shape>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -243,10 +252,12 @@ mod tests {
     #[test]
     fn test_shade_hit_with_reflective_material() {
         let mut w = World::default();
-        let mut shape = Plane::default();
-        shape.material.reflective = 0.5;
-        shape.transform = transforms::translation(0.0, -1.0, 0.0);
-        w.objects.push(Box::new(shape) as Box<Shape + Send + Sync>);
+        let shape = PlaneBuilder::default()
+            .transform(transforms::translation(0.0, -1.0, 0.0))
+            .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
+            .build()
+            .unwrap();
+        w.objects.push(Box::new(shape) as Box<Shape>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -265,16 +276,20 @@ mod tests {
         let light = PointLight::new(Point::new(0.0, 0.0, 0.0), color::WHITE);
         let mut w = World::new(light, vec![]);
 
-        let mut lower = Plane::default();
-        lower.material.reflective = 1.0;
-        lower.transform = transforms::translation(0.0, -1.0, 0.0);
+        let lower = PlaneBuilder::default()
+            .transform(transforms::translation(0.0, -1.0, 0.0))
+            .material(MaterialBuilder::default().reflective(1.0).build().unwrap())
+            .build()
+            .unwrap();
 
-        let mut upper = Plane::default();
-        upper.material.reflective = 1.0;
-        upper.transform = transforms::translation(0.0, 1.0, 0.0);
+        let upper = PlaneBuilder::default()
+            .transform(transforms::translation(0.0, 1.0, 0.0))
+            .material(MaterialBuilder::default().reflective(1.0).build().unwrap())
+            .build()
+            .unwrap();
 
-        w.objects.push(Box::new(lower) as Box<Shape + Send + Sync>);
-        w.objects.push(Box::new(upper) as Box<Shape + Send + Sync>);
+        w.objects.push(Box::new(lower) as Box<Shape>);
+        w.objects.push(Box::new(upper) as Box<Shape>);
 
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
         w.color_at(r, 5);
@@ -283,10 +298,12 @@ mod tests {
     #[test]
     fn test_reflected_color_at_the_maximum_recurive_depth() {
         let mut w = World::default();
-        let mut shape = Plane::default();
-        shape.material.reflective = 0.5;
-        shape.transform = transforms::translation(0.0, -1.0, 0.0);
-        w.objects.push(Box::new(shape) as Box<Shape + Send + Sync>);
+        let shape = PlaneBuilder::default()
+            .transform(transforms::translation(0.0, -1.0, 0.0))
+            .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
+            .build()
+            .unwrap();
+        w.objects.push(Box::new(shape) as Box<Shape>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),

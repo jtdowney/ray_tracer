@@ -5,8 +5,8 @@ use std::fmt::Debug;
 mod plane;
 mod sphere;
 
-pub use self::plane::Plane;
-pub use self::sphere::Sphere;
+pub use self::plane::{Plane, PlaneBuilder};
+pub use self::sphere::{Sphere, SphereBuilder};
 
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
@@ -37,11 +37,21 @@ mod tests {
     use std::cell::RefCell;
     use std::f64::consts::PI;
 
-    #[derive(Debug, Default)]
+    #[derive(Debug)]
     struct TestShape {
         transform: Matrix4,
         material: Material,
         saved_ray: RefCell<Option<Ray>>,
+    }
+
+    impl Default for TestShape {
+        fn default() -> Self {
+            TestShape {
+                transform: Matrix4::identity(),
+                material: Material::default(),
+                saved_ray: RefCell::new(None),
+            }
+        }
     }
 
     impl Shape for TestShape {
