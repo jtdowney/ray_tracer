@@ -19,7 +19,7 @@ mod tests {
     use std::f64::consts::PI;
 
     #[test]
-    fn test_rendering_world_with_camera() {
+    fn rendering_world_with_camera() {
         let from = Point::new(0.0, 0.0, -5.0);
         let to = Point::default();
         let up = Vector3::new(0.0, 1.0, 0.0);

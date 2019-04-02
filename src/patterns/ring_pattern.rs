@@ -41,7 +41,7 @@ mod tests {
     use crate::color;
 
     #[test]
-    fn test_ring_extends_in_both_x_and_z() {
+    fn ring_extends_in_both_x_and_z() {
         let pattern = RingPattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::BLACK, pattern.pattern_at(Point::new(1.0, 0.0, 0.0)));

@@ -82,7 +82,7 @@ mod tests {
     use std::ptr;
 
     #[test]
-    fn test_hit_with_all_positive_times() {
+    fn hit_with_all_positive_times() {
         let s = Sphere::default();
         let i1 = Intersection {
             time: 1.0,
@@ -98,7 +98,7 @@ mod tests {
     }
 
     #[test]
-    fn test_hit_with_some_negative_times() {
+    fn hit_with_some_negative_times() {
         let s = Sphere::default();
         let i1 = Intersection {
             time: -1.0,
@@ -114,7 +114,7 @@ mod tests {
     }
 
     #[test]
-    fn test_hit_with_all_negative_times() {
+    fn hit_with_all_negative_times() {
         let s = Sphere::default();
         let i1 = Intersection {
             time: -2.0,
@@ -129,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn test_hit_lowest_positive_intersection() {
+    fn hit_lowest_positive_intersection() {
         let s = Sphere::default();
         let i1 = Intersection {
             time: 5.0,
@@ -153,7 +153,7 @@ mod tests {
     }
 
     #[test]
-    fn test_precomputing_state_of_intersection() {
+    fn precomputing_state_of_intersection() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let shape = Sphere::default();
         let i = Intersection {
@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    fn test_precomputing_state_of_intersection_with_hit_inside() {
+    fn precomputing_state_of_intersection_with_hit_inside() {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let shape = Sphere::default();
         let i = Intersection {
@@ -185,7 +185,7 @@ mod tests {
     }
 
     #[test]
-    fn test_hit_should_offset_point() {
+    fn hit_should_offset_point() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let shape = SphereBuilder::default()
             .transform(transforms::translation(0.0, 0.0, 1.0))
@@ -201,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    fn test_precomputing_reflection_vector() {
+    fn precomputing_reflection_vector() {
         let shape = Plane::default();
         let r = Ray::new(
             Point::new(0.0, 1.0, -1.0),

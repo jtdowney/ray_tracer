@@ -66,13 +66,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_planes_default_transformation() {
+    fn planes_default_transformation() {
         let s = Plane::default();
         assert_eq!(Matrix4::identity(), s.transform);
     }
 
     #[test]
-    fn test_normal_of_plane_is_constant() {
+    fn normal_of_plane_is_constant() {
         let p = Plane::default();
         let n1 = p.local_normal_at(Point::new(0.0, 0.0, 0.0));
         let n2 = p.local_normal_at(Point::new(10.0, 0.0, -10.0));
@@ -83,7 +83,7 @@ mod tests {
     }
 
     #[test]
-    fn test_plane_intersect_with_parallel_ray() {
+    fn plane_intersect_with_parallel_ray() {
         let p = Plane::default();
         let r = Ray::new(Point::new(0.0, 10.0, 10.0), Vector3::new(0.0, 0.0, 1.0));
         let mut xs = p.local_intersect(r).into_iter();
@@ -91,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn test_plane_intersect_with_coplaner_ray() {
+    fn plane_intersect_with_coplaner_ray() {
         let p = Plane::default();
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let mut xs = p.local_intersect(r).into_iter();
@@ -99,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    fn test_plane_intersect_from_above() {
+    fn plane_intersect_from_above() {
         let p = Plane::default();
         let r = Ray::new(Point::new(0.0, 1.0, 0.0), Vector3::new(0.0, -1.0, 0.0));
         let mut xs = p.local_intersect(r).into_iter();
@@ -110,7 +110,7 @@ mod tests {
     }
 
     #[test]
-    fn test_plane_intersect_from_below() {
+    fn plane_intersect_from_below() {
         let p = Plane::default();
         let r = Ray::new(Point::new(0.0, -1.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
         let mut xs = p.local_intersect(r).into_iter();

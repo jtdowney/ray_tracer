@@ -305,7 +305,7 @@ mod tests {
     use crate::Vector4;
 
     #[test]
-    fn test_constructing_2x2_matrix() {
+    fn constructing_2x2_matrix() {
         let m = Matrix2::new(&[-3.0, 5.0, 1.0, -2.0]);
 
         assert_eq!(-3.0, m[(0, 0)]);
@@ -315,7 +315,7 @@ mod tests {
     }
 
     #[test]
-    fn test_constructing_3x3_matrix() {
+    fn constructing_3x3_matrix() {
         let m = Matrix3::new(&[-3.0, 5.0, 0.0, 1.0, -2.0, -7.0, 0.0, 1.0, 1.0]);
 
         assert_eq!(-3.0, m[(0, 0)]);
@@ -324,7 +324,7 @@ mod tests {
     }
 
     #[test]
-    fn test_constructing_4x4_matrix() {
+    fn constructing_4x4_matrix() {
         let m = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 5.5, 6.5, 7.5, 8.5, 9.0, 10.0, 11.0, 12.0, 13.5, 14.5, 15.5, 16.5,
         ]);
@@ -339,7 +339,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_row() {
+    fn matrix_row() {
         let m = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
         ]);
@@ -348,7 +348,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_column() {
+    fn matrix_column() {
         let m = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
         ]);
@@ -357,7 +357,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_equality() {
+    fn matrix_equality() {
         let a = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
         ]);
@@ -369,7 +369,7 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_inequality() {
+    fn matrix_inequality() {
         let a = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
         ]);
@@ -381,7 +381,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiplying_matrices() {
+    fn multiplying_matrices() {
         let a = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0,
         ]);
@@ -399,7 +399,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiplying_matrix_by_vector() {
+    fn multiplying_matrix_by_vector() {
         let a = Matrix4::new(&[
             1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,
         ]);
@@ -409,7 +409,7 @@ mod tests {
     }
 
     #[test]
-    fn test_identity() {
+    fn identity() {
         assert_eq!(Matrix2::new(&[1.0, 0.0, 0.0, 1.0]), Matrix::identity());
         assert_eq!(
             Matrix3::new(&[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]),
@@ -424,7 +424,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiplying_matrix_by_identity() {
+    fn multiplying_matrix_by_identity() {
         let m = Matrix4::new(&[
             0.0, 1.0, 2.0, 4.0, 1.0, 2.0, 4.0, 8.0, 2.0, 4.0, 8.0, 16.0, 4.0, 8.0, 16.0, 32.0,
         ]);
@@ -432,7 +432,7 @@ mod tests {
     }
 
     #[test]
-    fn test_transposing_matrix() {
+    fn transposing_matrix() {
         let m = Matrix4::new(&[
             0.0, 9.0, 3.0, 0.0, 9.0, 8.0, 0.0, 8.0, 1.0, 8.0, 5.0, 3.0, 0.0, 0.0, 5.0, 8.0,
         ]);
@@ -445,25 +445,25 @@ mod tests {
     }
 
     #[test]
-    fn test_transposing_identity_matrix() {
+    fn transposing_identity_matrix() {
         let m = Matrix4::identity();
         assert_eq!(Matrix4::identity(), m.transpose());
     }
 
     #[test]
-    fn test_determinant_of_2x2_matrix() {
+    fn determinant_of_2x2_matrix() {
         let m = Matrix2::new(&[1.0, 5.0, -3.0, 2.0]);
         assert_eq!(17.0, m.determinant());
     }
 
     #[test]
-    fn test_submatrix_of_3x3_matrix() {
+    fn submatrix_of_3x3_matrix() {
         let m = Matrix3::new(&[1.0, 5.0, 0.0, -3.0, 2.0, 7.0, 0.0, 6.0, -3.0]);
         assert_eq!(Matrix2::new(&[-3.0, 2.0, 0.0, 6.0]), m.submatrix(0, 2));
     }
 
     #[test]
-    fn test_submatrix_of_4x4_matrix() {
+    fn submatrix_of_4x4_matrix() {
         let m = Matrix4::new(&[
             -6.0, 1.0, 1.0, 6.0, -8.0, 5.0, 8.0, 6.0, -1.0, 0.0, 8.0, 2.0, -7.0, 1.0, -1.0, 1.0,
         ]);
@@ -474,20 +474,20 @@ mod tests {
     }
 
     #[test]
-    fn test_minor_of_3x3_matrix() {
+    fn minor_of_3x3_matrix() {
         let m = Matrix3::new(&[3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
         assert_eq!(25.0, m.minor(1, 0));
     }
 
     #[test]
-    fn test_cofactor_of_3x3_matrix() {
+    fn cofactor_of_3x3_matrix() {
         let m = Matrix3::new(&[3.0, 5.0, 0.0, 2.0, -1.0, -7.0, 6.0, -1.0, 5.0]);
         assert_eq!(-12.0, m.cofactor(0, 0));
         assert_eq!(-25.0, m.cofactor(1, 0));
     }
 
     #[test]
-    fn test_determinant_of_3x3_matrix() {
+    fn determinant_of_3x3_matrix() {
         let m = Matrix3::new(&[1.0, 2.0, 6.0, -5.0, 8.0, -4.0, 2.0, 6.0, 4.0]);
         assert_eq!(56.0, m.cofactor(0, 0));
         assert_eq!(12.0, m.cofactor(0, 1));
@@ -496,7 +496,7 @@ mod tests {
     }
 
     #[test]
-    fn test_determinant_of_4x4_matrix() {
+    fn determinant_of_4x4_matrix() {
         let m = Matrix4::new(&[
             -2.0, -8.0, 3.0, 5.0, -3.0, 1.0, 7.0, 3.0, 1.0, 2.0, -9.0, 6.0, -6.0, 7.0, 7.0, -9.0,
         ]);
@@ -508,7 +508,7 @@ mod tests {
     }
 
     #[test]
-    fn test_invertable_matrix() {
+    fn invertable_matrix() {
         let m = Matrix4::new(&[
             6.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 6.0, 4.0, -9.0, 3.0, -7.0, 9.0, 1.0, 7.0, -6.0,
         ]);
@@ -518,7 +518,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn test_noninvertable_matrix() {
+    fn noninvertable_matrix() {
         let m = Matrix4::new(&[
             -4.0, 2.0, -2.0, -3.0, 9.0, 6.0, 2.0, 6.0, 0.0, -5.0, 1.0, -5.0, 0.0, 0.0, 0.0, 0.0,
         ]);
@@ -527,7 +527,7 @@ mod tests {
     }
 
     #[test]
-    fn test_calculating_inverse_matrix() {
+    fn calculating_inverse_matrix() {
         let a = Matrix4::new(&[
             -5.0, 2.0, 6.0, -8.0, 1.0, -5.0, 1.0, 8.0, 7.0, 7.0, -6.0, -7.0, 1.0, -3.0, 7.0, 4.0,
         ]);
@@ -573,7 +573,7 @@ mod tests {
     }
 
     #[test]
-    fn test_multiplying_matrix_by_inverse() {
+    fn multiplying_matrix_by_inverse() {
         let a = Matrix4::new(&[
             3.0, -9.0, 7.0, 3.0, 3.0, -8.0, 2.0, -9.0, -4.0, 4.0, 4.0, 1.0, -6.0, 5.0, -1.0, 1.0,
         ]);

@@ -41,7 +41,7 @@ mod tests {
     use crate::color;
 
     #[test]
-    fn test_checkers_repeats_in_x() {
+    fn checkers_repeats_in_x() {
         let pattern = CheckersPattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.99, 0.0, 0.0)));
@@ -49,7 +49,7 @@ mod tests {
     }
 
     #[test]
-    fn test_checkers_repeats_in_y() {
+    fn checkers_repeats_in_y() {
         let pattern = CheckersPattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.99, 0.0)));
@@ -57,7 +57,7 @@ mod tests {
     }
 
     #[test]
-    fn test_checkers_repeats_in_z() {
+    fn checkers_repeats_in_z() {
         let pattern = CheckersPattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.99)));

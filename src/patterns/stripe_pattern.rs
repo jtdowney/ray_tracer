@@ -41,14 +41,14 @@ mod tests {
     use crate::color;
 
     #[test]
-    fn test_creating_stripe_pattern() {
+    fn creating_stripe_pattern() {
         let pattern = StripePattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.a);
         assert_eq!(color::BLACK, pattern.b);
     }
 
     #[test]
-    fn test_stripe_pattern_constant_in_y() {
+    fn stripe_pattern_constant_in_y() {
         let pattern = StripePattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 1.0, 0.0)));
@@ -56,7 +56,7 @@ mod tests {
     }
 
     #[test]
-    fn test_stripe_pattern_constant_in_z() {
+    fn stripe_pattern_constant_in_z() {
         let pattern = StripePattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 1.0)));
@@ -64,7 +64,7 @@ mod tests {
     }
 
     #[test]
-    fn test_stripe_pattern_alternates_in_x() {
+    fn stripe_pattern_alternates_in_x() {
         let pattern = StripePattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.9, 0.0, 0.0)));

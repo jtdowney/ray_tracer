@@ -59,28 +59,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_adding_points() {
+    fn adding_points() {
         let p1 = Point::new(3.0, -2.0, 5.0);
         let p2 = Point::new(-2.0, 3.0, 1.0);
         assert_eq!(Point::new(1.0, 1.0, 6.0), p1 + p2);
     }
 
     #[test]
-    fn test_adding_point_and_vector() {
+    fn adding_point_and_vector() {
         let p = Point::new(3.0, -2.0, 5.0);
         let v = Vector3::new(-2.0, 3.0, 1.0);
         assert_eq!(Point::new(1.0, 1.0, 6.0), p + v);
     }
 
     #[test]
-    fn test_subtracting_points() {
+    fn subtracting_points() {
         let p1 = Point::new(3.0, 2.0, 1.0);
         let p2 = Point::new(5.0, 6.0, 7.0);
         assert_eq!(Vector3::new(-2.0, -4.0, -6.0), p1 - p2);
     }
 
     #[test]
-    fn test_subtracting_vector_from_point() {
+    fn subtracting_vector_from_point() {
         let p = Point::new(3.0, 2.0, 1.0);
         let v = Vector3::new(5.0, 6.0, 7.0);
         assert_eq!(Point::new(-2.0, -4.0, -6.0), p - v);

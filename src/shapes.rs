@@ -93,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn test_intersecting_scaled_shape_with_ray() {
+    fn intersecting_scaled_shape_with_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut s = TestShape::default();
         s.transform = transforms::scaling(2.0, 2.0, 2.0);
@@ -109,7 +109,7 @@ mod tests {
     }
 
     #[test]
-    fn test_intersecting_translated_shape_with_ray() {
+    fn intersecting_translated_shape_with_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut s = TestShape::default();
         s.transform = transforms::translation(5.0, 0.0, 0.0);
@@ -125,7 +125,7 @@ mod tests {
     }
 
     #[test]
-    fn test_normal_on_translated_shape() {
+    fn normal_on_translated_shape() {
         let mut s = TestShape::default();
         s.transform = transforms::translation(0.0, 1.0, 0.0);
         assert_eq!(
@@ -135,7 +135,7 @@ mod tests {
     }
 
     #[test]
-    fn test_normal_on_transformed_shape() {
+    fn normal_on_transformed_shape() {
         let mut s = TestShape::default();
         s.transform = transforms::scaling(1.0, 0.5, 1.0) * transforms::rotation_z(PI / 5.0);
         assert_eq!(

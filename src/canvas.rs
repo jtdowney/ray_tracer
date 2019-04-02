@@ -75,7 +75,7 @@ mod tests {
     use crate::color;
 
     #[test]
-    fn test_creating_canvas() {
+    fn creating_canvas() {
         let canvas = Canvas::new(10, 20);
         assert_eq!(10, canvas.width);
         assert_eq!(20, canvas.height);
@@ -85,7 +85,7 @@ mod tests {
     }
 
     #[test]
-    fn test_writing_pixel_to_canvas() {
+    fn writing_pixel_to_canvas() {
         let mut canvas = Canvas::new(10, 20);
         let red = Color::new(1.0, 0.0, 0.0);
         canvas.write_pixel(2, 3, red);
@@ -93,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn test_constructing_ppm_header() {
+    fn constructing_ppm_header() {
         let canvas = Canvas::new(5, 3);
         let ppm = canvas.to_ppm().unwrap();
         let mut lines = ppm.lines();
@@ -103,7 +103,7 @@ mod tests {
     }
 
     #[test]
-    fn test_constructing_ppm_pixel_data() {
+    fn constructing_ppm_pixel_data() {
         let mut canvas = Canvas::new(5, 3);
         let c1 = Color::new(1.5, 0.0, 0.0);
         let c2 = Color::new(0.0, 0.5, 0.0);
@@ -119,7 +119,7 @@ mod tests {
     }
 
     #[test]
-    fn test_splitting_long_lines_in_ppm() {
+    fn splitting_long_lines_in_ppm() {
         let mut canvas = Canvas::new(10, 2);
         let c = Color::new(1.0, 0.8, 0.6);
         canvas.fill(c);
@@ -144,7 +144,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ppm_files_are_newline_terminated() {
+    fn ppm_files_are_newline_terminated() {
         let canvas = Canvas::new(5, 3);
         let ppm = canvas.to_ppm().unwrap();
         let line = ppm.lines().last();

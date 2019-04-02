@@ -29,7 +29,7 @@ mod tests {
     use crate::transforms;
 
     #[test]
-    fn test_creating_ray() {
+    fn creating_ray() {
         let origin = Point::new(1.0, 2.0, 3.0);
         let direction = Vector3::new(4.0, 5.0, 6.0);
         let r = Ray::new(origin, direction);
@@ -38,7 +38,7 @@ mod tests {
     }
 
     #[test]
-    fn test_computing_point_from_distance() {
+    fn computing_point_from_distance() {
         let r = Ray::new(Point::new(2.0, 3.0, 4.0), Vector3::new(1.0, 0.0, 0.0));
         assert_eq!(Point::new(2.0, 3.0, 4.0), r.position(0.0));
         assert_eq!(Point::new(3.0, 3.0, 4.0), r.position(1.0));
@@ -47,7 +47,7 @@ mod tests {
     }
 
     #[test]
-    fn test_translating_ray() {
+    fn translating_ray() {
         let r = Ray::new(Point::new(1.0, 2.0, 3.0), Vector3::new(0.0, 1.0, 0.0));
         let m = transforms::translation(3.0, 4.0, 5.0);
         let r2 = r.transform(m);
@@ -56,7 +56,7 @@ mod tests {
     }
 
     #[test]
-    fn test_scaling_ray() {
+    fn scaling_ray() {
         let r = Ray::new(Point::new(1.0, 2.0, 3.0), Vector3::new(0.0, 1.0, 0.0));
         let m = transforms::scaling(2.0, 3.0, 4.0);
         let r2 = r.transform(m);

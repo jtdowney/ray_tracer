@@ -96,19 +96,19 @@ mod tests {
     use std::f64::consts::PI;
 
     #[test]
-    fn test_pixel_size_for_horizontal_canvas() {
+    fn pixel_size_for_horizontal_canvas() {
         let c = Camera::new(200, 125, PI / 2.0);
         assert!((0.01 - c.pixel_size).abs() < EPSILON);
     }
 
     #[test]
-    fn test_pixel_size_for_vertical_canvas() {
+    fn pixel_size_for_vertical_canvas() {
         let c = Camera::new(125, 200, PI / 2.0);
         assert!((0.01 - c.pixel_size).abs() < EPSILON);
     }
 
     #[test]
-    fn test_ray_for_pixel_at_center() {
+    fn ray_for_pixel_at_center() {
         let c = Camera::new(201, 101, PI / 2.0);
         let r = c.ray_for_pixel(100, 50);
         assert_eq!(Point::new(0.0, 0.0, 0.0), r.origin);
@@ -116,7 +116,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ray_for_pixel_at_corner() {
+    fn ray_for_pixel_at_corner() {
         let c = Camera::new(201, 101, PI / 2.0);
         let r = c.ray_for_pixel(0, 0);
         assert_eq!(Point::new(0.0, 0.0, 0.0), r.origin);
@@ -124,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ray_for_transformed_camera() {
+    fn ray_for_transformed_camera() {
         let mut c = Camera::new(201, 101, PI / 2.0);
         c.transform = transforms::rotation_y(PI / 4.0) * transforms::translation(0.0, -2.0, 5.0);
         let r = c.ray_for_pixel(100, 50);
@@ -136,7 +136,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pixels_iterator() {
+    fn pixels_iterator() {
         let c = Camera::new(3, 2, PI / 2.0);
         let mut pixels = c.pixels();
         assert_eq!(Some((0, 0)), pixels.next());

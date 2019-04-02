@@ -41,7 +41,7 @@ mod tests {
     use crate::color;
 
     #[test]
-    fn test_solid_pattern_returns_constant_color() {
+    fn solid_pattern_returns_constant_color() {
         let pattern = SolidPattern::new(color::WHITE);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(1.0, 0.0, 0.0)));

@@ -82,13 +82,13 @@ mod tests {
     use std::ptr;
 
     #[test]
-    fn test_spheres_default_transformation() {
+    fn spheres_default_transformation() {
         let s = Sphere::default();
         assert_eq!(Matrix4::identity(), s.transform);
     }
 
     #[test]
-    fn test_normal_on_sphere_at_x_axis() {
+    fn normal_on_sphere_at_x_axis() {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(1.0, 0.0, 0.0),
@@ -97,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn test_normal_on_sphere_at_y_axis() {
+    fn normal_on_sphere_at_y_axis() {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(0.0, 1.0, 0.0),
@@ -106,7 +106,7 @@ mod tests {
     }
 
     #[test]
-    fn test_normal_on_sphere_at_z_axis() {
+    fn normal_on_sphere_at_z_axis() {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(0.0, 0.0, 1.0),
@@ -115,7 +115,7 @@ mod tests {
     }
 
     #[test]
-    fn test_normal_on_sphere_at_nonaxial_point() {
+    fn normal_on_sphere_at_nonaxial_point() {
         let s = Sphere::default();
         assert_eq!(
             Vector3::new(
@@ -132,7 +132,7 @@ mod tests {
     }
 
     #[test]
-    fn test_normal_is_a_normalized_vector() {
+    fn normal_is_a_normalized_vector() {
         let s = Sphere::default();
         let n = s.normal_at(Point::new(
             f64::sqrt(3.0) / 3.0,
@@ -143,7 +143,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ray_intersects_sphere_at_two_points() {
+    fn ray_intersects_sphere_at_two_points() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let mut xs = s.intersect(r).into_iter();
@@ -153,7 +153,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ray_intersects_sphere_at_tangent() {
+    fn ray_intersects_sphere_at_tangent() {
         let r = Ray::new(Point::new(0.0, 1.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let mut xs = s.intersect(r).into_iter();
@@ -163,7 +163,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ray_misses_sphere() {
+    fn ray_misses_sphere() {
         let r = Ray::new(Point::new(0.0, 2.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let xs = s.intersect(r).into_iter();
@@ -171,7 +171,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ray_originates_inside_sphere() {
+    fn ray_originates_inside_sphere() {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let mut xs = s.intersect(r).into_iter();
@@ -181,7 +181,7 @@ mod tests {
     }
 
     #[test]
-    fn test_sphere_behind_ray() {
+    fn sphere_behind_ray() {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let mut xs = s.intersect(r).into_iter();
@@ -191,7 +191,7 @@ mod tests {
     }
 
     #[test]
-    fn test_intersection_has_time_and_object() {
+    fn intersection_has_time_and_object() {
         let s = Sphere::default();
         let i = Intersection {
             time: 3.5,
@@ -203,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn test_intersect_sets_objects() {
+    fn intersect_sets_objects() {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let mut xs = s.intersect(r).into_iter();

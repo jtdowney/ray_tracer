@@ -39,7 +39,7 @@ mod tests {
     use crate::color;
 
     #[test]
-    fn test_gradient_linearly_interpolates_between_colors() {
+    fn gradient_linearly_interpolates_between_colors() {
         let pattern = GradientPattern::new(color::WHITE, color::BLACK);
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(

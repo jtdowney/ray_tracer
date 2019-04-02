@@ -108,7 +108,7 @@ mod tests {
     use crate::{Sphere, StripePattern};
 
     #[test]
-    fn test_lighting_with_eye_between_light_and_surface() {
+    fn lighting_with_eye_between_light_and_surface() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
@@ -121,7 +121,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lighting_with_eye_between_light_and_surface_with_eye_offset() {
+    fn lighting_with_eye_between_light_and_surface_with_eye_offset() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
@@ -134,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lighting_with_eye_between_light_and_surface_with_light_offset() {
+    fn lighting_with_eye_between_light_and_surface_with_light_offset() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
@@ -147,7 +147,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lighting_with_eye_in_path_of_reflection() {
+    fn lighting_with_eye_in_path_of_reflection() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, -f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
@@ -160,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lighting_with_light_behind_surface() {
+    fn lighting_with_light_behind_surface() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
@@ -173,7 +173,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lighting_surface_in_shadow() {
+    fn lighting_surface_in_shadow() {
         let m = Material::default();
         let position = Point::new(0.0, 0.0, 0.0);
         let eyev = Vector3::new(0.0, 0.0, -1.0);
@@ -194,7 +194,7 @@ mod tests {
     }
 
     #[test]
-    fn test_lighting_with_pattern() {
+    fn lighting_with_pattern() {
         let m = MaterialBuilder::default()
             .pattern(StripePattern::new(color::WHITE, color::BLACK))
             .ambient(1.0)

@@ -209,52 +209,52 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_adding_vectors() {
+    fn adding_vectors() {
         let v1 = Vector3::new(3.0, -2.0, 5.0);
         let v2 = Vector3::new(-2.0, 3.0, 1.0);
         assert_eq!(Vector3::new(1.0, 1.0, 6.0), v1 + v2);
     }
 
     #[test]
-    fn test_subtracting_vectors() {
+    fn subtracting_vectors() {
         let v1 = Vector3::new(3.0, 2.0, 1.0);
         let v2 = Vector3::new(5.0, 6.0, 7.0);
         assert_eq!(Vector3::new(-2.0, -4.0, -6.0), v1 - v2);
     }
 
     #[test]
-    fn test_subtracting_vector_from_zero() {
+    fn subtracting_vector_from_zero() {
         let zero = Vector3::default();
         let v = Vector3::new(1.0, -2.0, 3.0);
         assert_eq!(Vector3::new(-1.0, 2.0, -3.0), zero - v);
     }
 
     #[test]
-    fn test_negating_vector() {
+    fn negating_vector() {
         let v = Vector3::new(1.0, -2.0, 3.0);
         assert_eq!(Vector3::new(-1.0, 2.0, -3.0), -v);
     }
 
     #[test]
-    fn test_multiplying_vector_by_scalar() {
+    fn multiplying_vector_by_scalar() {
         let v = Vector3::new(1.0, -2.0, 3.0);
         assert_eq!(Vector3::new(3.5, -7.0, 10.5), v * 3.5);
     }
 
     #[test]
-    fn test_multiplying_vector_by_fraction() {
+    fn multiplying_vector_by_fraction() {
         let v = Vector3::new(1.0, -2.0, 3.0);
         assert_eq!(Vector3::new(0.5, -1.0, 1.5), v * 0.5);
     }
 
     #[test]
-    fn test_dividing_vector_by_scalar() {
+    fn dividing_vector_by_scalar() {
         let v = Vector3::new(1.0, -2.0, 3.0);
         assert_eq!(Vector3::new(0.5, -1.0, 1.5), v / 2.0);
     }
 
     #[test]
-    fn test_vector_magnitude() {
+    fn vector_magnitude() {
         let v = Vector3::new(1.0, 0.0, 0.0);
         assert_eq!(1.0, v.magnitude());
         let v = Vector3::new(0.0, 1.0, 0.0);
@@ -268,7 +268,7 @@ mod tests {
     }
 
     #[test]
-    fn test_vector_normalization() {
+    fn vector_normalization() {
         let v = Vector3::new(4.0, 0.0, 0.0);
         assert_eq!(Vector3::new(1.0, 0.0, 0.0), v.normalize());
         let v = Vector3::new(1.0, 2.0, 3.0);
@@ -276,14 +276,14 @@ mod tests {
     }
 
     #[test]
-    fn test_vector_dot_product() {
+    fn vector_dot_product() {
         let v1 = Vector3::new(1.0, 2.0, 3.0);
         let v2 = Vector3::new(2.0, 3.0, 4.0);
         assert_eq!(20.0, v1.dot(v2));
     }
 
     #[test]
-    fn test_vector_cross_product() {
+    fn vector_cross_product() {
         let v1 = Vector3::new(1.0, 2.0, 3.0);
         let v2 = Vector3::new(2.0, 3.0, 4.0);
         assert_eq!(Vector3::new(-1.0, 2.0, -1.0), v1.cross(v2));
@@ -291,14 +291,14 @@ mod tests {
     }
 
     #[test]
-    fn test_reflecting_vector_approaching_45() {
+    fn reflecting_vector_approaching_45() {
         let v = Vector3::new(1.0, -1.0, 0.0);
         let n = Vector3::new(0.0, 1.0, 0.0);
         assert_eq!(Vector3::new(1.0, 1.0, 0.0), v.reflect(n));
     }
 
     #[test]
-    fn test_reflecting_vector_off_slanted_surface() {
+    fn reflecting_vector_off_slanted_surface() {
         let v = Vector3::new(0.0, -1.0, 0.0);
         let n = Vector3::new(f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0);
         assert_eq!(Vector3::new(1.0, 0.0, 0.0), v.reflect(n));

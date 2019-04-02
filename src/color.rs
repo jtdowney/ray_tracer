@@ -115,27 +115,27 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_adding_colors() {
+    fn adding_colors() {
         let c1 = Color::new(1.0, 0.2, 0.4);
         let c2 = Color::new(0.9, 1.0, 0.1);
         assert_eq!(Color::new(1.9, 1.2, 0.5), c1 + c2);
     }
 
     #[test]
-    fn test_multiplying_color_by_scalar() {
+    fn multiplying_color_by_scalar() {
         let c = Color::new(0.2, 0.3, 0.4);
         assert_eq!(Color::new(0.4, 0.6, 0.8), c * 2.0);
     }
 
     #[test]
-    fn test_multiplying_colors() {
+    fn multiplying_colors() {
         let c1 = Color::new(1.0, 0.2, 0.4);
         let c2 = Color::new(0.9, 1.0, 0.1);
         assert_eq!(Color::new(0.9, 0.2, 0.04), c1 * c2);
     }
 
     #[test]
-    fn test_iterator_clamps() {
+    fn iterator_clamps() {
         let c = Color::new(1.5, 0.5, 0.1);
         let mut iter = c.into_iter();
         assert_eq!(Some(255), iter.next());
@@ -145,7 +145,7 @@ mod tests {
     }
 
     #[test]
-    fn test_iterator() {
+    fn iterator() {
         let c = Color::new(0.5, 0.3, 0.1);
         let mut iter = c.into_iter();
         assert_eq!(Some(128), iter.next());

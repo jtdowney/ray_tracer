@@ -139,7 +139,7 @@ mod tests {
     use crate::{PlaneBuilder, Sphere, Vector3};
 
     #[test]
-    fn test_intersect_world_with_ray() {
+    fn intersect_world_with_ray() {
         let w = World::default();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let mut xs = w.intersect(r).into_iter();
@@ -151,7 +151,7 @@ mod tests {
     }
 
     #[test]
-    fn test_shading_an_intersection() {
+    fn shading_an_intersection() {
         let w = World::default();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let shape = &w.objects[0];
@@ -164,21 +164,21 @@ mod tests {
     }
 
     #[test]
-    fn test_color_when_ray_misses() {
+    fn color_when_ray_misses() {
         let w = World::default();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 1.0, 0.0));
         assert_eq!(Color::new(0.0, 0.0, 0.0), w.color_at(r, 5));
     }
 
     #[test]
-    fn test_color_when_ray_hits() {
+    fn color_when_ray_hits() {
         let w = World::default();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), w.color_at(r, 5));
     }
 
     #[test]
-    fn test_color_with_intersection_behind_ray() {
+    fn color_with_intersection_behind_ray() {
         let mut w = World::default();
         let mut s1 = w.objects[0].as_any_mut().downcast_mut::<Sphere>().unwrap();
         s1.material.ambient = 1.0;
@@ -190,35 +190,35 @@ mod tests {
     }
 
     #[test]
-    fn test_no_shadow_with_no_collinear_objects() {
+    fn no_shadow_with_no_collinear_objects() {
         let w = World::default();
         let light = w.lights[0];
         assert_eq!(false, w.is_shadowed(Point::new(0.0, 10.0, 0.0), &light));
     }
 
     #[test]
-    fn test_shadow_when_object_between_point_and_light() {
+    fn shadow_when_object_between_point_and_light() {
         let w = World::default();
         let light = w.lights[0];
         assert_eq!(true, w.is_shadowed(Point::new(10.0, -10.0, 10.0), &light));
     }
 
     #[test]
-    fn test_no_shadow_when_object_behind_light() {
+    fn no_shadow_when_object_behind_light() {
         let w = World::default();
         let light = w.lights[0];
         assert_eq!(false, w.is_shadowed(Point::new(-20.0, 20.0, -20.0), &light));
     }
 
     #[test]
-    fn test_no_shadow_when_object_behind_point() {
+    fn no_shadow_when_object_behind_point() {
         let w = World::default();
         let light = w.lights[0];
         assert_eq!(false, w.is_shadowed(Point::new(-2.0, 2.0, -2.0), &light));
     }
 
     #[test]
-    fn test_shade_hit_when_in_shadow() {
+    fn shade_hit_when_in_shadow() {
         let w = WorldBuilder::default()
             .light(PointLight::new(Point::new(0.0, 0.0, -10.0), color::WHITE))
             .object(Sphere::default())
@@ -240,7 +240,7 @@ mod tests {
     }
 
     #[test]
-    fn test_reflected_color_for_nonreflective_material() {
+    fn reflected_color_for_nonreflective_material() {
         let mut w = World::default();
         let mut shape = w.objects[1].as_any_mut().downcast_mut::<Sphere>().unwrap();
         shape.material.ambient = 1.0;
@@ -255,7 +255,7 @@ mod tests {
     }
 
     #[test]
-    fn test_reflected_color_for_reflective_material() {
+    fn reflected_color_for_reflective_material() {
         let mut w = World::default();
         let shape = PlaneBuilder::default()
             .transform(transforms::translation(0.0, -1.0, 0.0))
@@ -280,7 +280,7 @@ mod tests {
     }
 
     #[test]
-    fn test_shade_hit_with_reflective_material() {
+    fn shade_hit_with_reflective_material() {
         let mut w = World::default();
         let shape = PlaneBuilder::default()
             .transform(transforms::translation(0.0, -1.0, 0.0))
@@ -302,7 +302,7 @@ mod tests {
     }
 
     #[test]
-    fn test_color_at_with_mutually_reflective_surfaces() {
+    fn color_at_with_mutually_reflective_surfaces() {
         let w = WorldBuilder::default()
             .light(PointLight::new(Point::new(0.0, 0.0, 0.0), color::WHITE))
             .object(
@@ -326,7 +326,7 @@ mod tests {
     }
 
     #[test]
-    fn test_reflected_color_at_the_maximum_recurive_depth() {
+    fn reflected_color_at_the_maximum_recurive_depth() {
         let mut w = World::default();
         let shape = PlaneBuilder::default()
             .transform(transforms::translation(0.0, -1.0, 0.0))

@@ -64,7 +64,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pattern_with_object_transformation() {
+    fn pattern_with_object_transformation() {
         let object = SphereBuilder::default()
             .transform(transforms::scaling(2.0, 2.0, 2.0))
             .build()
@@ -78,7 +78,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pattern_with_pattern_transformation() {
+    fn pattern_with_pattern_transformation() {
         let object = Sphere::default();
         let mut pattern = TestPattern::default();
         pattern.transform = transforms::scaling(2.0, 2.0, 2.0);
@@ -90,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    fn test_pattern_with_object_and_pattern_transformation() {
+    fn pattern_with_object_and_pattern_transformation() {
         let object = SphereBuilder::default()
             .transform(transforms::scaling(2.0, 2.0, 2.0))
             .build()
