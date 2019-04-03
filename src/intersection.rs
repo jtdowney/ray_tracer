@@ -65,8 +65,7 @@ impl<'a> Intersection<'a> {
             if self == i {
                 n1 = containers
                     .last()
-                    .map(|o| o.material().refractive_index)
-                    .unwrap_or(1.0);
+                    .map_or(1.0, |o| o.material().refractive_index);
             }
 
             if let Some(idx) = containers.iter().position(|&o| o == i.object) {
@@ -78,8 +77,7 @@ impl<'a> Intersection<'a> {
             if self == i {
                 n2 = containers
                     .last()
-                    .map(|o| o.material().refractive_index)
-                    .unwrap_or(1.0);
+                    .map_or(1.0, |o| o.material().refractive_index);
                 break;
             }
         }
