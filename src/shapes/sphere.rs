@@ -1,4 +1,6 @@
-use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3};
+use crate::{
+    Intersection, Intersections, Material, MaterialBuilder, Matrix4, Point, Ray, Shape, Vector3,
+};
 use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
@@ -9,6 +11,20 @@ pub struct Sphere {
     pub transform: Matrix4,
     #[builder(default)]
     pub material: Material,
+}
+
+impl SphereBuilder {
+    pub fn glass() -> Self {
+        let mut builder = SphereBuilder::default();
+        builder.material(
+            MaterialBuilder::default()
+                .transparency(1.0)
+                .refractive_index(1.5)
+                .build()
+                .unwrap(),
+        );
+        builder
+    }
 }
 
 impl Default for Sphere {
@@ -210,5 +226,12 @@ mod tests {
         assert_eq!(&s, xs.next().unwrap().object);
         assert_eq!(&s, xs.next().unwrap().object);
         assert!(xs.next().is_none());
+    }
+
+    #[test]
+    fn glass_sphere_helper() {
+        let s = SphereBuilder::glass().build().unwrap();
+        assert_eq!(1.0, s.material.transparency);
+        assert_eq!(1.5, s.material.refractive_index);
     }
 }

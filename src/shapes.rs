@@ -37,6 +37,12 @@ impl Clone for Box<Shape> {
     }
 }
 
+impl PartialEq for &Shape {
+    fn eq(&self, other: &&Shape) -> bool {
+        std::ptr::eq(*self, *other)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

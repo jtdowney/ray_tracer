@@ -32,12 +32,12 @@ impl Clone for Box<Pattern> {
 }
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
     use super::*;
     use crate::{transforms, Sphere, SphereBuilder};
 
     #[derive(Copy, Clone, Debug)]
-    struct TestPattern {
+    pub struct TestPattern {
         transform: Matrix4,
     }
 

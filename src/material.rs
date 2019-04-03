@@ -100,6 +100,10 @@ impl Material {
     pub fn is_reflective(&self) -> bool {
         self.reflective > 0.0
     }
+
+    pub fn is_transparent(&self) -> bool {
+        self.transparency > 0.0
+    }
 }
 
 #[cfg(test)]
