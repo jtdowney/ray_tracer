@@ -26,11 +26,11 @@ fn main() -> Result<(), fmt::Error> {
                 .material(
                     MaterialBuilder::default()
                         .color(color::WHITE)
-                        .diffuse(0.1)
-                        .ambient(0.1)
+                        .diffuse(0.3)
+                        .ambient(0.2)
                         .specular(0.2)
-                        .transparency(0.4)
-                        .reflective(0.4)
+                        .transparency(0.3)
+                        .reflective(0.9)
                         .shininess(300.0)
                         .build()
                         .unwrap(),
@@ -45,9 +45,11 @@ fn main() -> Result<(), fmt::Error> {
                 )
                 .material(
                     MaterialBuilder::default()
-                        .color(Color::new(0.7, 0.2, 0.3))
-                        .diffuse(0.7)
-                        .specular(0.3)
+                        .color(Color::new(0.5, 0.1, 0.2))
+                        .diffuse(0.2)
+                        .specular(0.2)
+                        .reflective(1.0)
+                        .shininess(400.0)
                         .build()
                         .unwrap(),
                 )
