@@ -18,9 +18,10 @@ pub trait Shape: Any + Debug {
     fn transform(&self) -> &Matrix4;
 
     fn normal_at(&self, point: Point) -> Vector3 {
-        let local_point = self.transform().inverse() * point;
+        let transform_inverse = self.transform().inverse();
+        let local_point = transform_inverse * point;
         let local_normal = self.local_normal_at(local_point);
-        let world_normal = self.transform().inverse().transpose() * local_normal;
+        let world_normal = transform_inverse.transpose() * local_normal;
 
         world_normal.normalize()
     }
