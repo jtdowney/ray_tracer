@@ -1,3 +1,4 @@
+use indicatif::ProgressBar;
 use ray_tracer::{
     color, transforms, Camera, CheckersPattern, Color, MaterialBuilder, PlaneBuilder, Point,
     PointLight, SphereBuilder, Vector3, WorldBuilder,
@@ -72,14 +73,17 @@ fn main() -> Result<(), fmt::Error> {
         ))
         .build();
 
-    let mut camera = Camera::new(1000, 500, PI / 3.0);
+    let width = 1000;
+    let height = 500;
+    let mut camera = Camera::new(width as u16, height as u16, PI / 3.0);
     camera.transform = transforms::view(
         Point::new(0.0, 1.5, -5.0),
         Point::new(0.0, 1.0, 0.0),
         Vector3::new(0.0, 1.0, 0.0),
     );
 
-    let canvas = ray_tracer::render_parallel(camera, world);
+    let bar = ProgressBar::new(width * height);
+    let canvas = ray_tracer::render_parallel(camera, world, || bar.inc(1));
     print!("{}", canvas.to_ppm()?);
 
     Ok(())

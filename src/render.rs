@@ -1,29 +1,31 @@
 use crate::{Camera, Canvas, Color, World};
-use indicatif::{ProgressBar, ProgressStyle};
 use rayon::prelude::*;
 
-pub fn render(camera: Camera, world: World) -> Canvas {
+pub fn render<F>(camera: Camera, world: World, tick: F) -> Canvas
+where
+    F: Fn() -> (),
+{
     let mut canvas = Canvas::new(camera.horizontal_size, camera.vertical_size);
-
-    let length = camera.horizontal_size as u64 * camera.vertical_size as u64;
-    let bar = create_progress_bar(length);
     for (x, y) in camera.pixels() {
         let color = render_pixel(&camera, &world, x, y);
         canvas.write_pixel(x, y, color);
-        bar.inc(1);
+        tick();
     }
 
     canvas
 }
 
-pub fn render_parallel(camera: Camera, world: World) -> Canvas {
+pub fn render_parallel<F>(camera: Camera, world: World, tick: F) -> Canvas
+where
+    F: Fn() -> () + Send + Sync,
+{
     let pixels: Vec<(u16, u16)> = camera.pixels().collect();
-    let bar = create_progress_bar(pixels.len() as u64);
     let rendered_pixels: Vec<Color> = pixels
         .into_par_iter()
         .map(|(x, y)| {
-            bar.inc(1);
-            render_pixel(&camera, &world, x, y)
+            let color = render_pixel(&camera, &world, x, y);
+            tick();
+            color
         })
         .collect();
 
@@ -32,15 +34,6 @@ pub fn render_parallel(camera: Camera, world: World) -> Canvas {
         camera.vertical_size,
         rendered_pixels,
     )
-}
-
-fn create_progress_bar(length: u64) -> ProgressBar {
-    let bar = ProgressBar::new(length);
-    bar.set_style(
-        ProgressStyle::default_bar()
-            .template("[{elapsed_precise}] {percent:>2}% {wide_bar} {pos:>7}/{len:7} {eta}"),
-    );
-    bar
 }
 
 fn render_pixel(camera: &Camera, world: &World, x: u16, y: u16) -> Color {
@@ -64,7 +57,7 @@ mod tests {
         let mut c = Camera::new(11, 11, PI / 2.0);
         c.transform = transforms::view(from, to, up);
 
-        let image = render(c, w);
+        let image = render(c, w, || {});
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), image.pixel_at(5, 5));
     }
 }
