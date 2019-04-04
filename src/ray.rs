@@ -15,7 +15,7 @@ impl Ray {
         self.origin + self.direction * time
     }
 
-    pub fn transform(self, transform: Matrix4) -> Ray {
+    pub fn transform(&self, transform: Matrix4) -> Ray {
         Ray {
             origin: transform * self.origin,
             direction: transform * self.direction,

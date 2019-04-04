@@ -21,7 +21,7 @@ where
     N: ArrayLength<f64> + Copy,
     N::ArrayType: Copy,
 {
-    pub fn dot(self, other: Vector<N>) -> f64 {
+    pub fn dot(&self, other: Vector<N>) -> f64 {
         self.values
             .as_slice()
             .iter()
@@ -30,8 +30,8 @@ where
             .sum()
     }
 
-    pub fn reflect(self, other: Vector<N>) -> Self {
-        self - other * 2.0 * self.dot(other)
+    pub fn reflect(&self, other: Vector<N>) -> Self {
+        *self - other * 2.0 * self.dot(other)
     }
 
     pub fn magnitude(&self) -> f64 {
