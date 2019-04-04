@@ -14,7 +14,7 @@ pub use self::solid_pattern::SolidPattern;
 pub use self::stripe_pattern::StripePattern;
 
 pub trait Pattern: Debug {
-    fn box_clone(&self) -> Box<Pattern>;
+    fn box_clone(&self) -> Box<Pattern + Sync + Send>;
     fn pattern_at(&self, point: Point) -> Color;
     fn transform(&self) -> Matrix4;
 
@@ -25,7 +25,7 @@ pub trait Pattern: Debug {
     }
 }
 
-impl Clone for Box<Pattern> {
+impl Clone for Box<Pattern + Sync + Send> {
     fn clone(&self) -> Self {
         self.box_clone()
     }
@@ -50,7 +50,7 @@ pub mod tests {
     }
 
     impl Pattern for TestPattern {
-        fn box_clone(&self) -> Box<Pattern> {
+        fn box_clone(&self) -> Box<Pattern + Sync + Send> {
             Box::new(*self)
         }
 

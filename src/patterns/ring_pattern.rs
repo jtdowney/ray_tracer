@@ -18,7 +18,7 @@ impl RingPattern {
 }
 
 impl Pattern for RingPattern {
-    fn box_clone(&self) -> Box<Pattern> {
+    fn box_clone(&self) -> Box<Pattern + Sync + Send> {
         Box::new(*self)
     }
 

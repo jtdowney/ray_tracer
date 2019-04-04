@@ -79,7 +79,7 @@ fn main() -> Result<(), fmt::Error> {
         Vector3::new(0.0, 1.0, 0.0),
     );
 
-    let canvas = ray_tracer::render(camera, world);
+    let canvas = ray_tracer::render_parallel(camera, world);
     print!("{}", canvas.to_ppm()?);
 
     Ok(())

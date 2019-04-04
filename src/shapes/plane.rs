@@ -35,7 +35,7 @@ impl Shape for Plane {
         self
     }
 
-    fn box_clone(&self) -> Box<Shape> {
+    fn box_clone(&self) -> Box<Shape + Sync + Send> {
         Box::new((*self).clone())
     }
 

@@ -20,7 +20,7 @@ pub struct Material {
     pub refractive_index: f64,
     #[builder(setter(prefix = "boxed"))]
     #[builder(default = "Self::default_pattern()")]
-    pub pattern: Box<Pattern>,
+    pub pattern: Box<Pattern + Sync + Send>,
 }
 
 impl MaterialBuilder {
@@ -28,12 +28,12 @@ impl MaterialBuilder {
         self.pattern(SolidPattern::new(value))
     }
 
-    pub fn pattern<P: Pattern + 'static>(&mut self, value: P) -> &mut Self {
+    pub fn pattern<P: Pattern + Sync + Send + 'static>(&mut self, value: P) -> &mut Self {
         self.boxed_pattern(Box::new(value))
     }
 
-    fn default_pattern() -> Box<Pattern> {
-        Box::new(SolidPattern::new(color::WHITE)) as Box<Pattern>
+    fn default_pattern() -> Box<Pattern + Sync + Send> {
+        Box::new(SolidPattern::new(color::WHITE)) as Box<Pattern + Sync + Send>
     }
 }
 

@@ -11,7 +11,7 @@ pub use self::sphere::{Sphere, SphereBuilder};
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
     fn as_any_mut(&mut self) -> &mut Any;
-    fn box_clone(&self) -> Box<Shape>;
+    fn box_clone(&self) -> Box<Shape + Sync + Send>;
     fn local_normal_at(&self, point: Point) -> Vector3;
     fn local_intersect(&self, ray: Ray) -> Intersections;
     fn material(&self) -> &Material;
@@ -31,7 +31,7 @@ pub trait Shape: Any + Debug {
     }
 }
 
-impl Clone for Box<Shape> {
+impl Clone for Box<Shape + Sync + Send> {
     fn clone(&self) -> Self {
         self.box_clone()
     }
@@ -49,12 +49,13 @@ mod tests {
     use crate::transforms;
     use std::cell::RefCell;
     use std::f64::consts::PI;
+    use std::sync::Mutex;
 
-    #[derive(Clone, Debug)]
+    #[derive(Debug)]
     struct TestShape {
         transform: Matrix4,
         material: Material,
-        saved_ray: RefCell<Option<Ray>>,
+        saved_ray: Mutex<RefCell<Option<Ray>>>,
     }
 
     impl Default for TestShape {
@@ -62,7 +63,7 @@ mod tests {
             TestShape {
                 transform: Matrix4::identity(),
                 material: Material::default(),
-                saved_ray: RefCell::new(None),
+                saved_ray: Mutex::new(RefCell::new(None)),
             }
         }
     }
@@ -76,8 +77,8 @@ mod tests {
             self
         }
 
-        fn box_clone(&self) -> Box<Shape> {
-            Box::new((*self).clone())
+        fn box_clone(&self) -> Box<Shape + Sync + Send> {
+            unimplemented!()
         }
 
         fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {
@@ -85,7 +86,7 @@ mod tests {
         }
 
         fn local_intersect(&self, ray: Ray) -> Intersections {
-            *self.saved_ray.borrow_mut() = Some(ray);
+            *self.saved_ray.lock().unwrap().borrow_mut() = Some(ray);
             Intersections(vec![])
         }
 
@@ -104,13 +105,14 @@ mod tests {
         let mut s = TestShape::default();
         s.transform = transforms::scaling(2.0, 2.0, 2.0);
         s.intersect(r);
+        let saved_ray = s.saved_ray.lock().unwrap();
         assert_eq!(
             Point::new(0.0, 0.0, -2.5),
-            s.saved_ray.borrow().unwrap().origin
+            saved_ray.borrow().unwrap().origin
         );
         assert_eq!(
             Vector3::new(0.0, 0.0, 0.5),
-            s.saved_ray.borrow().unwrap().direction
+            saved_ray.borrow().unwrap().direction
         );
     }
 
@@ -120,13 +122,14 @@ mod tests {
         let mut s = TestShape::default();
         s.transform = transforms::translation(5.0, 0.0, 0.0);
         s.intersect(r);
+        let saved_ray = s.saved_ray.lock().unwrap();
         assert_eq!(
             Point::new(-5.0, 0.0, -5.0),
-            s.saved_ray.borrow().unwrap().origin
+            saved_ray.borrow().unwrap().origin
         );
         assert_eq!(
             Vector3::new(0.0, 0.0, 1.0),
-            s.saved_ray.borrow().unwrap().direction
+            saved_ray.borrow().unwrap().direction
         );
     }
 

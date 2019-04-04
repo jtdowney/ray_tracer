@@ -5,7 +5,7 @@ use crate::{
 
 #[derive(Default)]
 pub struct WorldBuilder {
-    objects: Vec<Box<Shape>>,
+    objects: Vec<Box<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
 }
 
@@ -17,9 +17,10 @@ impl WorldBuilder {
 
     pub fn object<T>(&mut self, object: T) -> &mut Self
     where
-        T: Shape,
+        T: Shape + Sync + Send,
     {
-        self.objects.push(Box::new(object) as Box<Shape>);
+        self.objects
+            .push(Box::new(object) as Box<Shape + Sync + Send>);
         self
     }
 
@@ -32,7 +33,7 @@ impl WorldBuilder {
 }
 
 pub struct World {
-    objects: Vec<Box<Shape>>,
+    objects: Vec<Box<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
 }
 
@@ -297,7 +298,7 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Box::new(shape) as Box<Shape>);
+        w.objects.push(Box::new(shape) as Box<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -323,7 +324,7 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Box::new(shape) as Box<Shape>);
+        w.objects.push(Box::new(shape) as Box<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -370,7 +371,7 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Box::new(shape) as Box<Shape>);
+        w.objects.push(Box::new(shape) as Box<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -433,7 +434,7 @@ mod tests {
         {
             let mut s1 = w.objects[0].as_any_mut().downcast_mut::<Sphere>().unwrap();
             s1.material.ambient = 1.0;
-            s1.material.pattern = Box::new(TestPattern::default()) as Box<Pattern>;
+            s1.material.pattern = Box::new(TestPattern::default()) as Box<Pattern + Sync + Send>;
         }
 
         {
@@ -493,8 +494,8 @@ mod tests {
             .build()
             .unwrap();
 
-        w.objects.push(Box::new(floor) as Box<Shape>);
-        w.objects.push(Box::new(ball) as Box<Shape>);
+        w.objects.push(Box::new(floor) as Box<Shape + Sync + Send>);
+        w.objects.push(Box::new(ball) as Box<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -536,8 +537,8 @@ mod tests {
             .build()
             .unwrap();
 
-        w.objects.push(Box::new(floor) as Box<Shape>);
-        w.objects.push(Box::new(ball) as Box<Shape>);
+        w.objects.push(Box::new(floor) as Box<Shape + Sync + Send>);
+        w.objects.push(Box::new(ball) as Box<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),

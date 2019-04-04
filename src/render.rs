@@ -1,15 +1,34 @@
-use crate::{Camera, Canvas, World};
+use crate::{Camera, Canvas, Color, World};
+use rayon::prelude::*;
 
 pub fn render(camera: Camera, world: World) -> Canvas {
     let mut canvas = Canvas::new(camera.horizontal_size, camera.vertical_size);
 
     for (x, y) in camera.pixels() {
-        let ray = camera.ray_for_pixel(x, y);
-        let color = world.color_at(ray, 5);
+        let color = render_pixel(&camera, &world, x, y);
         canvas.write_pixel(x, y, color);
     }
 
     canvas
+}
+
+pub fn render_parallel(camera: Camera, world: World) -> Canvas {
+    let pixels: Vec<(u16, u16)> = camera.pixels().collect();
+    let rendered_pixels: Vec<Color> = pixels
+        .into_par_iter()
+        .map(|(x, y)| render_pixel(&camera, &world, x, y))
+        .collect();
+
+    Canvas::from_pixels(
+        camera.horizontal_size,
+        camera.vertical_size,
+        rendered_pixels,
+    )
+}
+
+fn render_pixel(camera: &Camera, world: &World, x: u16, y: u16) -> Color {
+    let ray = camera.ray_for_pixel(x, y);
+    world.color_at(ray, 5)
 }
 
 #[cfg(test)]

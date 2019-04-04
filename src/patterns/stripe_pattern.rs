@@ -18,7 +18,7 @@ impl StripePattern {
 }
 
 impl Pattern for StripePattern {
-    fn box_clone(&self) -> Box<Pattern> {
+    fn box_clone(&self) -> Box<Pattern + Sync + Send> {
         Box::new(*self)
     }
 
