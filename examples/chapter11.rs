@@ -1,6 +1,6 @@
 use indicatif::ProgressBar;
 use ray_tracer::{
-    color, transforms, Camera, CheckersPattern, Color, MaterialBuilder, PlaneBuilder, Point,
+    color, transforms, Camera, CheckersPatternBuilder, Color, MaterialBuilder, PlaneBuilder, Point,
     PointLight, SphereBuilder, Vector3, WorldBuilder,
 };
 use std::f64::consts::PI;
@@ -12,7 +12,13 @@ fn main() -> Result<(), fmt::Error> {
             PlaneBuilder::default() // floor
                 .material(
                     MaterialBuilder::default()
-                        .pattern(CheckersPattern::new(color::WHITE, color::BLACK))
+                        .pattern(
+                            CheckersPatternBuilder::default()
+                                .first(color::WHITE)
+                                .second(color::BLACK)
+                                .build()
+                                .unwrap(),
+                        )
                         .specular(0.0)
                         .reflective(0.7)
                         .build()

@@ -22,7 +22,9 @@ pub use crate::light::PointLight;
 pub use crate::material::{Material, MaterialBuilder};
 pub use crate::matrix::{Matrix, Matrix2, Matrix3, Matrix4};
 pub use crate::patterns::{
-    CheckersPattern, GradientPattern, Pattern, RingPattern, SolidPattern, StripePattern,
+    CheckersPattern, CheckersPatternBuilder, GradientPattern, GradientPatternBuilder, Pattern,
+    RingPattern, RingPatternBuilder, SolidPattern, SolidPatternBuilder, StripePattern,
+    StripePatternBuilder,
 };
 pub use crate::point::Point;
 pub use crate::ray::Ray;

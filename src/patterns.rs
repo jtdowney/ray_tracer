@@ -7,11 +7,11 @@ mod ring_pattern;
 mod solid_pattern;
 mod stripe_pattern;
 
-pub use self::checkers_pattern::CheckersPattern;
-pub use self::gradient_pattern::GradientPattern;
-pub use self::ring_pattern::RingPattern;
-pub use self::solid_pattern::SolidPattern;
-pub use self::stripe_pattern::StripePattern;
+pub use self::checkers_pattern::{CheckersPattern, CheckersPatternBuilder};
+pub use self::gradient_pattern::{GradientPattern, GradientPatternBuilder};
+pub use self::ring_pattern::{RingPattern, RingPatternBuilder};
+pub use self::solid_pattern::{SolidPattern, SolidPatternBuilder};
+pub use self::stripe_pattern::{StripePattern, StripePatternBuilder};
 
 pub trait Pattern: Debug {
     fn box_clone(&self) -> Box<Pattern + Sync + Send>;

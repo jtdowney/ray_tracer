@@ -1,4 +1,4 @@
-use crate::{color, Color, Pattern, Point, PointLight, Shape, SolidPattern, Vector3};
+use crate::{color, Color, Pattern, Point, PointLight, Shape, SolidPatternBuilder, Vector3};
 use derive_builder::Builder;
 use std::ptr;
 
@@ -25,7 +25,7 @@ pub struct Material {
 
 impl MaterialBuilder {
     pub fn color(&mut self, value: Color) -> &mut Self {
-        self.pattern(SolidPattern::new(value))
+        self.pattern(SolidPatternBuilder::default().color(value).build().unwrap())
     }
 
     pub fn pattern<P: Pattern + Sync + Send + 'static>(&mut self, value: P) -> &mut Self {
@@ -33,7 +33,12 @@ impl MaterialBuilder {
     }
 
     fn default_pattern() -> Box<Pattern + Sync + Send> {
-        Box::new(SolidPattern::new(color::WHITE)) as Box<Pattern + Sync + Send>
+        Box::new(
+            SolidPatternBuilder::default()
+                .color(color::WHITE)
+                .build()
+                .unwrap(),
+        ) as Box<Pattern + Sync + Send>
     }
 }
 
@@ -109,7 +114,7 @@ impl Material {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Sphere, StripePattern};
+    use crate::{Sphere, StripePatternBuilder};
 
     #[test]
     fn lighting_with_eye_between_light_and_surface() {
@@ -200,7 +205,13 @@ mod tests {
     #[test]
     fn lighting_with_pattern() {
         let m = MaterialBuilder::default()
-            .pattern(StripePattern::new(color::WHITE, color::BLACK))
+            .pattern(
+                StripePatternBuilder::default()
+                    .first(color::WHITE)
+                    .second(color::BLACK)
+                    .build()
+                    .unwrap(),
+            )
             .ambient(1.0)
             .diffuse(0.0)
             .specular(0.0)

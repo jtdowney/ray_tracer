@@ -1,20 +1,12 @@
 use crate::{Color, Matrix4, Pattern, Point};
+use derive_builder::Builder;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Builder, Copy, Clone, Debug, PartialEq)]
 pub struct GradientPattern {
-    a: Color,
-    b: Color,
+    first: Color,
+    second: Color,
+    #[builder(default = "Matrix4::identity()")]
     transform: Matrix4,
-}
-
-impl GradientPattern {
-    pub fn new(a: Color, b: Color) -> Self {
-        GradientPattern {
-            a,
-            b,
-            transform: Matrix4::identity(),
-        }
-    }
 }
 
 impl Pattern for GradientPattern {
@@ -27,9 +19,9 @@ impl Pattern for GradientPattern {
     }
 
     fn pattern_at(&self, Point { x, .. }: Point) -> Color {
-        let distance = self.b - self.a;
+        let distance = self.second - self.first;
         let fraction = x - x.floor();
-        self.a + distance * fraction
+        self.first + distance * fraction
     }
 }
 
@@ -40,7 +32,11 @@ mod tests {
 
     #[test]
     fn gradient_linearly_interpolates_between_colors() {
-        let pattern = GradientPattern::new(color::WHITE, color::BLACK);
+        let pattern = GradientPatternBuilder::default()
+            .first(color::WHITE)
+            .second(color::BLACK)
+            .build()
+            .unwrap();
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(
             Color::new(0.75, 0.75, 0.75),

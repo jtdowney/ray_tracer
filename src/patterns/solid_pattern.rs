@@ -1,24 +1,11 @@
 use crate::{Color, Matrix4, Pattern, Point};
+use derive_builder::Builder;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Builder, Copy, Clone, Debug, PartialEq)]
 pub struct SolidPattern {
     color: Color,
+    #[builder(default = "Matrix4::identity()")]
     transform: Matrix4,
-}
-
-impl From<Color> for SolidPattern {
-    fn from(color: Color) -> Self {
-        SolidPattern::new(color)
-    }
-}
-
-impl SolidPattern {
-    pub fn new(color: Color) -> Self {
-        SolidPattern {
-            color,
-            transform: Matrix4::identity(),
-        }
-    }
 }
 
 impl Pattern for SolidPattern {
@@ -42,7 +29,10 @@ mod tests {
 
     #[test]
     fn solid_pattern_returns_constant_color() {
-        let pattern = SolidPattern::new(color::WHITE);
+        let pattern = SolidPatternBuilder::default()
+            .color(color::WHITE)
+            .build()
+            .unwrap();
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(1.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(1.0, 1.0, 0.0)));

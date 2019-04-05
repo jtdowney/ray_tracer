@@ -1,14 +1,12 @@
 use indicatif::ProgressBar;
 use ray_tracer::{
-    color, transforms, Camera, CheckersPattern, Color, CubeBuilder, MaterialBuilder, Point,
+    color, transforms, Camera, CheckersPatternBuilder, Color, CubeBuilder, MaterialBuilder, Point,
     PointLight, SphereBuilder, Vector3, WorldBuilder,
 };
 use std::f64::consts::PI;
 use std::fmt;
 
 fn main() -> Result<(), fmt::Error> {
-    let mut pattern = CheckersPattern::new(color::WHITE, color::BLACK);
-    pattern.transform = transforms::scaling(1.0 / 12.0, 1.0 / 12.0, 1.0 / 12.0);
     let world = WorldBuilder::default()
         .object(
             CubeBuilder::default() // room
@@ -19,7 +17,14 @@ fn main() -> Result<(), fmt::Error> {
                 )
                 .material(
                     MaterialBuilder::default()
-                        .pattern(pattern)
+                        .pattern(
+                            CheckersPatternBuilder::default()
+                                .first(color::WHITE)
+                                .second(color::BLACK)
+                                .transform(transforms::scaling(1.0 / 12.0, 1.0 / 12.0, 1.0 / 12.0))
+                                .build()
+                                .unwrap(),
+                        )
                         .specular(0.0)
                         .build()
                         .unwrap(),

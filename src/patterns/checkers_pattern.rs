@@ -1,20 +1,12 @@
 use crate::{Color, Matrix4, Pattern, Point};
+use derive_builder::Builder;
 
-#[derive(Copy, Clone, Debug, PartialEq)]
+#[derive(Builder, Copy, Clone, Debug, PartialEq)]
 pub struct CheckersPattern {
-    a: Color,
-    b: Color,
+    first: Color,
+    second: Color,
+    #[builder(default = "Matrix4::identity()")]
     transform: Matrix4,
-}
-
-impl CheckersPattern {
-    pub fn new(a: Color, b: Color) -> Self {
-        CheckersPattern {
-            a,
-            b,
-            transform: Matrix4::identity(),
-        }
-    }
 }
 
 impl Pattern for CheckersPattern {
@@ -28,9 +20,9 @@ impl Pattern for CheckersPattern {
 
     fn pattern_at(&self, Point { x, y, z }: Point) -> Color {
         if (x.floor() + y.floor() + z.floor()) as u32 % 2 == 0 {
-            self.a
+            self.first
         } else {
-            self.b
+            self.second
         }
     }
 }
@@ -42,7 +34,11 @@ mod tests {
 
     #[test]
     fn checkers_repeats_in_x() {
-        let pattern = CheckersPattern::new(color::WHITE, color::BLACK);
+        let pattern = CheckersPatternBuilder::default()
+            .first(color::WHITE)
+            .second(color::BLACK)
+            .build()
+            .unwrap();
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.99, 0.0, 0.0)));
         assert_eq!(color::BLACK, pattern.pattern_at(Point::new(1.01, 0.0, 0.0)));
@@ -50,7 +46,11 @@ mod tests {
 
     #[test]
     fn checkers_repeats_in_y() {
-        let pattern = CheckersPattern::new(color::WHITE, color::BLACK);
+        let pattern = CheckersPatternBuilder::default()
+            .first(color::WHITE)
+            .second(color::BLACK)
+            .build()
+            .unwrap();
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.99, 0.0)));
         assert_eq!(color::BLACK, pattern.pattern_at(Point::new(0.0, 1.01, 0.0)));
@@ -58,7 +58,11 @@ mod tests {
 
     #[test]
     fn checkers_repeats_in_z() {
-        let pattern = CheckersPattern::new(color::WHITE, color::BLACK);
+        let pattern = CheckersPatternBuilder::default()
+            .first(color::WHITE)
+            .second(color::BLACK)
+            .build()
+            .unwrap();
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.0)));
         assert_eq!(color::WHITE, pattern.pattern_at(Point::new(0.0, 0.0, 0.99)));
         assert_eq!(color::BLACK, pattern.pattern_at(Point::new(0.0, 0.0, 1.01)));
