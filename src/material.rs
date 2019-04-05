@@ -5,19 +5,19 @@ use std::ptr;
 #[derive(Builder, Clone, Debug)]
 pub struct Material {
     #[builder(default = "0.1")]
-    pub ambient: f64,
+    pub ambient: f32,
     #[builder(default = "0.9")]
-    pub diffuse: f64,
+    pub diffuse: f32,
     #[builder(default = "0.9")]
-    pub specular: f64,
+    pub specular: f32,
     #[builder(default = "200.0")]
-    pub shininess: f64,
+    pub shininess: f32,
     #[builder(default = "0.0")]
-    pub reflective: f64,
+    pub reflective: f32,
     #[builder(default = "0.0")]
-    pub transparency: f64,
+    pub transparency: f32,
     #[builder(default = "1.0")]
-    pub refractive_index: f64,
+    pub refractive_index: f32,
     #[builder(setter(prefix = "boxed"))]
     #[builder(default = "Self::default_pattern()")]
     pub pattern: Box<Pattern + Sync + Send>,
@@ -90,7 +90,7 @@ impl Material {
             if reflect_dot_eye <= 0.0 {
                 specular = color::BLACK;
             } else {
-                let factor = reflect_dot_eye.powf(self.shininess);
+                let factor = reflect_dot_eye.powf(f64::from(self.shininess));
                 specular = light.intensity * self.specular * factor;
             }
         }
@@ -163,7 +163,7 @@ mod tests {
         let normalv = Vector3::new(0.0, 0.0, -1.0);
         let light = PointLight::new(Point::new(0.0, 10.0, -10.0), color::WHITE);
         assert_eq!(
-            Color::new(1.63638, 1.63638, 1.63638),
+            Color::new(1.63639, 1.63639, 1.63639),
             m.lighting(&Sphere::default(), &light, position, eyev, normalv, false)
         );
     }

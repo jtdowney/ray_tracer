@@ -150,15 +150,15 @@ impl World {
         }
 
         let n_ratio = comps.n1 / comps.n2;
-        let cos_i = comps.eye_vector.dot(comps.normal_vector);
+        let cos_i = comps.eye_vector.dot(comps.normal_vector) as f32;
         let sin2_t = n_ratio.powi(2) * (1.0 - cos_i.powi(2));
         if sin2_t > 1.0 {
             return color::BLACK;
         }
 
         let cos_t = (1.0 - sin2_t).sqrt();
-        let direction =
-            comps.normal_vector * (n_ratio * cos_i - cos_t) - comps.eye_vector * n_ratio;
+        let direction = comps.normal_vector * f64::from(n_ratio * cos_i - cos_t)
+            - comps.eye_vector * f64::from(n_ratio);
         let refract_ray = Ray::new(comps.under_point, direction);
 
         self.color_at(refract_ray, remaining - 1) * comps.object.material().transparency
@@ -311,7 +311,7 @@ mod tests {
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
         assert_eq!(
-            Color::new(0.19032, 0.2379, 0.14274),
+            Color::new(0.19034, 0.23793, 0.14276),
             w.reflected_color(comps, 5)
         );
     }
@@ -463,7 +463,7 @@ mod tests {
         let xs = Intersections(vec![i1, i2, i3, i4]);
         let comps = i3.prepare_computations(r, &xs);
         assert_eq!(
-            Color::new(0.0, 0.99888, 0.04725),
+            Color::new(0.0, 0.99878, 0.04724),
             w.refracted_color(comps, 5)
         );
     }

@@ -1,19 +1,20 @@
-use crate::EPSILON;
 use std::iter::Sum;
 use std::ops::{Add, Mul, Sub};
+
+const EPSILON: f32 = 1e-4;
 
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0);
 pub const WHITE: Color = Color::new(1.0, 1.0, 1.0);
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Color {
-    red: f64,
-    green: f64,
-    blue: f64,
+    red: f32,
+    green: f32,
+    blue: f32,
 }
 
 impl Color {
-    pub const fn new(red: f64, green: f64, blue: f64) -> Color {
+    pub const fn new(red: f32, green: f32, blue: f32) -> Color {
         Color { red, green, blue }
     }
 }
@@ -42,11 +43,19 @@ impl Mul<Color> for Color {
     }
 }
 
+impl Mul<f32> for Color {
+    type Output = Color;
+
+    fn mul(self, other: f32) -> Self::Output {
+        Color::new(self.red * other, self.green * other, self.blue * other)
+    }
+}
+
 impl Mul<f64> for Color {
     type Output = Color;
 
     fn mul(self, other: f64) -> Self::Output {
-        Color::new(self.red * other, self.green * other, self.blue * other)
+        self * (other as f32)
     }
 }
 
@@ -70,9 +79,9 @@ impl Sum<Color> for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
-        (self.red - other.red).abs() < EPSILON
-            && (self.green - other.green).abs() < EPSILON
-            && (self.blue - other.blue).abs() < EPSILON
+        (self.red - other.red).abs() <= EPSILON
+            && (self.green - other.green).abs() <= EPSILON
+            && (self.blue - other.blue).abs() <= EPSILON
     }
 }
 

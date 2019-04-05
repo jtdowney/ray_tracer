@@ -12,13 +12,13 @@ pub struct Computations<'a> {
     pub normal_vector: Vector3,
     pub reflect_vector: Vector3,
     pub inside: bool,
-    pub n1: f64,
-    pub n2: f64,
+    pub n1: f32,
+    pub n2: f32,
 }
 
 impl<'a> Computations<'a> {
-    pub fn schlick(&self) -> f64 {
-        let mut cos = self.eye_vector.dot(self.normal_vector);
+    pub fn schlick(&self) -> f32 {
+        let mut cos = self.eye_vector.dot(self.normal_vector) as f32;
         if self.n1 > self.n2 {
             let n = self.n1 / self.n2;
             let sin2_t = n.powi(2) * (1.0 - cos.powi(2));
@@ -396,7 +396,7 @@ mod tests {
         };
         let xs = Intersections(vec![i1, i2]);
         let comps = i2.prepare_computations(r, &xs);
-        assert!((0.04 - comps.schlick()).abs() < EPSILON);
+        assert!((0.04 - comps.schlick()).abs() < 0.00001);
     }
 
     #[test]
@@ -409,6 +409,6 @@ mod tests {
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
-        assert!((0.48873 - comps.schlick()).abs() < EPSILON);
+        assert!((0.48873 - comps.schlick()).abs() < 0.0001);
     }
 }

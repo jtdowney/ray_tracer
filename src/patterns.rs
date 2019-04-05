@@ -55,7 +55,7 @@ pub mod tests {
         }
 
         fn pattern_at(&self, Point { x, y, z }: Point) -> Color {
-            Color::new(x, y, z)
+            Color::new(x as f32, y as f32, z as f32)
         }
 
         fn transform(&self) -> Matrix4 {
