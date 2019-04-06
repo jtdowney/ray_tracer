@@ -1,4 +1,5 @@
 use crate::{Point, Vector, Vector3, EPSILON};
+use approx::relative_eq;
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use std::iter::FromIterator;
 use std::marker::PhantomData;
@@ -206,7 +207,7 @@ where
             .as_slice()
             .iter()
             .zip(other.values.as_slice())
-            .all(|(&a, &b)| (a - b).abs() <= EPSILON)
+            .all(|(&a, &b)| relative_eq!(a, b, epsilon = EPSILON))
     }
 }
 

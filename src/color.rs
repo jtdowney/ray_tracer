@@ -1,7 +1,7 @@
+use crate::EPSILON;
+use approx::relative_eq;
 use std::iter::Sum;
 use std::ops::{Add, Mul, Sub};
-
-const EPSILON: f32 = 1e-4;
 
 pub const BLACK: Color = Color::new(0.0, 0.0, 0.0);
 pub const WHITE: Color = Color::new(1.0, 1.0, 1.0);
@@ -79,9 +79,9 @@ impl Sum<Color> for Color {
 
 impl PartialEq for Color {
     fn eq(&self, other: &Color) -> bool {
-        (self.red - other.red).abs() <= EPSILON
-            && (self.green - other.green).abs() <= EPSILON
-            && (self.blue - other.blue).abs() <= EPSILON
+        relative_eq!(self.red, other.red, epsilon = EPSILON as f32)
+            && relative_eq!(self.green, other.green, epsilon = EPSILON as f32)
+            && relative_eq!(self.blue, other.blue, epsilon = EPSILON as f32)
     }
 }
 

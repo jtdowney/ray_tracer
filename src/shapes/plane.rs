@@ -1,4 +1,5 @@
 use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, EPSILON};
+use approx::relative_eq;
 use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
@@ -44,7 +45,7 @@ impl Shape for Plane {
     }
 
     fn local_intersect(&self, ray: Ray) -> Intersections {
-        if ray.direction[1].abs() < EPSILON {
+        if relative_eq!(ray.direction[1], 0.0, epsilon = EPSILON) {
             Intersections(vec![])
         } else {
             let time = -ray.origin.y / ray.direction[1];

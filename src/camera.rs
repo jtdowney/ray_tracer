@@ -93,18 +93,19 @@ impl Iterator for PixelsIter {
 mod tests {
     use super::*;
     use crate::{transforms, Vector3, EPSILON};
+    use approx::assert_relative_eq;
     use std::f64::consts::PI;
 
     #[test]
     fn pixel_size_for_horizontal_canvas() {
         let c = Camera::new(200, 125, PI / 2.0);
-        assert!((0.01 - c.pixel_size).abs() < EPSILON);
+        assert_relative_eq!(0.01, c.pixel_size, epsilon = EPSILON);
     }
 
     #[test]
     fn pixel_size_for_vertical_canvas() {
         let c = Camera::new(125, 200, PI / 2.0);
-        assert!((0.01 - c.pixel_size).abs() < EPSILON);
+        assert_relative_eq!(0.01, c.pixel_size, epsilon = EPSILON);
     }
 
     #[test]

@@ -130,6 +130,7 @@ impl<'a> Intersections<'a> {
 mod tests {
     use super::*;
     use crate::{transforms, Plane, Sphere, SphereBuilder};
+    use approx::assert_relative_eq;
     use std::ptr;
 
     #[test]
@@ -396,7 +397,7 @@ mod tests {
         };
         let xs = Intersections(vec![i1, i2]);
         let comps = i2.prepare_computations(r, &xs);
-        assert!((0.04 - comps.schlick()).abs() < 0.00001);
+        assert_relative_eq!(0.04, comps.schlick(), epsilon = EPSILON as f32);
     }
 
     #[test]
@@ -409,6 +410,6 @@ mod tests {
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
-        assert!((0.48873 - comps.schlick()).abs() < 0.0001);
+        assert_relative_eq!(0.48873, comps.schlick(), epsilon = EPSILON as f32);
     }
 }

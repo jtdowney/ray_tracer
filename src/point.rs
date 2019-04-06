@@ -1,4 +1,5 @@
 use crate::{Vector3, EPSILON};
+use approx::relative_eq;
 use std::ops::{Add, Sub};
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -48,9 +49,9 @@ impl Sub<Vector3> for Point {
 
 impl PartialEq for Point {
     fn eq(&self, other: &Point) -> bool {
-        (self.x - other.x).abs() < EPSILON
-            && (self.y - other.y).abs() < EPSILON
-            && (self.z - other.z).abs() < EPSILON
+        relative_eq!(self.x, other.x, epsilon = EPSILON)
+            && relative_eq!(self.y, other.y, epsilon = EPSILON)
+            && relative_eq!(self.z, other.z, epsilon = EPSILON)
     }
 }
 
