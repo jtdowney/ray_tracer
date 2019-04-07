@@ -29,7 +29,10 @@ pub use crate::patterns::{
 pub use crate::point::Point;
 pub use crate::ray::Ray;
 pub use crate::render::{render, render_parallel};
-pub use crate::shapes::{Cube, CubeBuilder, Plane, PlaneBuilder, Shape, Sphere, SphereBuilder};
+pub use crate::shapes::{
+    Cone, ConeBuilder, Cube, CubeBuilder, Cylinder, CylinderBuilder, Plane, PlaneBuilder, Shape,
+    Sphere, SphereBuilder,
+};
 pub use crate::vector::{Vector, Vector3, Vector4};
 pub use crate::world::{World, WorldBuilder};
 

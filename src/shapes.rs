@@ -2,11 +2,15 @@ use crate::{Intersections, Material, Matrix4, Point, Ray, Vector3};
 use std::any::Any;
 use std::fmt::Debug;
 
+mod cone;
 mod cube;
+mod cylinder;
 mod plane;
 mod sphere;
 
+pub use self::cone::{Cone, ConeBuilder};
 pub use self::cube::{Cube, CubeBuilder};
+pub use self::cylinder::{Cylinder, CylinderBuilder};
 pub use self::plane::{Plane, PlaneBuilder};
 pub use self::sphere::{Sphere, SphereBuilder};
 
