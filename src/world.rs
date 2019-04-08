@@ -2,10 +2,11 @@ use crate::{
     color, intersection, transforms, Color, Intersection, Intersections, MaterialBuilder, Point,
     PointLight, Ray, Shape, SphereBuilder,
 };
+use std::sync::Arc;
 
 #[derive(Default)]
 pub struct WorldBuilder {
-    objects: Vec<Box<Shape + Sync + Send>>,
+    objects: Vec<Arc<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
 }
 
@@ -15,12 +16,12 @@ impl WorldBuilder {
         self
     }
 
-    pub fn object<T>(&mut self, object: T) -> &mut Self
+    pub fn object<O, T>(&mut self, object: O) -> &mut Self
     where
+        O: Into<Arc<T>>,
         T: Shape + Sync + Send,
     {
-        self.objects
-            .push(Box::new(object) as Box<Shape + Sync + Send>);
+        self.objects.push(object.into());
         self
     }
 
@@ -33,7 +34,7 @@ impl WorldBuilder {
 }
 
 pub struct World {
-    objects: Vec<Box<Shape + Sync + Send>>,
+    objects: Vec<Arc<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
 }
 
@@ -214,9 +215,17 @@ mod tests {
     #[test]
     fn color_with_intersection_behind_ray() {
         let mut w = World::default();
-        let mut s1 = w.objects[0].as_any_mut().downcast_mut::<Sphere>().unwrap();
+        let mut s1 = Arc::get_mut(&mut w.objects[0])
+            .unwrap()
+            .as_any_mut()
+            .downcast_mut::<Sphere>()
+            .unwrap();
         s1.material.ambient = 1.0;
-        let mut s2 = w.objects[1].as_any_mut().downcast_mut::<Sphere>().unwrap();
+        let mut s2 = Arc::get_mut(&mut w.objects[1])
+            .unwrap()
+            .as_any_mut()
+            .downcast_mut::<Sphere>()
+            .unwrap();
         s2.material.ambient = 1.0;
 
         let r = Ray::new(Point::new(0.0, 0.0, 0.75), Vector3::new(0.0, 0.0, -1.0));
@@ -277,7 +286,11 @@ mod tests {
     #[test]
     fn reflected_color_for_nonreflective_material() {
         let mut w = World::default();
-        let mut shape = w.objects[1].as_any_mut().downcast_mut::<Sphere>().unwrap();
+        let mut shape = Arc::get_mut(&mut w.objects[1])
+            .unwrap()
+            .as_any_mut()
+            .downcast_mut::<Sphere>()
+            .unwrap();
         shape.material.ambient = 1.0;
 
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
@@ -298,7 +311,7 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Box::new(shape) as Box<Shape + Sync + Send>);
+        w.objects.push(Arc::new(shape) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -324,7 +337,7 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Box::new(shape) as Box<Shape + Sync + Send>);
+        w.objects.push(Arc::new(shape) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -371,7 +384,7 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Box::new(shape) as Box<Shape + Sync + Send>);
+        w.objects.push(Arc::new(shape) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -407,7 +420,11 @@ mod tests {
     #[test]
     fn refracted_color_under_total_internal_reflection() {
         let mut w = World::default();
-        let mut shape = w.objects[0].as_any_mut().downcast_mut::<Sphere>().unwrap();
+        let mut shape = Arc::get_mut(&mut w.objects[0])
+            .unwrap()
+            .as_any_mut()
+            .downcast_mut::<Sphere>()
+            .unwrap();
         shape.material.transparency = 1.0;
         shape.material.refractive_index = 1.5;
 
@@ -432,13 +449,21 @@ mod tests {
     fn refracted_color_with_refracted_ray() {
         let mut w = World::default();
         {
-            let mut s1 = w.objects[0].as_any_mut().downcast_mut::<Sphere>().unwrap();
+            let mut s1 = Arc::get_mut(&mut w.objects[0])
+                .unwrap()
+                .as_any_mut()
+                .downcast_mut::<Sphere>()
+                .unwrap();
             s1.material.ambient = 1.0;
             s1.material.pattern = Box::new(TestPattern::default()) as Box<Pattern + Sync + Send>;
         }
 
         {
-            let mut s2 = w.objects[1].as_any_mut().downcast_mut::<Sphere>().unwrap();
+            let mut s2 = Arc::get_mut(&mut w.objects[1])
+                .unwrap()
+                .as_any_mut()
+                .downcast_mut::<Sphere>()
+                .unwrap();
             s2.material.transparency = 1.0;
             s2.material.refractive_index = 1.5;
         }
@@ -494,8 +519,8 @@ mod tests {
             .build()
             .unwrap();
 
-        w.objects.push(Box::new(floor) as Box<Shape + Sync + Send>);
-        w.objects.push(Box::new(ball) as Box<Shape + Sync + Send>);
+        w.objects.push(Arc::new(floor) as Arc<Shape + Sync + Send>);
+        w.objects.push(Arc::new(ball) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -537,8 +562,8 @@ mod tests {
             .build()
             .unwrap();
 
-        w.objects.push(Box::new(floor) as Box<Shape + Sync + Send>);
-        w.objects.push(Box::new(ball) as Box<Shape + Sync + Send>);
+        w.objects.push(Arc::new(floor) as Arc<Shape + Sync + Send>);
+        w.objects.push(Arc::new(ball) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),

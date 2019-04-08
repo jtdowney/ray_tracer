@@ -5,7 +5,7 @@ use std::any::Any;
 use std::f64::INFINITY;
 use std::vec;
 
-#[derive(Builder, Clone, Debug, PartialEq)]
+#[derive(Builder, Clone, Debug)]
 pub struct Cylinder {
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
@@ -25,15 +25,6 @@ impl Default for Cylinder {
     }
 }
 
-impl PartialEq<Shape> for Cylinder {
-    fn eq(&self, other: &Shape) -> bool {
-        other
-            .as_any()
-            .downcast_ref::<Self>()
-            .map_or(false, |x| x == self)
-    }
-}
-
 impl Shape for Cylinder {
     fn as_any(&self) -> &Any {
         self
@@ -41,10 +32,6 @@ impl Shape for Cylinder {
 
     fn as_any_mut(&mut self) -> &mut Any {
         self
-    }
-
-    fn box_clone(&self) -> Box<Shape + Sync + Send> {
-        Box::new((*self).clone())
     }
 
     fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {

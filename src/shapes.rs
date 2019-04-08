@@ -17,7 +17,6 @@ pub use self::sphere::{Sphere, SphereBuilder};
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
     fn as_any_mut(&mut self) -> &mut Any;
-    fn box_clone(&self) -> Box<Shape + Sync + Send>;
     fn local_normal_at(&self, point: Point) -> Vector3;
     fn local_intersect(&self, ray: Ray) -> Intersections;
     fn material(&self) -> &Material;
@@ -35,12 +34,6 @@ pub trait Shape: Any + Debug {
     fn intersect(&self, ray: Ray) -> Intersections {
         let local_ray = ray.transform(self.transform().inverse());
         self.local_intersect(local_ray)
-    }
-}
-
-impl Clone for Box<Shape + Sync + Send> {
-    fn clone(&self) -> Self {
-        self.box_clone()
     }
 }
 
@@ -82,10 +75,6 @@ mod tests {
 
         fn as_any_mut(&mut self) -> &mut Any {
             self
-        }
-
-        fn box_clone(&self) -> Box<Shape + Sync + Send> {
-            unimplemented!()
         }
 
         fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {

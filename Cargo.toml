@@ -5,12 +5,12 @@ authors = ["John Downey <jdowney@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+approx = "0.3.2"
+derive_builder = "0.7.1"
 generic-array = "0.12.0"
 num-traits = "0.2.6"
-typenum = "1.10.0"
-derive_builder = "0.7.1"
 rayon = "1.0.3"
-approx = "0.3.2"
+typenum = "1.10.0"
 
 [dev-dependencies]
 indicatif = "0.11.0"

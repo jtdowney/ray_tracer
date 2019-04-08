@@ -4,7 +4,7 @@ use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
 
-#[derive(Builder, Clone, Debug, PartialEq)]
+#[derive(Builder, Clone, Debug)]
 pub struct Plane {
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
@@ -18,15 +18,6 @@ impl Default for Plane {
     }
 }
 
-impl PartialEq<Shape> for Plane {
-    fn eq(&self, other: &Shape) -> bool {
-        other
-            .as_any()
-            .downcast_ref::<Self>()
-            .map_or(false, |x| x == self)
-    }
-}
-
 impl Shape for Plane {
     fn as_any(&self) -> &Any {
         self
@@ -34,10 +25,6 @@ impl Shape for Plane {
 
     fn as_any_mut(&mut self) -> &mut Any {
         self
-    }
-
-    fn box_clone(&self) -> Box<Shape + Sync + Send> {
-        Box::new((*self).clone())
     }
 
     fn local_normal_at(&self, _: Point) -> Vector3 {
@@ -65,6 +52,7 @@ impl Shape for Plane {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ptr;
 
     #[test]
     fn planes_default_transformation() {
@@ -106,7 +94,10 @@ mod tests {
         let mut xs = p.local_intersect(r).into_iter();
         let i = xs.next().unwrap();
         assert_eq!(1.0, i.time);
-        assert_eq!(&p, i.object);
+        assert!(ptr::eq(
+            &p,
+            i.object.as_any().downcast_ref::<Plane>().unwrap()
+        ));
         assert_eq!(None, xs.next());
     }
 
@@ -117,7 +108,10 @@ mod tests {
         let mut xs = p.local_intersect(r).into_iter();
         let i = xs.next().unwrap();
         assert_eq!(1.0, i.time);
-        assert_eq!(&p, i.object);
+        assert!(ptr::eq(
+            &p,
+            i.object.as_any().downcast_ref::<Plane>().unwrap()
+        ));
         assert_eq!(None, xs.next());
     }
 }

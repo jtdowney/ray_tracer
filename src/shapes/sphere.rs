@@ -5,7 +5,7 @@ use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
 
-#[derive(Builder, Clone, Debug, PartialEq)]
+#[derive(Builder, Clone, Debug)]
 pub struct Sphere {
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
@@ -33,15 +33,6 @@ impl Default for Sphere {
     }
 }
 
-impl PartialEq<Shape> for Sphere {
-    fn eq(&self, other: &Shape) -> bool {
-        other
-            .as_any()
-            .downcast_ref::<Self>()
-            .map_or(false, |x| x == self)
-    }
-}
-
 impl Shape for Sphere {
     fn as_any(&self) -> &Any {
         self
@@ -49,10 +40,6 @@ impl Shape for Sphere {
 
     fn as_any_mut(&mut self) -> &mut Any {
         self
-    }
-
-    fn box_clone(&self) -> Box<Shape + Sync + Send> {
-        Box::new((*self).clone())
     }
 
     fn local_normal_at(&self, point: Point) -> Vector3 {
@@ -223,8 +210,24 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let s = Sphere::default();
         let mut xs = s.intersect(r).into_iter();
-        assert_eq!(&s, xs.next().unwrap().object);
-        assert_eq!(&s, xs.next().unwrap().object);
+        assert!(ptr::eq(
+            &s,
+            xs.next()
+                .unwrap()
+                .object
+                .as_any()
+                .downcast_ref::<Sphere>()
+                .unwrap()
+        ));
+        assert!(ptr::eq(
+            &s,
+            xs.next()
+                .unwrap()
+                .object
+                .as_any()
+                .downcast_ref::<Sphere>()
+                .unwrap()
+        ));
         assert!(xs.next().is_none());
     }
 
