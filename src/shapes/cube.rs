@@ -1,4 +1,5 @@
 use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, EPSILON};
+use approx::relative_eq;
 use derive_builder::Builder;
 use std::any::Any;
 use std::vec;
@@ -28,9 +29,9 @@ impl Shape for Cube {
 
     fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {
         let max = x.abs().max(y.abs()).max(z.abs());
-        if max == x.abs() {
+        if relative_eq!(max, x.abs()) {
             Vector3::new(x, 0.0, 0.0)
-        } else if max == y.abs() {
+        } else if relative_eq!(max, y.abs()) {
             Vector3::new(0.0, y, 0.0)
         } else {
             Vector3::new(0.0, 0.0, z)
