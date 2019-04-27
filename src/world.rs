@@ -2,11 +2,11 @@ use crate::{
     color, intersection, transforms, Color, Intersection, Intersections, MaterialBuilder, Point,
     PointLight, Ray, Shape, SphereBuilder,
 };
+use indextree::Arena;
 use std::sync::Arc;
 
-#[derive(Default)]
 pub struct WorldBuilder {
-    objects: Vec<Arc<Shape + Sync + Send>>,
+    objects: Arena<Arc<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
 }
 
@@ -21,7 +21,7 @@ impl WorldBuilder {
         O: Into<Arc<T>>,
         T: Shape + Sync + Send,
     {
-        self.objects.push(object.into());
+        self.objects.new_node(object.into());
         self
     }
 
@@ -33,8 +33,17 @@ impl WorldBuilder {
     }
 }
 
+impl Default for WorldBuilder {
+    fn default() -> Self {
+        WorldBuilder {
+            objects: Arena::new(),
+            lights: vec![],
+        }
+    }
+}
+
 pub struct World {
-    objects: Vec<Arc<Shape + Sync + Send>>,
+    objects: Arena<Arc<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
 }
 
@@ -84,10 +93,9 @@ impl World {
     }
 
     fn intersect(&self, ray: Ray) -> Intersections {
-        let mut intersections = self
-            .objects
-            .iter()
-            .flat_map(|o| o.intersect(ray))
+        let roots = self.objects.iter().filter(|node| node.parent().is_none());
+        let mut intersections = roots
+            .flat_map(|o| o.data.intersect(ray))
             .collect::<Vec<Intersection>>();
         intersections.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
         Intersections(intersections)
@@ -171,6 +179,7 @@ mod tests {
     use super::*;
     use crate::patterns::tests::TestPattern;
     use crate::{Pattern, PlaneBuilder, Sphere, Vector3};
+    use indextree::NodeId;
 
     #[test]
     fn intersect_world_with_ray() {
@@ -188,7 +197,7 @@ mod tests {
     fn shading_an_intersection() {
         let w = World::default();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
-        let shape = &w.objects[0];
+        let shape = &w.objects[NodeId::new(0)].data;
         let i = Intersection {
             time: 4.0,
             object: shape.as_ref(),
@@ -215,13 +224,13 @@ mod tests {
     #[test]
     fn color_with_intersection_behind_ray() {
         let mut w = World::default();
-        let mut s1 = Arc::get_mut(&mut w.objects[0])
+        let mut s1 = Arc::get_mut(&mut w.objects[NodeId::new(0)].data)
             .unwrap()
             .as_any_mut()
             .downcast_mut::<Sphere>()
             .unwrap();
         s1.material.ambient = 1.0;
-        let mut s2 = Arc::get_mut(&mut w.objects[1])
+        let mut s2 = Arc::get_mut(&mut w.objects[NodeId::new(1)].data)
             .unwrap()
             .as_any_mut()
             .downcast_mut::<Sphere>()
@@ -276,7 +285,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {
             time: 4.0,
-            object: w.objects[1].as_ref(),
+            object: w.objects[NodeId::new(1)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
@@ -286,7 +295,7 @@ mod tests {
     #[test]
     fn reflected_color_for_nonreflective_material() {
         let mut w = World::default();
-        let mut shape = Arc::get_mut(&mut w.objects[1])
+        let mut shape = Arc::get_mut(&mut w.objects[NodeId::new(1)].data)
             .unwrap()
             .as_any_mut()
             .downcast_mut::<Sphere>()
@@ -296,7 +305,7 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {
             time: 1.0,
-            object: w.objects[1].as_ref(),
+            object: w.objects[NodeId::new(1)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
@@ -311,7 +320,8 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Arc::new(shape) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(shape) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -319,7 +329,7 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[2].as_ref(),
+            object: w.objects[NodeId::new(2)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
@@ -337,7 +347,8 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Arc::new(shape) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(shape) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -345,7 +356,7 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[2].as_ref(),
+            object: w.objects[NodeId::new(2)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
@@ -384,7 +395,8 @@ mod tests {
             .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
             .build()
             .unwrap();
-        w.objects.push(Arc::new(shape) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(shape) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -392,7 +404,7 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[2].as_ref(),
+            object: w.objects[NodeId::new(2)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
@@ -402,7 +414,7 @@ mod tests {
     #[test]
     fn refracted_color_with_opaque_surface() {
         let w = World::default();
-        let shape = &w.objects[0];
+        let shape = &w.objects[NodeId::new(0)].data;
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let i1 = Intersection {
             time: 4.0,
@@ -420,7 +432,7 @@ mod tests {
     #[test]
     fn refracted_color_under_total_internal_reflection() {
         let mut w = World::default();
-        let mut shape = Arc::get_mut(&mut w.objects[0])
+        let mut shape = Arc::get_mut(&mut w.objects[NodeId::new(0)].data)
             .unwrap()
             .as_any_mut()
             .downcast_mut::<Sphere>()
@@ -434,11 +446,11 @@ mod tests {
         );
         let i1 = Intersection {
             time: -f64::sqrt(2.0) / 2.0,
-            object: w.objects[0].as_ref(),
+            object: w.objects[NodeId::new(0)].data.as_ref(),
         };
         let i2 = Intersection {
             time: f64::sqrt(2.0) / 2.0,
-            object: w.objects[0].as_ref(),
+            object: w.objects[NodeId::new(0)].data.as_ref(),
         };
         let xs = Intersections(vec![i1, i2]);
         let comps = i2.prepare_computations(r, &xs);
@@ -449,7 +461,7 @@ mod tests {
     fn refracted_color_with_refracted_ray() {
         let mut w = World::default();
         {
-            let mut s1 = Arc::get_mut(&mut w.objects[0])
+            let mut s1 = Arc::get_mut(&mut w.objects[NodeId::new(0)].data)
                 .unwrap()
                 .as_any_mut()
                 .downcast_mut::<Sphere>()
@@ -459,7 +471,7 @@ mod tests {
         }
 
         {
-            let mut s2 = Arc::get_mut(&mut w.objects[1])
+            let mut s2 = Arc::get_mut(&mut w.objects[NodeId::new(1)].data)
                 .unwrap()
                 .as_any_mut()
                 .downcast_mut::<Sphere>()
@@ -471,19 +483,19 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.1), Vector3::new(0.0, 1.0, 0.0));
         let i1 = Intersection {
             time: -0.9899,
-            object: w.objects[0].as_ref(),
+            object: w.objects[NodeId::new(0)].data.as_ref(),
         };
         let i2 = Intersection {
             time: -0.4899,
-            object: w.objects[1].as_ref(),
+            object: w.objects[NodeId::new(1)].data.as_ref(),
         };
         let i3 = Intersection {
             time: 0.4899,
-            object: w.objects[1].as_ref(),
+            object: w.objects[NodeId::new(1)].data.as_ref(),
         };
         let i4 = Intersection {
             time: 0.9899,
-            object: w.objects[0].as_ref(),
+            object: w.objects[NodeId::new(0)].data.as_ref(),
         };
         let xs = Intersections(vec![i1, i2, i3, i4]);
         let comps = i3.prepare_computations(r, &xs);
@@ -519,8 +531,10 @@ mod tests {
             .build()
             .unwrap();
 
-        w.objects.push(Arc::new(floor) as Arc<Shape + Sync + Send>);
-        w.objects.push(Arc::new(ball) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(floor) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(ball) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -528,7 +542,7 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[2].as_ref(),
+            object: w.objects[NodeId::new(2)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
@@ -562,8 +576,10 @@ mod tests {
             .build()
             .unwrap();
 
-        w.objects.push(Arc::new(floor) as Arc<Shape + Sync + Send>);
-        w.objects.push(Arc::new(ball) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(floor) as Arc<Shape + Sync + Send>);
+        w.objects
+            .new_node(Arc::new(ball) as Arc<Shape + Sync + Send>);
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -571,7 +587,7 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[2].as_ref(),
+            object: w.objects[NodeId::new(2)].data.as_ref(),
         };
         let xs = Intersections(vec![i]);
         let comps = i.prepare_computations(r, &xs);
