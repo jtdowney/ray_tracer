@@ -1,4 +1,4 @@
-use ray_tracer::{Canvas, Color, Point, Ray, Shape, Sphere};
+use ray_tracer::{Canvas, Color, Point, Ray, Shape, Sphere, World};
 use std::fmt;
 
 fn main() -> Result<(), fmt::Error> {
@@ -12,6 +12,7 @@ fn main() -> Result<(), fmt::Error> {
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
     let color = Color::new(1.0, 0.0, 0.0);
     let shape = Sphere::default();
+    let world = World::default();
 
     for y in 0..canvas_pixels {
         let world_y = half - pixel_size * f64::from(y);
@@ -20,7 +21,7 @@ fn main() -> Result<(), fmt::Error> {
             let world_x = -half + pixel_size * f64::from(x);
             let position = Point::new(world_x, world_y, wall_z);
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
-            let xs = shape.intersect(ray);
+            let xs = shape.intersect(ray, &world);
             if xs.hit().is_some() {
                 canvas.write_pixel(x, y, color);
             }

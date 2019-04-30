@@ -1,5 +1,5 @@
 use ray_tracer::{
-    color, Canvas, Color, MaterialBuilder, Point, PointLight, Ray, Shape, SphereBuilder,
+    color, Canvas, Color, MaterialBuilder, Point, PointLight, Ray, Shape, SphereBuilder, World,
 };
 use std::error;
 use std::fmt::Display;
@@ -39,6 +39,7 @@ fn main() -> Result<(), Error> {
     let light_position = Point::new(-10.0, 10.0, -10.0);
     let light_color = color::WHITE;
     let light = PointLight::new(light_position, light_color);
+    let world = World::default();
 
     for y in 0..canvas_pixels {
         let world_y = half - pixel_size * f64::from(y);
@@ -47,15 +48,19 @@ fn main() -> Result<(), Error> {
             let world_x = -half + pixel_size * f64::from(x);
             let position = Point::new(world_x, world_y, wall_z);
             let ray = Ray::new(ray_origin, (position - ray_origin).normalize());
-            let xs = shape.intersect(ray);
+            let xs = shape.intersect(ray, &world);
             if let Some(hit) = xs.hit() {
                 let point = ray.position(hit.time);
-                let normal = hit.object.normal_at(point);
+                let normal = hit.object.normal_at(point, &world);
                 let eye = -ray.direction;
-                let color = hit
-                    .object
-                    .material()
-                    .lighting(hit.object, &light, point, eye, normal, false);
+                let color = hit.object.material().lighting(
+                    hit.object.as_ref() as &Shape,
+                    &light,
+                    point,
+                    eye,
+                    normal,
+                    false,
+                );
                 canvas.write_pixel(x, y, color);
             }
         }

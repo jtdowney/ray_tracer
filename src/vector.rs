@@ -2,7 +2,7 @@ use crate::EPSILON;
 use approx::relative_eq;
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
 use std::iter::FromIterator;
-use std::ops::{Add, Div, Index, Mul, Neg, Sub};
+use std::ops::{Add, Div, Index, IndexMut, Mul, Neg, Sub};
 use typenum::{U3, U4};
 
 #[derive(Copy, Clone, Debug, Default)]
@@ -116,6 +116,16 @@ where
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.values[index]
+    }
+}
+
+impl<N> IndexMut<usize> for Vector<N>
+where
+    N: ArrayLength<f64>,
+    N::ArrayType: Copy,
+{
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.values[index]
     }
 }
 

@@ -1,13 +1,14 @@
 use crate::{
-    color, intersection, transforms, Color, Intersection, Intersections, MaterialBuilder, Point,
-    PointLight, Ray, Shape, SphereBuilder,
+    color, intersection, transforms, Color, Group, Intersection, Intersections, MaterialBuilder,
+    Point, PointLight, Ray, Shape, SphereBuilder,
 };
-use indextree::Arena;
+use indextree::{Arena, NodeId};
 use std::sync::Arc;
 
 pub struct WorldBuilder {
     objects: Arena<Arc<Shape + Sync + Send>>,
     lights: Vec<PointLight>,
+    group_stack: Vec<NodeId>,
 }
 
 impl WorldBuilder {
@@ -21,7 +22,34 @@ impl WorldBuilder {
         O: Into<Arc<T>>,
         T: Shape + Sync + Send,
     {
-        self.objects.new_node(object.into());
+        let id = self.objects.new_node(object.into());
+        Arc::get_mut(&mut self.objects[id].data).unwrap().set_id(id);
+        if let Some(&group_id) = self.group_stack.last() {
+            group_id
+                .append(id, &mut self.objects)
+                .expect("error adding to group");
+        }
+
+        self
+    }
+
+    pub fn start_group(&mut self, group: Group) -> &mut Self {
+        let group = Arc::new(group) as Arc<Shape + Sync + Send>;
+        let id = self.objects.new_node(group);
+        Arc::get_mut(&mut self.objects[id].data).unwrap().set_id(id);
+
+        if let Some(&group_id) = self.group_stack.last() {
+            group_id
+                .append(id, &mut self.objects)
+                .expect("error adding to group");
+        }
+
+        self.group_stack.push(id);
+        self
+    }
+
+    pub fn end_group(&mut self) -> &mut Self {
+        self.group_stack.pop().expect("no group to end");
         self
     }
 
@@ -31,25 +59,10 @@ impl WorldBuilder {
             lights: self.lights.clone(),
         }
     }
-}
 
-impl Default for WorldBuilder {
-    fn default() -> Self {
-        WorldBuilder {
-            objects: Arena::new(),
-            lights: vec![],
-        }
-    }
-}
-
-pub struct World {
-    objects: Arena<Arc<Shape + Sync + Send>>,
-    lights: Vec<PointLight>,
-}
-
-impl Default for World {
-    fn default() -> Self {
-        WorldBuilder::default()
+    pub fn test_world() -> WorldBuilder {
+        let mut builder = WorldBuilder::default();
+        builder
             .object(
                 SphereBuilder::default()
                     .material(
@@ -72,8 +85,30 @@ impl Default for World {
             .light(PointLight::new(
                 Point::new(-10.0, 10.0, -10.0),
                 color::WHITE,
-            ))
-            .build()
+            ));
+        builder
+    }
+}
+
+impl Default for WorldBuilder {
+    fn default() -> Self {
+        WorldBuilder {
+            objects: Arena::new(),
+            lights: vec![],
+            group_stack: vec![],
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct World {
+    pub objects: Arena<Arc<Shape + Sync + Send>>,
+    pub lights: Vec<PointLight>,
+}
+
+impl Default for World {
+    fn default() -> Self {
+        WorldBuilder::test_world().build()
     }
 }
 
@@ -85,7 +120,7 @@ impl World {
 
         let intersections = self.intersect(ray);
         if let Some(hit) = intersections.hit() {
-            let comps = hit.prepare_computations(ray, &intersections);
+            let comps = hit.prepare_computations(ray, &intersections, self);
             self.shade_hit(comps, remaining)
         } else {
             color::BLACK
@@ -95,7 +130,7 @@ impl World {
     fn intersect(&self, ray: Ray) -> Intersections {
         let roots = self.objects.iter().filter(|node| node.parent().is_none());
         let mut intersections = roots
-            .flat_map(|o| o.data.intersect(ray))
+            .flat_map(|o| o.data.intersect(ray, self))
             .collect::<Vec<Intersection>>();
         intersections.sort_by(|a, b| a.time.partial_cmp(&b.time).unwrap());
         Intersections(intersections)
@@ -108,7 +143,7 @@ impl World {
             .map(|light| {
                 let shadowed = self.is_shadowed(comps.over_point, light);
                 comps.object.material().lighting(
-                    comps.object,
+                    comps.object.as_ref() as &Shape,
                     light,
                     comps.over_point,
                     comps.eye_vector,
@@ -117,8 +152,8 @@ impl World {
                 )
             })
             .sum::<Color>();
-        let reflected = self.reflected_color(comps, remaining);
-        let refracted = self.refracted_color(comps, remaining);
+        let reflected = self.reflected_color(&comps, remaining);
+        let refracted = self.refracted_color(&comps, remaining);
 
         let material = comps.object.material();
         if material.is_reflective() && material.is_transparent() {
@@ -143,7 +178,7 @@ impl World {
         }
     }
 
-    fn reflected_color(&self, comps: intersection::Computations, remaining: u8) -> Color {
+    fn reflected_color(&self, comps: &intersection::Computations, remaining: u8) -> Color {
         if remaining == 0 || !comps.object.material().is_reflective() {
             color::BLACK
         } else {
@@ -153,7 +188,7 @@ impl World {
         }
     }
 
-    fn refracted_color(&self, comps: intersection::Computations, remaining: u8) -> Color {
+    fn refracted_color(&self, comps: &intersection::Computations, remaining: u8) -> Color {
         if !comps.object.material().is_transparent() {
             return color::BLACK;
         }
@@ -179,7 +214,6 @@ mod tests {
     use super::*;
     use crate::patterns::tests::TestPattern;
     use crate::{Pattern, PlaneBuilder, Sphere, Vector3};
-    use indextree::NodeId;
 
     #[test]
     fn intersect_world_with_ray() {
@@ -200,10 +234,10 @@ mod tests {
         let shape = &w.objects[NodeId::new(0)].data;
         let i = Intersection {
             time: 4.0,
-            object: shape.as_ref(),
+            object: shape.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
         assert_eq!(Color::new(0.38066, 0.47583, 0.2855), w.shade_hit(comps, 5));
     }
 
@@ -285,10 +319,10 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 5.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {
             time: 4.0,
-            object: w.objects[NodeId::new(1)].data.as_ref(),
+            object: w.objects[NodeId::new(1)].data.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
         assert_eq!(Color::new(0.1, 0.1, 0.1), w.shade_hit(comps, 5));
     }
 
@@ -305,23 +339,25 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
         let i = Intersection {
             time: 1.0,
-            object: w.objects[NodeId::new(1)].data.as_ref(),
+            object: w.objects[NodeId::new(1)].data.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
-        assert_eq!(color::BLACK, w.reflected_color(comps, 5));
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
+        assert_eq!(color::BLACK, w.reflected_color(&comps, 5));
     }
 
     #[test]
     fn reflected_color_for_reflective_material() {
-        let mut w = World::default();
-        let shape = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, -1.0, 0.0))
-            .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
-            .build()
-            .unwrap();
-        w.objects
-            .new_node(Arc::new(shape) as Arc<Shape + Sync + Send>);
+        let w = WorldBuilder::test_world()
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, -1.0, 0.0))
+                    .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+        let shape = &w.objects[NodeId::new(2)].data;
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -329,26 +365,28 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[NodeId::new(2)].data.as_ref(),
+            object: shape.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
         assert_eq!(
             Color::new(0.19034, 0.23793, 0.14276),
-            w.reflected_color(comps, 5)
+            w.reflected_color(&comps, 5)
         );
     }
 
     #[test]
     fn shade_hit_with_reflective_material() {
-        let mut w = World::default();
-        let shape = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, -1.0, 0.0))
-            .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
-            .build()
-            .unwrap();
-        w.objects
-            .new_node(Arc::new(shape) as Arc<Shape + Sync + Send>);
+        let w = WorldBuilder::test_world()
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, -1.0, 0.0))
+                    .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+        let shape = &w.objects[NodeId::new(2)].data;
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -356,10 +394,10 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[NodeId::new(2)].data.as_ref(),
+            object: shape.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
         assert_eq!(Color::new(0.87677, 0.92436, 0.82918), w.shade_hit(comps, 5));
     }
 
@@ -389,14 +427,16 @@ mod tests {
 
     #[test]
     fn reflected_color_at_the_maximum_recurive_depth() {
-        let mut w = World::default();
-        let shape = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, -1.0, 0.0))
-            .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
-            .build()
-            .unwrap();
-        w.objects
-            .new_node(Arc::new(shape) as Arc<Shape + Sync + Send>);
+        let w = WorldBuilder::test_world()
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, -1.0, 0.0))
+                    .material(MaterialBuilder::default().reflective(0.5).build().unwrap())
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+        let shape = &w.objects[NodeId::new(2)].data;
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -404,11 +444,11 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[NodeId::new(2)].data.as_ref(),
+            object: shape.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
-        assert_eq!(color::BLACK, w.reflected_color(comps, 0));
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
+        assert_eq!(color::BLACK, w.reflected_color(&comps, 0));
     }
 
     #[test]
@@ -418,15 +458,15 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), Vector3::new(0.0, 0.0, 1.0));
         let i1 = Intersection {
             time: 4.0,
-            object: shape.as_ref(),
+            object: shape.clone(),
         };
         let i2 = Intersection {
             time: 6.0,
-            object: shape.as_ref(),
+            object: shape.clone(),
         };
-        let xs = Intersections(vec![i1, i2]);
-        let comps = i1.prepare_computations(r, &xs);
-        assert_eq!(color::BLACK, w.refracted_color(comps, 5));
+        let xs = Intersections(vec![i1.clone(), i2]);
+        let comps = i1.prepare_computations(r, &xs, &w);
+        assert_eq!(color::BLACK, w.refracted_color(&comps, 5));
     }
 
     #[test]
@@ -446,15 +486,15 @@ mod tests {
         );
         let i1 = Intersection {
             time: -f64::sqrt(2.0) / 2.0,
-            object: w.objects[NodeId::new(0)].data.as_ref(),
+            object: w.objects[NodeId::new(0)].data.clone(),
         };
         let i2 = Intersection {
             time: f64::sqrt(2.0) / 2.0,
-            object: w.objects[NodeId::new(0)].data.as_ref(),
+            object: w.objects[NodeId::new(0)].data.clone(),
         };
-        let xs = Intersections(vec![i1, i2]);
-        let comps = i2.prepare_computations(r, &xs);
-        assert_eq!(color::BLACK, w.refracted_color(comps, 5));
+        let xs = Intersections(vec![i1, i2.clone()]);
+        let comps = i2.prepare_computations(r, &xs, &w);
+        assert_eq!(color::BLACK, w.refracted_color(&comps, 5));
     }
 
     #[test]
@@ -483,58 +523,59 @@ mod tests {
         let r = Ray::new(Point::new(0.0, 0.0, 0.1), Vector3::new(0.0, 1.0, 0.0));
         let i1 = Intersection {
             time: -0.9899,
-            object: w.objects[NodeId::new(0)].data.as_ref(),
+            object: w.objects[NodeId::new(0)].data.clone(),
         };
         let i2 = Intersection {
             time: -0.4899,
-            object: w.objects[NodeId::new(1)].data.as_ref(),
+            object: w.objects[NodeId::new(1)].data.clone(),
         };
         let i3 = Intersection {
             time: 0.4899,
-            object: w.objects[NodeId::new(1)].data.as_ref(),
+            object: w.objects[NodeId::new(1)].data.clone(),
         };
         let i4 = Intersection {
             time: 0.9899,
-            object: w.objects[NodeId::new(0)].data.as_ref(),
+            object: w.objects[NodeId::new(0)].data.clone(),
         };
-        let xs = Intersections(vec![i1, i2, i3, i4]);
-        let comps = i3.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i1, i2, i3.clone(), i4]);
+        let comps = i3.prepare_computations(r, &xs, &w);
         assert_eq!(
             Color::new(0.0, 0.99878, 0.04724),
-            w.refracted_color(comps, 5)
+            w.refracted_color(&comps, 5)
         );
     }
 
     #[test]
     fn shade_hit_with_transparent_material() {
-        let mut w = World::default();
-        let floor = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, -1.0, 0.0))
-            .material(
-                MaterialBuilder::default()
-                    .transparency(0.5)
-                    .refractive_index(1.5)
+        let w = WorldBuilder::test_world()
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, -1.0, 0.0))
+                    .material(
+                        MaterialBuilder::default()
+                            .transparency(0.5)
+                            .refractive_index(1.5)
+                            .build()
+                            .unwrap(),
+                    )
                     .build()
                     .unwrap(),
             )
-            .build()
-            .unwrap();
-        let ball = SphereBuilder::default()
-            .transform(transforms::translation(0.0, -3.5, -0.5))
-            .material(
-                MaterialBuilder::default()
-                    .color(Color::new(1.0, 0.0, 0.0))
-                    .ambient(0.5)
+            .object(
+                SphereBuilder::default()
+                    .transform(transforms::translation(0.0, -3.5, -0.5))
+                    .material(
+                        MaterialBuilder::default()
+                            .color(Color::new(1.0, 0.0, 0.0))
+                            .ambient(0.5)
+                            .build()
+                            .unwrap(),
+                    )
                     .build()
                     .unwrap(),
             )
-            .build()
-            .unwrap();
-
-        w.objects
-            .new_node(Arc::new(floor) as Arc<Shape + Sync + Send>);
-        w.objects
-            .new_node(Arc::new(ball) as Arc<Shape + Sync + Send>);
+            .build();
+        let floor = &w.objects[NodeId::new(2)].data;
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -542,44 +583,45 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[NodeId::new(2)].data.as_ref(),
+            object: floor.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
         assert_eq!(Color::new(0.93642, 0.68642, 0.68642), w.shade_hit(comps, 5));
     }
 
     #[test]
     fn shade_hit_with_reflective_transparent_material() {
-        let mut w = World::default();
-        let floor = PlaneBuilder::default()
-            .transform(transforms::translation(0.0, -1.0, 0.0))
-            .material(
-                MaterialBuilder::default()
-                    .reflective(0.5)
-                    .transparency(0.5)
-                    .refractive_index(1.5)
+        let w = WorldBuilder::test_world()
+            .object(
+                PlaneBuilder::default()
+                    .transform(transforms::translation(0.0, -1.0, 0.0))
+                    .material(
+                        MaterialBuilder::default()
+                            .reflective(0.5)
+                            .transparency(0.5)
+                            .refractive_index(1.5)
+                            .build()
+                            .unwrap(),
+                    )
                     .build()
                     .unwrap(),
             )
-            .build()
-            .unwrap();
-        let ball = SphereBuilder::default()
-            .transform(transforms::translation(0.0, -3.5, -0.5))
-            .material(
-                MaterialBuilder::default()
-                    .color(Color::new(1.0, 0.0, 0.0))
-                    .ambient(0.5)
+            .object(
+                SphereBuilder::default()
+                    .transform(transforms::translation(0.0, -3.5, -0.5))
+                    .material(
+                        MaterialBuilder::default()
+                            .color(Color::new(1.0, 0.0, 0.0))
+                            .ambient(0.5)
+                            .build()
+                            .unwrap(),
+                    )
                     .build()
                     .unwrap(),
             )
-            .build()
-            .unwrap();
-
-        w.objects
-            .new_node(Arc::new(floor) as Arc<Shape + Sync + Send>);
-        w.objects
-            .new_node(Arc::new(ball) as Arc<Shape + Sync + Send>);
+            .build();
+        let floor = &w.objects[NodeId::new(2)].data;
 
         let r = Ray::new(
             Point::new(0.0, 0.0, -3.0),
@@ -587,10 +629,10 @@ mod tests {
         );
         let i = Intersection {
             time: f64::sqrt(2.0),
-            object: w.objects[NodeId::new(2)].data.as_ref(),
+            object: floor.clone(),
         };
-        let xs = Intersections(vec![i]);
-        let comps = i.prepare_computations(r, &xs);
+        let xs = Intersections(vec![i.clone()]);
+        let comps = i.prepare_computations(r, &xs, &w);
         assert_eq!(Color::new(0.93391, 0.69643, 0.69243), w.shade_hit(comps, 5));
     }
 }

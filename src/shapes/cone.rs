@@ -1,8 +1,12 @@
-use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, EPSILON};
+use crate::{
+    Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World, EPSILON,
+};
 use approx::relative_eq;
 use derive_builder::Builder;
+use indextree::NodeId;
 use std::any::Any;
 use std::f64::INFINITY;
+use std::sync::Arc;
 use std::vec;
 
 #[derive(Builder, Clone, Debug)]
@@ -17,6 +21,8 @@ pub struct Cone {
     maximum: f64,
     #[builder(default = "false")]
     closed: bool,
+    #[builder(setter(skip))]
+    id: Option<NodeId>,
 }
 
 impl Default for Cone {
@@ -34,7 +40,7 @@ impl Shape for Cone {
         self
     }
 
-    fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {
+    fn local_normal_at(&self, Point { x, y, z }: Point, _: &World) -> Vector3 {
         let dist = x.powi(2) + z.powi(2);
         if dist < 1.0 && y >= self.maximum - EPSILON {
             Vector3::new(0.0, 1.0, 0.0)
@@ -47,7 +53,7 @@ impl Shape for Cone {
         }
     }
 
-    fn local_intersect(&self, ray: Ray) -> Intersections {
+    fn local_intersect(&self, ray: Ray, world: &World) -> Intersections {
         let a = ray.direction[0].powi(2) - ray.direction[1].powi(2) + ray.direction[2].powi(2);
         let b = 2.0 * ray.origin.x * ray.direction[0] - 2.0 * ray.origin.y * ray.direction[1]
             + 2.0 * ray.origin.z * ray.direction[2];
@@ -60,9 +66,15 @@ impl Shape for Cone {
             return Intersections(intersections);
         }
 
+        let id = self.id.unwrap();
+        let object = &world.objects[id].data;
+
         if a_zero {
             let time = -c / (2.0 * b);
-            intersections.push(Intersection { time, object: self });
+            intersections.push(Intersection {
+                time,
+                object: object.clone(),
+            });
         } else {
             let disc = b.powi(2) - 4.0 * a * c;
             if disc < 0.0 {
@@ -77,7 +89,7 @@ impl Shape for Cone {
             if self.minimum < y0 && y0 < self.maximum {
                 intersections.push(Intersection {
                     time: t0,
-                    object: self,
+                    object: object.clone(),
                 });
             }
 
@@ -85,13 +97,13 @@ impl Shape for Cone {
             if self.minimum < y1 && y1 < self.maximum {
                 intersections.push(Intersection {
                     time: t1,
-                    object: self,
+                    object: object.clone(),
                 });
             }
         }
 
         if self.closed {
-            let cap_intersections = self.intersect_caps(ray);
+            let cap_intersections = self.intersect_caps(ray, object.clone());
             intersections.extend_from_slice(&cap_intersections);
         }
 
@@ -105,6 +117,14 @@ impl Shape for Cone {
     fn transform(&self) -> &Matrix4 {
         &self.transform
     }
+
+    fn set_id(&mut self, id: NodeId) {
+        self.id = Some(id)
+    }
+
+    fn id(&self) -> Option<NodeId> {
+        self.id
+    }
 }
 
 impl Cone {
@@ -115,7 +135,7 @@ impl Cone {
         (x.powi(2) + z.powi(2)) <= radius
     }
 
-    fn intersect_caps(&self, ray: Ray) -> Vec<Intersection> {
+    fn intersect_caps(&self, ray: Ray, object: Arc<Shape + Sync + Send>) -> Vec<Intersection> {
         let mut intersections = vec![];
 
         if !self.closed || relative_eq!(ray.direction[1], 0.0, epsilon = EPSILON) {
@@ -124,12 +144,18 @@ impl Cone {
 
         let time = (self.minimum - ray.origin.y) / ray.direction[1];
         if self.check_cap(ray, time, self.minimum.abs()) {
-            intersections.push(Intersection { time, object: self })
+            intersections.push(Intersection {
+                time,
+                object: object.clone(),
+            })
         }
 
         let time = (self.maximum - ray.origin.y) / ray.direction[1];
         if self.check_cap(ray, time, self.maximum.abs()) {
-            intersections.push(Intersection { time, object: self })
+            intersections.push(Intersection {
+                time,
+                object: object.clone(),
+            })
         }
 
         intersections
@@ -139,29 +165,31 @@ impl Cone {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::WorldBuilder;
     use approx::assert_relative_eq;
 
     #[test]
     fn ray_strikes_cone() {
-        let cone = Cone::default();
+        let w = WorldBuilder::default().object(Cone::default()).build();
+        let cone = &w.objects[NodeId::new(0)].data;
 
         let direction = Vector3::new(0.0, 0.0, 1.0).normalize();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), direction);
-        let mut xs = cone.local_intersect(r).into_iter();
+        let mut xs = cone.local_intersect(r, &w).into_iter();
         assert_eq!(5.0, xs.next().unwrap().time);
         assert_eq!(5.0, xs.next().unwrap().time);
         assert_eq!(None, xs.next());
 
         let direction = Vector3::new(1.0, 1.0, 1.0).normalize();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), direction);
-        let mut xs = cone.local_intersect(r).into_iter();
+        let mut xs = cone.local_intersect(r, &w).into_iter();
         assert_relative_eq!(8.66025, xs.next().unwrap().time, epsilon = EPSILON);
         assert_relative_eq!(8.66025, xs.next().unwrap().time, epsilon = EPSILON);
         assert_eq!(None, xs.next());
 
         let direction = Vector3::new(-0.5, -1.0, 1.0).normalize();
         let r = Ray::new(Point::new(1.0, 1.0, -5.0), direction);
-        let mut xs = cone.local_intersect(r).into_iter();
+        let mut xs = cone.local_intersect(r, &w).into_iter();
         assert_relative_eq!(4.55006, xs.next().unwrap().time, epsilon = EPSILON);
         assert_relative_eq!(49.44994, xs.next().unwrap().time, epsilon = EPSILON);
         assert_eq!(None, xs.next());
@@ -169,55 +197,62 @@ mod tests {
 
     #[test]
     fn intersecting_a_cone_parallel_to_one_of_its_halves() {
-        let cone = Cone::default();
+        let w = WorldBuilder::default().object(Cone::default()).build();
+        let cone = &w.objects[NodeId::new(0)].data;
 
         let direction = Vector3::new(0.0, 1.0, 1.0).normalize();
         let r = Ray::new(Point::new(0.0, 0.0, -1.0), direction);
-        let mut xs = cone.local_intersect(r).into_iter();
+        let mut xs = cone.local_intersect(r, &w).into_iter();
         assert_relative_eq!(0.35355, xs.next().unwrap().time, epsilon = EPSILON);
         assert_eq!(None, xs.next());
     }
 
     #[test]
     fn intersecting_codes_end_caps() {
-        let cone = ConeBuilder::default()
-            .minimum(-0.5)
-            .maximum(0.5)
-            .closed(true)
-            .build()
-            .unwrap();
+        let w = WorldBuilder::default()
+            .object(
+                ConeBuilder::default()
+                    .minimum(-0.5)
+                    .maximum(0.5)
+                    .closed(true)
+                    .build()
+                    .unwrap(),
+            )
+            .build();
+        let cone = &w.objects[NodeId::new(0)].data;
 
         let direction = Vector3::new(0.0, 1.0, 0.0).normalize();
         let r = Ray::new(Point::new(0.0, 0.0, -5.0), direction);
-        let xs = cone.local_intersect(r).into_iter();
+        let xs = cone.local_intersect(r, &w).into_iter();
         assert_eq!(0, xs.count());
 
         let direction = Vector3::new(0.0, 1.0, 1.0).normalize();
         let r = Ray::new(Point::new(0.0, 0.0, -0.25), direction);
-        let xs = cone.local_intersect(r).into_iter();
+        let xs = cone.local_intersect(r, &w).into_iter();
         assert_eq!(2, xs.count());
 
         let direction = Vector3::new(0.0, 1.0, 0.0).normalize();
         let r = Ray::new(Point::new(0.0, 0.0, -0.25), direction);
-        let xs = cone.local_intersect(r).into_iter();
+        let xs = cone.local_intersect(r, &w).into_iter();
         assert_eq!(4, xs.count());
     }
 
     #[test]
     fn computing_normal_vector_on_cone() {
-        let cone = Cone::default();
+        let w = WorldBuilder::default().object(Cone::default()).build();
+        let cone = &w.objects[NodeId::new(0)].data;
 
         assert_eq!(
             Vector3::new(0.0, 0.0, 0.0),
-            cone.local_normal_at(Point::new(0.0, 0.0, 0.0))
+            cone.local_normal_at(Point::new(0.0, 0.0, 0.0), &w)
         );
         assert_eq!(
             Vector3::new(1.0, -f64::sqrt(2.0), 1.0),
-            cone.local_normal_at(Point::new(1.0, 1.0, 1.0))
+            cone.local_normal_at(Point::new(1.0, 1.0, 1.0), &w)
         );
         assert_eq!(
             Vector3::new(-1.0, 1.0, 0.0),
-            cone.local_normal_at(Point::new(-1.0, -1.0, 0.0))
+            cone.local_normal_at(Point::new(-1.0, -1.0, 0.0), &w)
         );
     }
 }
