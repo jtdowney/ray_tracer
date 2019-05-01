@@ -1,5 +1,6 @@
 use crate::{
-    Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World, EPSILON,
+    Bounds, Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World,
+    EPSILON,
 };
 use approx::relative_eq;
 use derive_builder::Builder;
@@ -40,7 +41,15 @@ impl Shape for Cone {
         self
     }
 
-    fn local_normal_at(&self, Point { x, y, z }: Point, _: &World) -> Vector3 {
+    fn bounds(&self, _: &World) -> Bounds {
+        let radius = self.maximum.abs().max(self.minimum.abs());
+
+        Bounds::default()
+            + Point::new(-radius, self.minimum, -radius)
+            + Point::new(radius, self.maximum, radius)
+    }
+
+    fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {
         let dist = x.powi(2) + z.powi(2);
         if dist < 1.0 && y >= self.maximum - EPSILON {
             Vector3::new(0.0, 1.0, 0.0)
@@ -244,15 +253,15 @@ mod tests {
 
         assert_eq!(
             Vector3::new(0.0, 0.0, 0.0),
-            cone.local_normal_at(Point::new(0.0, 0.0, 0.0), &w)
+            cone.local_normal_at(Point::new(0.0, 0.0, 0.0))
         );
         assert_eq!(
             Vector3::new(1.0, -f64::sqrt(2.0), 1.0),
-            cone.local_normal_at(Point::new(1.0, 1.0, 1.0), &w)
+            cone.local_normal_at(Point::new(1.0, 1.0, 1.0))
         );
         assert_eq!(
             Vector3::new(-1.0, 1.0, 0.0),
-            cone.local_normal_at(Point::new(-1.0, -1.0, 0.0), &w)
+            cone.local_normal_at(Point::new(-1.0, -1.0, 0.0))
         );
     }
 }

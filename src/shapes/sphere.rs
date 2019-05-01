@@ -1,6 +1,6 @@
 use crate::{
-    Intersection, Intersections, Material, MaterialBuilder, Matrix4, Point, Ray, Shape, Vector3,
-    World,
+    Bounds, Intersection, Intersections, Material, MaterialBuilder, Matrix4, Point, Ray, Shape,
+    Vector3, World,
 };
 use derive_builder::Builder;
 use indextree::NodeId;
@@ -46,7 +46,11 @@ impl Shape for Sphere {
         self
     }
 
-    fn local_normal_at(&self, point: Point, _: &World) -> Vector3 {
+    fn bounds(&self, _: &World) -> Bounds {
+        Bounds::default() + Point::new(-1.0, -1.0, -1.0) + Point::new(1.0, 1.0, 1.0)
+    }
+
+    fn local_normal_at(&self, point: Point) -> Vector3 {
         point - Point::default()
     }
 

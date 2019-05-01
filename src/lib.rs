@@ -1,3 +1,4 @@
+mod bounds;
 mod camera;
 mod canvas;
 pub mod color;
@@ -14,6 +15,7 @@ pub mod transforms;
 mod vector;
 mod world;
 
+pub use crate::bounds::Bounds;
 pub use crate::camera::Camera;
 pub use crate::canvas::Canvas;
 pub use crate::color::Color;

@@ -1,5 +1,6 @@
 use crate::{
-    Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World, EPSILON,
+    Bounds, Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World,
+    EPSILON,
 };
 use approx::relative_eq;
 use derive_builder::Builder;
@@ -40,7 +41,13 @@ impl Shape for Cylinder {
         self
     }
 
-    fn local_normal_at(&self, Point { x, y, z }: Point, _: &World) -> Vector3 {
+    fn bounds(&self, _: &World) -> Bounds {
+        Bounds::default()
+            + Point::new(-1.0, self.minimum, -1.0)
+            + Point::new(1.0, self.maximum, 1.0)
+    }
+
+    fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {
         let dist = x.powi(2) + z.powi(2);
         if dist < 1.0 && y >= self.maximum - EPSILON {
             Vector3::new(0.0, 1.0, 0.0)
@@ -204,19 +211,19 @@ mod tests {
 
         assert_eq!(
             Vector3::new(1.0, 0.0, 0.0),
-            cyl.local_normal_at(Point::new(1.0, 0.0, 0.0), &w)
+            cyl.local_normal_at(Point::new(1.0, 0.0, 0.0))
         );
         assert_eq!(
             Vector3::new(0.0, 0.0, -1.0),
-            cyl.local_normal_at(Point::new(0.0, 5.0, -1.0), &w)
+            cyl.local_normal_at(Point::new(0.0, 5.0, -1.0))
         );
         assert_eq!(
             Vector3::new(0.0, 0.0, 1.0),
-            cyl.local_normal_at(Point::new(0.0, -2.0, 1.0), &w)
+            cyl.local_normal_at(Point::new(0.0, -2.0, 1.0))
         );
         assert_eq!(
             Vector3::new(-1.0, 0.0, 0.0),
-            cyl.local_normal_at(Point::new(-1.0, 1.0, 0.0), &w)
+            cyl.local_normal_at(Point::new(-1.0, 1.0, 0.0))
         );
     }
 
@@ -333,27 +340,27 @@ mod tests {
 
         assert_eq!(
             Vector3::new(0.0, -1.0, 0.0),
-            cyl.local_normal_at(Point::new(0.0, 1.0, 0.0), &w)
+            cyl.local_normal_at(Point::new(0.0, 1.0, 0.0))
         );
         assert_eq!(
             Vector3::new(0.0, -1.0, 0.0),
-            cyl.local_normal_at(Point::new(0.5, 1.0, 0.0), &w)
+            cyl.local_normal_at(Point::new(0.5, 1.0, 0.0))
         );
         assert_eq!(
             Vector3::new(0.0, -1.0, 0.0),
-            cyl.local_normal_at(Point::new(0.0, 1.0, 0.5), &w)
+            cyl.local_normal_at(Point::new(0.0, 1.0, 0.5))
         );
         assert_eq!(
             Vector3::new(0.0, 1.0, 0.0),
-            cyl.local_normal_at(Point::new(0.0, 2.0, 0.0), &w)
+            cyl.local_normal_at(Point::new(0.0, 2.0, 0.0))
         );
         assert_eq!(
             Vector3::new(0.0, 1.0, 0.0),
-            cyl.local_normal_at(Point::new(0.5, 2.0, 0.0), &w)
+            cyl.local_normal_at(Point::new(0.5, 2.0, 0.0))
         );
         assert_eq!(
             Vector3::new(0.0, 1.0, 0.0),
-            cyl.local_normal_at(Point::new(0.0, 2.0, 0.5), &w)
+            cyl.local_normal_at(Point::new(0.0, 2.0, 0.5))
         );
     }
 }

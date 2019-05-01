@@ -1,4 +1,4 @@
-use crate::{Intersections, Material, Matrix4, Point, Ray, Vector3, World};
+use crate::{Bounds, Intersections, Material, Matrix4, Point, Ray, Vector3, World};
 use indextree::NodeId;
 use std::any::Any;
 use std::fmt::Debug;
@@ -20,7 +20,8 @@ pub use self::sphere::{Sphere, SphereBuilder};
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &Any;
     fn as_any_mut(&mut self) -> &mut Any;
-    fn local_normal_at(&self, point: Point, world: &World) -> Vector3;
+    fn bounds(&self, world: &World) -> Bounds;
+    fn local_normal_at(&self, point: Point) -> Vector3;
     fn local_intersect(&self, ray: Ray, world: &World) -> Intersections;
     fn material(&self) -> &Material;
     fn transform(&self) -> &Matrix4;
@@ -29,7 +30,7 @@ pub trait Shape: Any + Debug {
 
     fn normal_at(&self, world_point: Point, world: &World) -> Vector3 {
         let local_point = self.world_to_object(world_point, world);
-        let local_normal = self.local_normal_at(local_point, world);
+        let local_normal = self.local_normal_at(local_point);
         self.normal_to_world(local_normal, world)
     }
 
@@ -106,7 +107,11 @@ mod tests {
             self
         }
 
-        fn local_normal_at(&self, Point { x, y, z }: Point, _: &World) -> Vector3 {
+        fn bounds(&self, _: &World) -> Bounds {
+            Bounds::default() + Point::new(0.0, 0.0, 0.0) + Point::new(1.0, 1.0, 1.0)
+        }
+
+        fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector3 {
             Vector3::new(x, y, z)
         }
 

@@ -1,4 +1,6 @@
-use crate::{Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World};
+use crate::{
+    Bounds, Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World,
+};
 use derive_builder::Builder;
 use indextree::NodeId;
 use std::any::Any;
@@ -26,11 +28,28 @@ impl Shape for Group {
         self
     }
 
-    fn local_normal_at(&self, _: Point, _: &World) -> Vector3 {
+    fn bounds(&self, world: &World) -> Bounds {
+        let id = self.id.unwrap();
+        id.children(&world.objects)
+            .map(|i| {
+                let object = &world.objects[i].data;
+                let object_bounds = object.bounds(&world);
+                let object_transform = *object.transform();
+
+                object_bounds * object_transform
+            })
+            .sum()
+    }
+
+    fn local_normal_at(&self, _: Point) -> Vector3 {
         unimplemented!()
     }
 
     fn local_intersect(&self, ray: Ray, world: &World) -> Intersections {
+        if !self.bounds(world).intersect(ray) {
+            return Intersections(vec![]);
+        }
+
         let id = self.id.unwrap();
         let mut intersections = id
             .children(&world.objects)

@@ -1,10 +1,12 @@
 use crate::{
-    Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World, EPSILON,
+    Bounds, Intersection, Intersections, Material, Matrix4, Point, Ray, Shape, Vector3, World,
+    EPSILON,
 };
 use approx::relative_eq;
 use derive_builder::Builder;
 use indextree::NodeId;
 use std::any::Any;
+use std::f64::{INFINITY, NEG_INFINITY};
 use std::vec;
 
 #[derive(Builder, Clone, Debug)]
@@ -32,7 +34,13 @@ impl Shape for Plane {
         self
     }
 
-    fn local_normal_at(&self, _: Point, _: &World) -> Vector3 {
+    fn bounds(&self, _: &World) -> Bounds {
+        Bounds::default()
+            + Point::new(NEG_INFINITY, 0.0, NEG_INFINITY)
+            + Point::new(INFINITY, 0.0, INFINITY)
+    }
+
+    fn local_normal_at(&self, _: Point) -> Vector3 {
         Vector3::new(0.0, 1.0, 0.0)
     }
 
@@ -83,9 +91,9 @@ mod tests {
     fn normal_of_plane_is_constant() {
         let w = WorldBuilder::default().object(Plane::default()).build();
         let p = &w.objects[NodeId::new(0)].data;
-        let n1 = p.local_normal_at(Point::new(0.0, 0.0, 0.0), &w);
-        let n2 = p.local_normal_at(Point::new(10.0, 0.0, -10.0), &w);
-        let n3 = p.local_normal_at(Point::new(-5.0, 0.0, 150.0), &w);
+        let n1 = p.local_normal_at(Point::new(0.0, 0.0, 0.0));
+        let n2 = p.local_normal_at(Point::new(10.0, 0.0, -10.0));
+        let n3 = p.local_normal_at(Point::new(-5.0, 0.0, 150.0));
         assert_eq!(Vector3::new(0.0, 1.0, 0.0), n1);
         assert_eq!(Vector3::new(0.0, 1.0, 0.0), n2);
         assert_eq!(Vector3::new(0.0, 1.0, 0.0), n3);
