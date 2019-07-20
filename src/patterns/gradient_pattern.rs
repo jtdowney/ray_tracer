@@ -10,7 +10,7 @@ pub struct GradientPattern {
 }
 
 impl Pattern for GradientPattern {
-    fn box_clone(&self) -> Box<Pattern + Sync + Send> {
+    fn box_clone(&self) -> Box<dyn Pattern + Sync + Send> {
         Box::new(*self)
     }
 

@@ -14,18 +14,18 @@ pub use self::solid_pattern::{SolidPattern, SolidPatternBuilder};
 pub use self::stripe_pattern::{StripePattern, StripePatternBuilder};
 
 pub trait Pattern: Debug {
-    fn box_clone(&self) -> Box<Pattern + Sync + Send>;
+    fn box_clone(&self) -> Box<dyn Pattern + Sync + Send>;
     fn pattern_at(&self, point: Point) -> Color;
     fn transform(&self) -> Matrix4;
 
-    fn pattern_at_object(&self, object: &Shape, world_point: Point) -> Color {
+    fn pattern_at_object(&self, object: &dyn Shape, world_point: Point) -> Color {
         let object_point = object.transform().inverse() * world_point;
         let pattern_point = self.transform().inverse() * object_point;
         self.pattern_at(pattern_point)
     }
 }
 
-impl Clone for Box<Pattern + Sync + Send> {
+impl Clone for Box<dyn Pattern + Sync + Send> {
     fn clone(&self) -> Self {
         self.box_clone()
     }
@@ -50,7 +50,7 @@ pub mod tests {
     }
 
     impl Pattern for TestPattern {
-        fn box_clone(&self) -> Box<Pattern + Sync + Send> {
+        fn box_clone(&self) -> Box<dyn Pattern + Sync + Send> {
             Box::new(*self)
         }
 

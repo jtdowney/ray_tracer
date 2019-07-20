@@ -38,11 +38,11 @@ impl Default for Sphere {
 }
 
 impl Shape for Sphere {
-    fn as_any(&self) -> &Any {
+    fn as_any(&self) -> &dyn Any {
         self
     }
 
-    fn as_any_mut(&mut self) -> &mut Any {
+    fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
 
@@ -232,7 +232,7 @@ mod tests {
     #[test]
     fn intersection_has_time_and_object() {
         let s = Sphere::default();
-        let object = Arc::new(s) as Arc<Shape + Sync + Send>;
+        let object = Arc::new(s) as Arc<dyn Shape + Sync + Send>;
         let i = Intersection {
             time: 3.5,
             object: object.clone(),

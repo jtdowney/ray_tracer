@@ -54,7 +54,7 @@ fn main() -> Result<(), Error> {
                 let normal = hit.object.normal_at(point, &world);
                 let eye = -ray.direction;
                 let color = hit.object.material().lighting(
-                    hit.object.as_ref() as &Shape,
+                    hit.object.as_ref() as &dyn Shape,
                     &light,
                     point,
                     eye,
