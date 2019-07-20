@@ -20,7 +20,7 @@ pub struct Material {
     pub refractive_index: f32,
     #[builder(setter(prefix = "boxed"))]
     #[builder(default = "Self::default_pattern()")]
-    pub pattern: Box<Pattern + Sync + Send>,
+    pub pattern: Box<dyn Pattern + Sync + Send>,
 }
 
 impl MaterialBuilder {
@@ -32,13 +32,13 @@ impl MaterialBuilder {
         self.boxed_pattern(Box::new(value))
     }
 
-    fn default_pattern() -> Box<Pattern + Sync + Send> {
+    fn default_pattern() -> Box<dyn Pattern + Sync + Send> {
         Box::new(
             SolidPatternBuilder::default()
                 .color(color::WHITE)
                 .build()
                 .unwrap(),
-        ) as Box<Pattern + Sync + Send>
+        ) as Box<dyn Pattern + Sync + Send>
     }
 }
 
@@ -64,7 +64,7 @@ impl PartialEq for Material {
 impl Material {
     pub fn lighting(
         &self,
-        object: &Shape,
+        object: &dyn Shape,
         light: &PointLight,
         position: Point,
         eye_vector: Vector3,

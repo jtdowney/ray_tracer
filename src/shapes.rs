@@ -18,8 +18,8 @@ pub use self::plane::{Plane, PlaneBuilder};
 pub use self::sphere::{Sphere, SphereBuilder};
 
 pub trait Shape: Any + Debug {
-    fn as_any(&self) -> &Any;
-    fn as_any_mut(&mut self) -> &mut Any;
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
     fn bounds(&self, world: &World) -> Bounds;
     fn local_normal_at(&self, point: Point) -> Vector3;
     fn local_intersect(&self, ray: Ray, world: &World) -> Intersections;
@@ -65,8 +65,8 @@ pub trait Shape: Any + Debug {
     }
 }
 
-impl PartialEq for &Shape {
-    fn eq(&self, other: &&Shape) -> bool {
+impl PartialEq for &dyn Shape {
+    fn eq(&self, other: &&dyn Shape) -> bool {
         std::ptr::eq(*self, *other)
     }
 }
@@ -99,11 +99,11 @@ mod tests {
     }
 
     impl Shape for TestShape {
-        fn as_any(&self) -> &Any {
+        fn as_any(&self) -> &dyn Any {
             self
         }
 
-        fn as_any_mut(&mut self) -> &mut Any {
+        fn as_any_mut(&mut self) -> &mut dyn Any {
             self
         }
 

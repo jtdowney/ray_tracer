@@ -6,7 +6,7 @@ use indextree::{Arena, NodeId};
 use std::sync::Arc;
 
 pub struct WorldBuilder {
-    objects: Arena<Arc<Shape + Sync + Send>>,
+    objects: Arena<Arc<dyn Shape + Sync + Send>>,
     lights: Vec<PointLight>,
     group_stack: Vec<NodeId>,
 }
@@ -34,7 +34,7 @@ impl WorldBuilder {
     }
 
     pub fn start_group(&mut self, group: Group) -> &mut Self {
-        let group = Arc::new(group) as Arc<Shape + Sync + Send>;
+        let group = Arc::new(group) as Arc<dyn Shape + Sync + Send>;
         let id = self.objects.new_node(group);
         Arc::get_mut(&mut self.objects[id].data).unwrap().set_id(id);
 
@@ -102,7 +102,7 @@ impl Default for WorldBuilder {
 
 #[derive(Debug)]
 pub struct World {
-    pub objects: Arena<Arc<Shape + Sync + Send>>,
+    pub objects: Arena<Arc<dyn Shape + Sync + Send>>,
     pub lights: Vec<PointLight>,
 }
 
@@ -143,7 +143,7 @@ impl World {
             .map(|light| {
                 let shadowed = self.is_shadowed(comps.over_point, light);
                 comps.object.material().lighting(
-                    comps.object.as_ref() as &Shape,
+                    comps.object.as_ref() as &dyn Shape,
                     light,
                     comps.over_point,
                     comps.eye_vector,
@@ -507,7 +507,7 @@ mod tests {
                 .downcast_mut::<Sphere>()
                 .unwrap();
             s1.material.ambient = 1.0;
-            s1.material.pattern = Box::new(TestPattern::default()) as Box<Pattern + Sync + Send>;
+            s1.material.pattern = Box::new(TestPattern::default()) as Box<dyn Pattern + Sync + Send>;
         }
 
         {

@@ -5,7 +5,7 @@ use std::vec;
 #[derive(Debug)]
 pub struct Computations {
     pub time: f64,
-    pub object: Arc<Shape + Sync + Send>,
+    pub object: Arc<dyn Shape + Sync + Send>,
     pub point: Point,
     pub over_point: Point,
     pub under_point: Point,
@@ -38,7 +38,7 @@ impl Computations {
 #[derive(Clone, Debug)]
 pub struct Intersection {
     pub time: f64,
-    pub object: Arc<Shape + Sync + Send>,
+    pub object: Arc<dyn Shape + Sync + Send>,
 }
 
 impl Intersection {
@@ -64,7 +64,7 @@ impl Intersection {
         let over_point = point + normal_vector * EPSILON;
         let under_point = point - normal_vector * EPSILON;
 
-        let mut containers: Vec<Arc<Shape + Sync + Send>> = vec![];
+        let mut containers: Vec<Arc<dyn Shape + Sync + Send>> = vec![];
         let mut n1 = 1.0;
         let mut n2 = 1.0;
         for i in intersections.0.iter() {
