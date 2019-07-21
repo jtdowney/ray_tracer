@@ -1,9 +1,10 @@
 use crate::EPSILON;
 use approx::relative_eq;
 use generic_array::{ArrayLength, GenericArray, GenericArrayIter};
+use packed_simd::f64x4;
 use std::iter::FromIterator;
 use std::ops::{Add, Div, Index, IndexMut, Mul, Neg, Sub};
-use typenum::{U3, U4};
+use typenum::U4;
 
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Vector<N>
@@ -14,7 +15,6 @@ where
     values: GenericArray<f64, N>,
 }
 
-pub type Vector3 = Vector<U3>;
 pub type Vector4 = Vector<U4>;
 
 impl<N> Vector<N>
@@ -212,6 +212,140 @@ where
             .map(|(a, b)| a - b)
             .collect();
         Vector { values }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default)]
+pub struct Vector3 {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
+impl Vector3 {
+    pub fn dot(self, other: Vector3) -> f64 {
+        let a: f64x4 = self.into();
+        let b: f64x4 = other.into();
+        (a * b).sum()
+    }
+
+    pub fn reflect(self, other: Vector3) -> Self {
+        self - other * 2.0 * self.dot(other)
+    }
+
+    pub fn magnitude(self) -> f64 {
+        let values: f64x4 = self.into();
+        values.powf(f64x4::splat(2.0)).sum().sqrt()
+    }
+
+    pub fn normalize(self) -> Vector3 {
+        let magnitude = self.magnitude();
+        let values: f64x4 = self.into();
+        (values / f64x4::splat(magnitude)).into()
+    }
+}
+
+impl PartialEq for Vector3 {
+    fn eq(&self, other: &Vector3) -> bool {
+        relative_eq!(self.x, other.x, epsilon = EPSILON)
+            && relative_eq!(self.y, other.y, epsilon = EPSILON)
+            && relative_eq!(self.z, other.z, epsilon = EPSILON)
+    }
+}
+
+impl From<f64x4> for Vector3 {
+    fn from(packed: f64x4) -> Self {
+        Vector3::new(packed.extract(0), packed.extract(1), packed.extract(2))
+    }
+}
+
+impl Into<f64x4> for Vector3 {
+    fn into(self) -> f64x4 {
+        f64x4::new(self.x, self.y, self.z, 0.0)
+    }
+}
+
+impl FromIterator<f64> for Vector3 {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = f64>,
+    {
+        let mut i = iter.into_iter();
+        let x = i.next().unwrap();
+        let y = i.next().unwrap();
+        let z = i.next().unwrap();
+        Vector3 { x, y, z }
+    }
+}
+
+impl Index<usize> for Vector3 {
+    type Output = f64;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl Add<Vector3> for Vector3 {
+    type Output = Vector3;
+
+    fn add(self, other: Vector3) -> Self::Output {
+        let a: f64x4 = self.into();
+        let b: f64x4 = other.into();
+        (a + b).into()
+    }
+}
+
+impl Div<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn div(self, other: f64) -> Self::Output {
+        let a: f64x4 = self.into();
+        let b: f64x4 = f64x4::splat(other);
+        (a / b).into()
+    }
+}
+
+impl Mul<Vector3> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, other: Vector3) -> Self::Output {
+        let a: f64x4 = self.into();
+        let b: f64x4 = other.into();
+        (a * b).into()
+    }
+}
+
+impl Mul<f64> for Vector3 {
+    type Output = Vector3;
+
+    fn mul(self, other: f64) -> Self::Output {
+        let values: f64x4 = self.into();
+        (values * f64x4::splat(other)).into()
+    }
+}
+
+impl Neg for Vector3 {
+    type Output = Vector3;
+
+    fn neg(self) -> Self::Output {
+        let values: f64x4 = self.into();
+        (-values).into()
+    }
+}
+
+impl Sub<Vector3> for Vector3 {
+    type Output = Vector3;
+
+    fn sub(self, other: Vector3) -> Self::Output {
+        let a: f64x4 = self.into();
+        let b: f64x4 = other.into();
+        (a - b).into()
     }
 }
 
