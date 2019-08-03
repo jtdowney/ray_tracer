@@ -507,7 +507,8 @@ mod tests {
                 .downcast_mut::<Sphere>()
                 .unwrap();
             s1.material.ambient = 1.0;
-            s1.material.pattern = Box::new(TestPattern::default()) as Box<dyn Pattern + Sync + Send>;
+            s1.material.pattern =
+                Box::new(TestPattern::default()) as Box<dyn Pattern + Sync + Send>;
         }
 
         {
