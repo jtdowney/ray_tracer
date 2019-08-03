@@ -9,6 +9,7 @@ mod cylinder;
 mod group;
 mod plane;
 mod sphere;
+mod triangle;
 
 pub use self::cone::{Cone, ConeBuilder};
 pub use self::cube::{Cube, CubeBuilder};
@@ -16,6 +17,7 @@ pub use self::cylinder::{Cylinder, CylinderBuilder};
 pub use self::group::{Group, GroupBuilder};
 pub use self::plane::{Plane, PlaneBuilder};
 pub use self::sphere::{Sphere, SphereBuilder};
+pub use self::triangle::{Triangle, TriangleBuilder};
 
 pub trait Shape: Any + Debug {
     fn as_any(&self) -> &dyn Any;

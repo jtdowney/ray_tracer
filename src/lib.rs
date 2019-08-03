@@ -33,7 +33,7 @@ pub use crate::ray::Ray;
 pub use crate::render::{render, render_parallel};
 pub use crate::shapes::{
     Cone, ConeBuilder, Cube, CubeBuilder, Cylinder, CylinderBuilder, Group, GroupBuilder, Plane,
-    PlaneBuilder, Shape, Sphere, SphereBuilder,
+    PlaneBuilder, Shape, Sphere, SphereBuilder, Triangle, TriangleBuilder,
 };
 pub use crate::vector::{Vector, Vector3, Vector4};
 pub use crate::world::{World, WorldBuilder};
