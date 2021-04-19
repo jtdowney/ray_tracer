@@ -1,5 +1,5 @@
 use approx::AbsDiffEq;
-use num_traits::Float;
+use num::Float;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 pub fn vector<N>(x: N, y: N, z: N) -> Vector<N>
