@@ -1,100 +1,100 @@
 use approx::AbsDiffEq;
 use std::ops::{Add, Mul, Sub};
 
-pub fn color<N>(r: N, g: N, b: N) -> Color<N>
+pub fn color<T>(r: T, g: T, b: T) -> Color<T>
 where
-    N: Copy,
+    T: Copy,
 {
     Color::new(r, g, b)
 }
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]
-pub struct Color<N>
+pub struct Color<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub r: N,
-    pub g: N,
-    pub b: N,
+    pub r: T,
+    pub g: T,
+    pub b: T,
 }
 
-impl<N> Color<N>
+impl<T> Color<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub fn new(r: N, g: N, b: N) -> Self {
+    pub fn new(r: T, g: T, b: T) -> Self {
         Self { r, g, b }
     }
 }
 
-impl<N: AbsDiffEq> AbsDiffEq for Color<N>
+impl<T> AbsDiffEq for Color<T>
 where
-    N: Copy,
-    N::Epsilon: Copy,
+    T: AbsDiffEq + Copy,
+    T::Epsilon: Copy,
 {
-    type Epsilon = N::Epsilon;
+    type Epsilon = T::Epsilon;
 
-    fn default_epsilon() -> N::Epsilon {
-        N::default_epsilon()
+    fn default_epsilon() -> T::Epsilon {
+        T::default_epsilon()
     }
 
-    fn abs_diff_eq(&self, other: &Self, epsilon: N::Epsilon) -> bool {
-        N::abs_diff_eq(&self.r, &other.r, epsilon)
-            && N::abs_diff_eq(&self.g, &other.g, epsilon)
-            && N::abs_diff_eq(&self.b, &other.b, epsilon)
+    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        T::abs_diff_eq(&self.r, &other.r, epsilon)
+            && T::abs_diff_eq(&self.g, &other.g, epsilon)
+            && T::abs_diff_eq(&self.b, &other.b, epsilon)
     }
 }
 
-impl<N> Add for Color<N>
+impl<T> Add for Color<T>
 where
-    N: Add<Output = N> + Copy,
+    T: Add<Output = T> + Copy,
 {
-    type Output = Color<N>;
+    type Output = Color<T>;
 
     fn add(self, rhs: Self) -> Self::Output {
         Color::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
     }
 }
 
-impl<N> Sub for Color<N>
+impl<T> Sub for Color<T>
 where
-    N: Sub<Output = N> + Copy,
+    T: Sub<Output = T> + Copy,
 {
-    type Output = Color<N>;
+    type Output = Color<T>;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Color::new(self.r - rhs.r, self.g - rhs.g, self.b - rhs.b)
     }
 }
 
-impl<N> Mul<N> for Color<N>
+impl<T> Mul<T> for Color<T>
 where
-    N: Mul<Output = N> + Copy,
+    T: Mul<Output = T> + Copy,
 {
-    type Output = Color<N>;
+    type Output = Color<T>;
 
-    fn mul(self, rhs: N) -> Self::Output {
+    fn mul(self, rhs: T) -> Self::Output {
         Color::new(self.r * rhs, self.g * rhs, self.b * rhs)
     }
 }
 
-impl<N> Mul for Color<N>
+impl<T> Mul for Color<T>
 where
-    N: Mul<Output = N> + Copy,
+    T: Mul<Output = T> + Copy,
 {
-    type Output = Color<N>;
+    type Output = Color<T>;
 
     fn mul(self, rhs: Self) -> Self::Output {
         Color::new(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
     }
 }
 
-impl<N> IntoIterator for Color<N>
+impl<T> IntoIterator for Color<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    type Item = N;
-    type IntoIter = ColorIterator<N>;
+    type Item = T;
+    type IntoIter = ColorIterator<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         ColorIterator {
@@ -104,19 +104,19 @@ where
     }
 }
 
-pub struct ColorIterator<N>
+pub struct ColorIterator<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    color: Color<N>,
+    color: Color<T>,
     index: usize,
 }
 
-impl<N> Iterator for ColorIterator<N>
+impl<T> Iterator for ColorIterator<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    type Item = N;
+    type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
         let item = match self.index {

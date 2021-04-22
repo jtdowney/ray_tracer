@@ -11,18 +11,18 @@ pub enum CanvasError {
     Format(#[from] fmt::Error),
 }
 
-pub struct Canvas<N>
+pub struct Canvas<T>
 where
-    N: Copy,
+    T: Copy,
 {
     pub width: usize,
     pub height: usize,
-    pixels: Vec<Color<N>>,
+    pixels: Vec<Color<T>>,
 }
 
-impl<N> Canvas<N>
+impl<T> Canvas<T>
 where
-    N: Copy + Default,
+    T: Copy + Default,
 {
     pub fn new(width: usize, height: usize) -> Self {
         let pixels = vec![Default::default(); width * height];
@@ -34,11 +34,11 @@ where
     }
 }
 
-impl<N> Canvas<N>
+impl<T> Canvas<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub fn write_pixel(&mut self, x: usize, y: usize, pixel: Color<N>) -> Result<(), CanvasError> {
+    pub fn write_pixel(&mut self, x: usize, y: usize, pixel: Color<T>) -> Result<(), CanvasError> {
         if x >= self.width || y >= self.height {
             Err(CanvasError::PixelOutOfBounds(x, y))
         } else {
@@ -48,7 +48,7 @@ where
         }
     }
 
-    pub fn pixel_at(&mut self, x: usize, y: usize) -> Result<Color<N>, CanvasError> {
+    pub fn pixel_at(&mut self, x: usize, y: usize) -> Result<Color<T>, CanvasError> {
         if x >= self.width || y >= self.height {
             Err(CanvasError::PixelOutOfBounds(x, y))
         } else {
@@ -58,7 +58,7 @@ where
         }
     }
 
-    pub fn fill(&mut self, pixel: Color<N>) -> Result<(), CanvasError> {
+    pub fn fill(&mut self, pixel: Color<T>) -> Result<(), CanvasError> {
         for y in 0..self.height {
             for x in 0..self.width {
                 self.write_pixel(x, y, pixel)?;
@@ -69,9 +69,9 @@ where
     }
 }
 
-impl<N> Canvas<N>
+impl<T> Canvas<T>
 where
-    N: Float + ByteScale + Copy,
+    T: Float + ByteScale + Copy,
 {
     pub fn to_ppm(&self) -> Result<String, CanvasError> {
         let mut output = String::new();
@@ -86,7 +86,7 @@ where
                 .take(self.width as usize)
                 .flat_map(|&p| p)
                 .map(|n| {
-                    let clamped = num::clamp(n, N::zero(), N::one());
+                    let clamped = num::clamp(n, T::zero(), T::one());
                     let scaled = clamped.byte_scale();
                     scaled.to_string()
                 })

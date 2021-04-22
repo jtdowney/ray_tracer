@@ -2,37 +2,37 @@ use approx::AbsDiffEq;
 use num::Float;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-pub fn vector<N>(x: N, y: N, z: N) -> Vector<N>
+pub fn vector<T>(x: T, y: T, z: T) -> Vector<T>
 where
-    N: Copy,
+    T: Copy,
 {
     Vector::new(x, y, z)
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Vector<N>
+pub struct Vector<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub x: N,
-    pub y: N,
-    pub z: N,
+    pub x: T,
+    pub y: T,
+    pub z: T,
 }
 
-impl<N> Vector<N>
+impl<T> Vector<T>
 where
-    N: Mul<Output = N> + Add<Output = N> + Copy,
+    T: Mul<Output = T> + Add<Output = T> + Copy,
 {
-    pub fn dot(self, other: Vector<N>) -> N {
+    pub fn dot(self, other: Vector<T>) -> T {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 }
 
-impl<N> Vector<N>
+impl<T> Vector<T>
 where
-    N: Mul<Output = N> + Sub<Output = N> + Copy,
+    T: Mul<Output = T> + Sub<Output = T> + Copy,
 {
-    pub fn cross(self, other: Vector<N>) -> Vector<N> {
+    pub fn cross(self, other: Vector<T>) -> Vector<T> {
         Vector::new(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
@@ -41,11 +41,11 @@ where
     }
 }
 
-impl<N> Vector<N>
+impl<T> Vector<T>
 where
-    N: Float + Copy,
+    T: Float + Copy,
 {
-    pub fn magnitude(self) -> N {
+    pub fn magnitude(self) -> T {
         let value = self.x.powi(2) + self.y.powi(2) + self.z.powi(2);
         value.sqrt()
     }
@@ -56,84 +56,84 @@ where
     }
 }
 
-impl<N: AbsDiffEq> AbsDiffEq for Vector<N>
+impl<T> AbsDiffEq for Vector<T>
 where
-    N: Copy,
-    N::Epsilon: Copy,
+    T: AbsDiffEq + Copy,
+    T::Epsilon: Copy,
 {
-    type Epsilon = N::Epsilon;
+    type Epsilon = T::Epsilon;
 
-    fn default_epsilon() -> N::Epsilon {
-        N::default_epsilon()
+    fn default_epsilon() -> T::Epsilon {
+        T::default_epsilon()
     }
 
-    fn abs_diff_eq(&self, other: &Self, epsilon: N::Epsilon) -> bool {
-        N::abs_diff_eq(&self.x, &other.x, epsilon)
-            && N::abs_diff_eq(&self.y, &other.y, epsilon)
-            && N::abs_diff_eq(&self.z, &other.z, epsilon)
+    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        T::abs_diff_eq(&self.x, &other.x, epsilon)
+            && T::abs_diff_eq(&self.y, &other.y, epsilon)
+            && T::abs_diff_eq(&self.z, &other.z, epsilon)
     }
 }
 
-impl<N> Vector<N>
+impl<T> Vector<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub fn new(x: N, y: N, z: N) -> Self {
+    pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
 }
 
-impl<N> Add for Vector<N>
+impl<T> Add for Vector<T>
 where
-    N: Add<Output = N> + Copy,
+    T: Add<Output = T> + Copy,
 {
-    type Output = Vector<N>;
+    type Output = Vector<T>;
 
     fn add(self, rhs: Self) -> Self::Output {
         Vector::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
-impl<N> Sub for Vector<N>
+impl<T> Sub for Vector<T>
 where
-    N: Sub<Output = N> + Copy,
+    T: Sub<Output = T> + Copy,
 {
-    type Output = Vector<N>;
+    type Output = Vector<T>;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vector::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
-impl<N> Neg for Vector<N>
+impl<T> Neg for Vector<T>
 where
-    N: Neg<Output = N> + Copy,
+    T: Neg<Output = T> + Copy,
 {
-    type Output = Vector<N>;
+    type Output = Vector<T>;
 
     fn neg(self) -> Self::Output {
         Vector::new(-self.x, -self.y, -self.z)
     }
 }
 
-impl<N> Mul<N> for Vector<N>
+impl<T> Mul<T> for Vector<T>
 where
-    N: Mul<Output = N> + Copy,
+    T: Mul<Output = T> + Copy,
 {
-    type Output = Vector<N>;
+    type Output = Vector<T>;
 
-    fn mul(self, rhs: N) -> Self::Output {
+    fn mul(self, rhs: T) -> Self::Output {
         Vector::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
-impl<N> Div<N> for Vector<N>
+impl<T> Div<T> for Vector<T>
 where
-    N: Div<Output = N> + Copy,
+    T: Div<Output = T> + Copy,
 {
-    type Output = Vector<N>;
+    type Output = Vector<T>;
 
-    fn div(self, rhs: N) -> Self::Output {
+    fn div(self, rhs: T) -> Self::Output {
         Vector::new(self.x / rhs, self.y / rhs, self.z / rhs)
     }
 }
@@ -143,6 +143,20 @@ mod tests {
     use super::*;
     use crate::EPSILON;
     use approx::assert_abs_diff_eq;
+    use quickcheck::Arbitrary;
+
+    impl<T> Arbitrary for Vector<T>
+    where
+        T: Arbitrary + Copy + Clone,
+    {
+        fn arbitrary(g: &mut quickcheck::Gen) -> Self {
+            let x = T::arbitrary(g);
+            let y = T::arbitrary(g);
+            let z = T::arbitrary(g);
+
+            Vector::new(x, y, z)
+        }
+    }
 
     #[test]
     fn adding_vectors() {

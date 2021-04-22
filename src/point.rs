@@ -1,62 +1,61 @@
+use crate::vector::Vector;
 use std::ops::{Add, Sub};
 
-use crate::vector::Vector;
-
-pub fn point<N>(x: N, y: N, z: N) -> Point<N>
+pub fn point<T>(x: T, y: T, z: T) -> Point<T>
 where
-    N: Copy,
+    T: Copy,
 {
     Point::new(x, y, z)
 }
 
 #[derive(Debug, PartialEq, Copy, Clone)]
-pub struct Point<N>
+pub struct Point<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub x: N,
-    pub y: N,
-    pub z: N,
+    pub x: T,
+    pub y: T,
+    pub z: T,
 }
 
-impl<N> Point<N>
+impl<T> Point<T>
 where
-    N: Copy,
+    T: Copy,
 {
-    pub fn new(x: N, y: N, z: N) -> Self {
+    pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
 }
 
-impl<N> Sub for Point<N>
+impl<T> Sub for Point<T>
 where
-    N: Sub<Output = N> + Copy,
+    T: Sub<Output = T> + Copy,
 {
-    type Output = Vector<N>;
+    type Output = Vector<T>;
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vector::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
-impl<N> Add<Vector<N>> for Point<N>
+impl<T> Add<Vector<T>> for Point<T>
 where
-    N: Add<Output = N> + Copy,
+    T: Add<Output = T> + Copy,
 {
-    type Output = Point<N>;
+    type Output = Point<T>;
 
-    fn add(self, rhs: Vector<N>) -> Self::Output {
+    fn add(self, rhs: Vector<T>) -> Self::Output {
         Point::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
-impl<N> Sub<Vector<N>> for Point<N>
+impl<T> Sub<Vector<T>> for Point<T>
 where
-    N: Sub<Output = N> + Copy,
+    T: Sub<Output = T> + Copy,
 {
-    type Output = Point<N>;
+    type Output = Point<T>;
 
-    fn sub(self, rhs: Vector<N>) -> Self::Output {
+    fn sub(self, rhs: Vector<T>) -> Self::Output {
         Point::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }

@@ -1,10 +1,12 @@
 mod canvas;
 mod color;
+mod matrix;
 mod point;
 mod vector;
 
 pub use canvas::*;
 pub use color::*;
+pub use matrix::*;
 pub use point::*;
 pub use vector::*;
 
