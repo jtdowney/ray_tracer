@@ -2,6 +2,7 @@ mod canvas;
 mod color;
 mod matrix;
 mod point;
+pub mod transformations;
 mod vector;
 
 pub use canvas::*;

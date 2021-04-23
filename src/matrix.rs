@@ -1,4 +1,4 @@
-use crate::Vector;
+use crate::{Point, Vector};
 use approx::AbsDiffEq;
 use generic_array::{ArrayLength, GenericArray};
 use num::{Integer, Num};
@@ -194,11 +194,26 @@ where
     type Output = Vector<T>;
 
     fn mul(self, rhs: Vector<T>) -> Self::Output {
+        let x = self[(0, 0)] * rhs.x + self[(0, 1)] * rhs.y + self[(0, 2)] * rhs.z;
+        let y = self[(1, 0)] * rhs.x + self[(1, 1)] * rhs.y + self[(1, 2)] * rhs.z;
+        let z = self[(2, 0)] * rhs.x + self[(2, 1)] * rhs.y + self[(2, 2)] * rhs.z;
+
+        Vector::new(x, y, z)
+    }
+}
+
+impl<T> Mul<Point<T>> for Matrix4<T>
+where
+    T: Mul<Output = T> + Add<Output = T> + Copy,
+{
+    type Output = Point<T>;
+
+    fn mul(self, rhs: Point<T>) -> Self::Output {
         let x = self[(0, 0)] * rhs.x + self[(0, 1)] * rhs.y + self[(0, 2)] * rhs.z + self[(0, 3)];
         let y = self[(1, 0)] * rhs.x + self[(1, 1)] * rhs.y + self[(1, 2)] * rhs.z + self[(1, 3)];
         let z = self[(2, 0)] * rhs.x + self[(2, 1)] * rhs.y + self[(2, 2)] * rhs.z + self[(2, 3)];
 
-        Vector::new(x, y, z)
+        Point::new(x, y, z)
     }
 }
 
@@ -336,7 +351,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{vector, EPSILON};
+    use crate::{point, EPSILON};
     use approx::assert_abs_diff_eq;
     use quickcheck::Arbitrary;
     use quickcheck_macros::quickcheck;
@@ -429,13 +444,13 @@ mod tests {
     }
 
     #[test]
-    fn multiplying_matrix_by_vector() {
+    fn multiplying_matrix_by_point() {
         let a: Matrix4<_> = matrix(&[
             1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,
         ]);
-        let b = vector(1.0, 2.0, 3.0);
+        let b = point(1.0, 2.0, 3.0);
 
-        assert_eq!(a * b, vector(18.0, 24.0, 33.0));
+        assert_eq!(a * b, point(18.0, 24.0, 33.0));
     }
 
     #[quickcheck]

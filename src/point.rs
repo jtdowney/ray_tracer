@@ -1,3 +1,5 @@
+use approx::AbsDiffEq;
+
 use crate::vector::Vector;
 use std::ops::{Add, Sub};
 
@@ -24,6 +26,24 @@ where
 {
     pub fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
+    }
+}
+
+impl<T> AbsDiffEq for Point<T>
+where
+    T: AbsDiffEq + Copy,
+    T::Epsilon: Copy,
+{
+    type Epsilon = T::Epsilon;
+
+    fn default_epsilon() -> T::Epsilon {
+        T::default_epsilon()
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
+        T::abs_diff_eq(&self.x, &other.x, epsilon)
+            && T::abs_diff_eq(&self.y, &other.y, epsilon)
+            && T::abs_diff_eq(&self.z, &other.z, epsilon)
     }
 }
 
