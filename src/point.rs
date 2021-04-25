@@ -1,4 +1,5 @@
 use approx::AbsDiffEq;
+use num::Num;
 
 use crate::vector::Vector;
 use std::ops::{Add, Sub};
@@ -25,6 +26,18 @@ where
     T: Copy,
 {
     pub fn new(x: T, y: T, z: T) -> Self {
+        Self { x, y, z }
+    }
+}
+
+impl<T> Point<T>
+where
+    T: Num + Copy,
+{
+    pub fn origin() -> Self {
+        let x = T::zero();
+        let y = T::zero();
+        let z = T::zero();
         Self { x, y, z }
     }
 }

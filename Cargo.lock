@@ -165,6 +165,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ord_subset"
+version = "3.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7ce14664caf5b27f5656ff727defd68ae1eb75ef3c4d95259361df1eb376bef"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -230,6 +236,7 @@ dependencies = [
  "approx",
  "generic-array",
  "num",
+ "ord_subset",
  "quickcheck",
  "quickcheck_macros",
  "thiserror",
