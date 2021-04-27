@@ -1,11 +1,23 @@
 use approx::AbsDiffEq;
 use std::ops::{Add, Mul, Sub};
 
+pub const BLACK: Color<f64> = Color {
+    r: 0.0,
+    g: 0.0,
+    b: 0.0,
+};
+
+pub const WHITE: Color<f64> = Color {
+    r: 1.0,
+    g: 1.0,
+    b: 1.0,
+};
+
 pub fn color<T>(r: T, g: T, b: T) -> Color<T>
 where
     T: Copy,
 {
-    Color::new(r, g, b)
+    Color { r, g, b }
 }
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]

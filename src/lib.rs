@@ -1,6 +1,8 @@
 mod canvas;
-mod color;
+pub mod color;
 mod intersection;
+mod light;
+mod material;
 mod matrix;
 mod point;
 mod ray;
@@ -11,6 +13,8 @@ mod vector;
 pub use canvas::*;
 pub use color::*;
 pub use intersection::*;
+pub use light::*;
+pub use material::*;
 pub use matrix::*;
 pub use point::*;
 pub use ray::*;

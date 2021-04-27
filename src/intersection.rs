@@ -1,78 +1,77 @@
 use crate::Sphere;
-use num::Num;
+use num::Float;
 use ord_subset::{OrdSubset, OrdSubsetIterExt};
-use std::{iter::FromIterator, rc::Rc, slice, vec};
+use std::{iter::FromIterator, slice, vec};
 
-pub fn intersection<T>(time: T, object: Rc<Sphere<T>>) -> Intersection<T>
+pub fn intersection<'o, T>(time: T, object: &'o Sphere<T>) -> Intersection<T>
 where
-    T: Copy + PartialEq,
+    T: Copy + Float + PartialEq,
 {
     Intersection { time, object }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Intersection<T>
+pub struct Intersection<'o, T>
 where
-    T: Copy + PartialEq,
+    T: Copy + Float + PartialEq,
 {
     pub time: T,
-    pub object: Rc<Sphere<T>>,
+    pub object: &'o Sphere<T>,
 }
 
-pub struct Intersections<T>(Vec<Intersection<T>>)
+pub struct Intersections<'o, T>(Vec<Intersection<'o, T>>)
 where
-    T: Copy + PartialEq;
+    T: Copy + Float + PartialEq;
 
-impl<T> Intersections<T>
+impl<'o, T> Intersections<'o, T>
 where
-    T: Copy + PartialEq,
+    T: Copy + Float + PartialEq,
 {
     pub fn empty() -> Self {
         Intersections(vec![])
     }
 
-    pub fn iter(&self) -> slice::Iter<Intersection<T>> {
+    pub fn iter(&self) -> slice::Iter<Intersection<'o, T>> {
         self.0.iter()
     }
 }
 
-impl<T> Intersections<T>
+impl<'o, T> Intersections<'o, T>
 where
-    T: Copy + PartialEq + OrdSubset + Num,
+    T: Copy + PartialEq + OrdSubset + Float,
 {
-    pub fn hit(&self) -> Option<Intersection<T>> {
+    pub fn hit(&self) -> Option<&Intersection<'o, T>> {
         self.iter()
-            .cloned()
             .filter(|i| i.time >= T::zero())
             .ord_subset_min_by_key(|i| i.time)
     }
 }
 
-impl<T> From<Vec<Intersection<T>>> for Intersections<T>
+impl<'o, T> From<Vec<Intersection<'o, T>>> for Intersections<'o, T>
 where
-    T: Copy + PartialEq,
+    T: Copy + Float + PartialEq,
 {
-    fn from(intersections: Vec<Intersection<T>>) -> Self {
+    fn from(intersections: Vec<Intersection<'o, T>>) -> Self {
         Intersections(intersections)
     }
 }
 
-impl<T> FromIterator<Intersection<T>> for Intersections<T>
+impl<'o, T> FromIterator<Intersection<'o, T>> for Intersections<'o, T>
 where
-    T: Copy + PartialEq,
+    T: Copy + Float + PartialEq,
 {
-    fn from_iter<I: IntoIterator<Item = Intersection<T>>>(iter: I) -> Self {
+    fn from_iter<I: IntoIterator<Item = Intersection<'o, T>>>(iter: I) -> Self {
         let intersections = iter.into_iter().collect();
         Intersections(intersections)
     }
 }
 
-impl<T> IntoIterator for Intersections<T>
+impl<'o, T> IntoIterator for Intersections<'o, T>
 where
-    T: Copy + PartialEq,
+    T: Copy + Float + PartialEq,
 {
-    type Item = Intersection<T>;
-    type IntoIter = vec::IntoIter<Intersection<T>>;
+    type Item = Intersection<'o, T>;
+    type IntoIter = vec::IntoIter<Intersection<'o, T>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -87,54 +86,54 @@ mod tests {
     #[test]
     fn intersection_has_time_and_object() {
         let s = sphere();
-        let i = intersection(3.5, s.clone());
+        let i = intersection(3.5, &s);
 
         assert_eq!(i.time, 3.5);
-        assert_eq!(i.object, s);
+        assert_eq!(i.object, &s);
     }
 
     #[test]
     fn hit_with_all_positive_times() {
         let s = sphere();
         let i1 = Intersection {
-            time: 1,
-            object: s.clone(),
+            time: 1.0,
+            object: &s,
         };
         let i2 = Intersection {
-            time: 2,
-            object: s.clone(),
+            time: 2.0,
+            object: &s,
         };
         let xs = Intersections(vec![i1.clone(), i2]);
         let i = xs.hit().unwrap();
-        assert_eq!(i, i1);
+        assert_eq!(i, &i1);
     }
 
     #[test]
     fn hit_with_some_negative_times() {
         let s = sphere();
         let i1 = Intersection {
-            time: -1,
-            object: s.clone(),
+            time: -1.0,
+            object: &s,
         };
         let i2 = Intersection {
-            time: 1,
-            object: s.clone(),
+            time: 1.0,
+            object: &s,
         };
         let xs = Intersections(vec![i2.clone(), i1]);
         let i = xs.hit().unwrap();
-        assert_eq!(i, i2);
+        assert_eq!(i, &i2);
     }
 
     #[test]
     fn hit_with_all_negative_times() {
         let s = sphere();
         let i1 = Intersection {
-            time: -2,
-            object: s.clone(),
+            time: -2.0,
+            object: &s,
         };
         let i2 = Intersection {
-            time: -1,
-            object: s.clone(),
+            time: -1.0,
+            object: &s,
         };
         let xs = Intersections(vec![i2, i1]);
         assert!(xs.hit().is_none());
@@ -144,23 +143,23 @@ mod tests {
     fn hit_lowest_positive_intersection() {
         let s = sphere();
         let i1 = Intersection {
-            time: 5,
-            object: s.clone(),
+            time: 5.0,
+            object: &s,
         };
         let i2 = Intersection {
-            time: 7,
-            object: s.clone(),
+            time: 7.0,
+            object: &s,
         };
         let i3 = Intersection {
-            time: -3,
-            object: s.clone(),
+            time: -3.0,
+            object: &s,
         };
         let i4 = Intersection {
-            time: 2,
-            object: s.clone(),
+            time: 2.0,
+            object: &s,
         };
         let xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit().unwrap();
-        assert_eq!(i, i4);
+        assert_eq!(i, &i4);
     }
 }

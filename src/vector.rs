@@ -1,5 +1,5 @@
 use approx::AbsDiffEq;
-use num::Float;
+use num::{Float, Num};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 pub fn vector<T>(x: T, y: T, z: T) -> Vector<T>
@@ -30,9 +30,19 @@ where
 
 impl<T> Vector<T>
 where
+    T: Num + Mul<Output = T> + Add<Output = T> + Copy,
+{
+    pub fn reflect(self, normal: Vector<T>) -> Self {
+        let two = T::one() + T::one();
+        self - normal * two * self.dot(normal)
+    }
+}
+
+impl<T> Vector<T>
+where
     T: Mul<Output = T> + Sub<Output = T> + Copy,
 {
-    pub fn cross(self, other: Vector<T>) -> Vector<T> {
+    pub fn cross(self, other: Vector<T>) -> Self {
         Vector::new(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
@@ -235,5 +245,21 @@ mod tests {
         let b = vector(2, 3, 4);
         assert_eq!(a.cross(b), vector(-1, 2, -1));
         assert_eq!(b.cross(a), vector(1, -2, 1));
+    }
+
+    #[test]
+    fn reflecting_vector_approaching_at_45() {
+        let v = vector(1.0, -1.0, 0.0);
+        let n = vector(0.0, 1.0, 0.0);
+        let r = v.reflect(n);
+        assert_eq!(r, vector(1.0, 1.0, 0.0))
+    }
+
+    #[test]
+    fn reflecting_vector_off_slanted_surface() {
+        let v = vector(0.0, -1.0, 0.0);
+        let n = vector(f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0, 0.0);
+        let r = v.reflect(n);
+        assert_abs_diff_eq!(r, vector(1.0, 0.0, 0.0))
     }
 }

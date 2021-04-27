@@ -1,4 +1,6 @@
-use ray_tracer::{color, point, ray, Canvas, SphereBuilder};
+use ray_tracer::{
+    color, point, point_light, ray, Canvas, Color, MaterialBuilder, Point, SphereBuilder,
+};
 
 fn main() -> anyhow::Result<()> {
     let ray_origin = point(0.0, 0.0, -5.0);
@@ -9,8 +11,19 @@ fn main() -> anyhow::Result<()> {
     let half = wall_size / 2.0;
 
     let mut canvas = Canvas::new(canvas_pixels, canvas_pixels);
-    let color = color(1.0, 0.0, 0.0);
-    let shape = SphereBuilder::default().build()?;
+    let shape = SphereBuilder::default()
+        .material(
+            MaterialBuilder::default()
+                .color(Color::new(1.0, 0.2, 1.0))
+                .build()
+                .unwrap(),
+        )
+        .build()
+        .unwrap();
+
+    let light_position = Point::new(-10.0, 10.0, -10.0);
+    let light_color = color::WHITE;
+    let light = point_light(light_position, light_color);
 
     for y in 0..canvas_pixels {
         let world_y = half - pixel_size * f64::from(y as u16);
@@ -20,7 +33,11 @@ fn main() -> anyhow::Result<()> {
             let position = point(world_x, world_y, wall_z);
             let ray = ray(ray_origin, (position - ray_origin).normalize());
             let xs = shape.intersect(ray);
-            if xs.hit().is_some() {
+            if let Some(hit) = xs.hit() {
+                let point = ray.position(hit.time);
+                let normal = hit.object.normal_at(point);
+                let eye = -ray.direction;
+                let color = hit.object.material.lighting(&light, point, eye, normal);
                 canvas.write_pixel(x, y, color)?;
             }
         }

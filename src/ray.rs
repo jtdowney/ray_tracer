@@ -8,6 +8,7 @@ where
     Ray { origin, direction }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Ray<T>
 where
     T: Copy,
