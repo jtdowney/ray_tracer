@@ -112,7 +112,7 @@ mod tests {
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
-            Color::new(1.9, 1.9, 1.9),
+            color(1.9, 1.9, 1.9),
             m.lighting(&light, position, eyev, normalv)
         );
     }

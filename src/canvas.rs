@@ -139,9 +139,9 @@ mod tests {
     #[test]
     fn constructing_ppm_pixel_data() {
         let mut canvas = Canvas::new(5, 3);
-        let c1 = Color::new(1.5, 0.0, 0.0);
-        let c2 = Color::new(0.0, 0.5, 0.0);
-        let c3 = Color::new(-0.5, 0.0, 1.0);
+        let c1 = color(1.5, 0.0, 0.0);
+        let c2 = color(0.0, 0.5, 0.0);
+        let c3 = color(-0.5, 0.0, 1.0);
         canvas.write_pixel(0, 0, c1).unwrap();
         canvas.write_pixel(2, 1, c2).unwrap();
         canvas.write_pixel(4, 2, c3).unwrap();
@@ -156,7 +156,7 @@ mod tests {
     #[test]
     fn splitting_long_lines_in_ppm() {
         let mut canvas = Canvas::new(10, 2);
-        let c = Color::new(1.0, 0.8, 0.6);
+        let c = color(1.0, 0.8, 0.6);
         canvas.fill(c).unwrap();
 
         let ppm = canvas.to_ppm().unwrap();

@@ -30,15 +30,6 @@ where
     pub b: T,
 }
 
-impl<T> Color<T>
-where
-    T: Copy,
-{
-    pub fn new(r: T, g: T, b: T) -> Self {
-        Self { r, g, b }
-    }
-}
-
 impl<T> AbsDiffEq for Color<T>
 where
     T: AbsDiffEq + Copy,
@@ -64,7 +55,7 @@ where
     type Output = Color<T>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Color::new(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
+        color(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
     }
 }
 
@@ -75,7 +66,7 @@ where
     type Output = Color<T>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Color::new(self.r - rhs.r, self.g - rhs.g, self.b - rhs.b)
+        color(self.r - rhs.r, self.g - rhs.g, self.b - rhs.b)
     }
 }
 
@@ -86,7 +77,7 @@ where
     type Output = Color<T>;
 
     fn mul(self, rhs: T) -> Self::Output {
-        Color::new(self.r * rhs, self.g * rhs, self.b * rhs)
+        color(self.r * rhs, self.g * rhs, self.b * rhs)
     }
 }
 
@@ -97,7 +88,7 @@ where
     type Output = Color<T>;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Color::new(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
+        color(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
     }
 }
 
