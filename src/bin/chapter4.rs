@@ -1,4 +1,4 @@
-use ray_tracer::{transformations, Canvas, Color, Point};
+use ray_tracer::{color, transformations, Canvas, Point};
 use std::f64::consts::PI;
 
 fn main() -> anyhow::Result<()> {
@@ -12,7 +12,7 @@ fn main() -> anyhow::Result<()> {
         canvas.write_pixel(
             (p.x + half_width).round() as usize,
             (p.y + half_width).round() as usize,
-            Color::new(1.0, 0.5, 0.0),
+            color(1.0, 0.5, 0.0),
         )?;
 
         p = transform * p;

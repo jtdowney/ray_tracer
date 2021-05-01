@@ -1,6 +1,4 @@
-use ray_tracer::{
-    color, point, point_light, ray, Canvas, Color, MaterialBuilder, Point, SphereBuilder,
-};
+use ray_tracer::{color, point, point_light, ray, Canvas, MaterialBuilder, SphereBuilder};
 
 fn main() -> anyhow::Result<()> {
     let ray_origin = point(0.0, 0.0, -5.0);
@@ -14,14 +12,14 @@ fn main() -> anyhow::Result<()> {
     let shape = SphereBuilder::default()
         .material(
             MaterialBuilder::default()
-                .color(Color::new(1.0, 0.2, 1.0))
+                .color(color(1.0, 0.2, 1.0))
                 .build()
                 .unwrap(),
         )
         .build()
         .unwrap();
 
-    let light_position = Point::new(-10.0, 10.0, -10.0);
+    let light_position = point(-10.0, 10.0, -10.0);
     let light_color = color::WHITE;
     let light = point_light(light_position, light_color);
 
