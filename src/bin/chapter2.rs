@@ -1,16 +1,14 @@
 use ray_tracer::{color, point, vector, Canvas, Point, Vector};
 
-type N = f32;
-
 #[derive(Copy, Clone)]
 struct Projectile {
-    position: Point<N>,
-    velocity: Vector<N>,
+    position: Point,
+    velocity: Vector,
 }
 
 struct Simulation {
-    gravity: Vector<N>,
-    wind: Vector<N>,
+    gravity: Vector,
+    wind: Vector,
     projectile: Projectile,
 }
 
@@ -44,7 +42,8 @@ fn main() -> anyhow::Result<()> {
         simulation.tick();
 
         let x = simulation.projectile.position.x.round() as usize;
-        let y = (N::from(canvas.height as u16) - simulation.projectile.position.y).round() as usize;
+        let y =
+            (f64::from(canvas.height as u16) - simulation.projectile.position.y).round() as usize;
 
         if x > canvas.width || y > canvas.height {
             continue;

@@ -1,11 +1,6 @@
-use num::{Float, Num};
-
 use crate::Matrix4;
 
-pub fn translation<T>(x: T, y: T, z: T) -> Matrix4<T>
-where
-    T: Num + Copy,
-{
+pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
     transform[(0, 3)] = x;
     transform[(1, 3)] = y;
@@ -13,10 +8,7 @@ where
     transform
 }
 
-pub fn scaling<T>(x: T, y: T, z: T) -> Matrix4<T>
-where
-    T: Num + Copy,
-{
+pub fn scaling(x: f64, y: f64, z: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
     transform[(0, 0)] = x;
     transform[(1, 1)] = y;
@@ -24,10 +16,7 @@ where
     transform
 }
 
-pub fn rotation_x<T>(theta: T) -> Matrix4<T>
-where
-    T: Float + Copy,
-{
+pub fn rotation_x(theta: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
     let (theta_sin, theta_cos) = theta.sin_cos();
     transform[(1, 1)] = theta_cos;
@@ -37,10 +26,7 @@ where
     transform
 }
 
-pub fn rotation_y<T>(theta: T) -> Matrix4<T>
-where
-    T: Float + Copy,
-{
+pub fn rotation_y(theta: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
     let (theta_sin, theta_cos) = theta.sin_cos();
     transform[(0, 0)] = theta_cos;
@@ -50,10 +36,7 @@ where
     transform
 }
 
-pub fn rotation_z<T>(theta: T) -> Matrix4<T>
-where
-    T: Float + Copy,
-{
+pub fn rotation_z(theta: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
     let (theta_sin, theta_cos) = theta.sin_cos();
     transform[(0, 0)] = theta_cos;
@@ -63,10 +46,7 @@ where
     transform
 }
 
-pub fn shearing<T>(x1: T, x2: T, y1: T, y2: T, z1: T, z2: T) -> Matrix4<T>
-where
-    T: Num + Copy,
-{
+pub fn shearing(x1: f64, x2: f64, y1: f64, y2: f64, z1: f64, z2: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
     transform[(0, 1)] = x1;
     transform[(0, 2)] = x2;
@@ -80,15 +60,15 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{point, vector, EPSILON};
+    use crate::{point, vector};
     use approx::assert_abs_diff_eq;
     use std::f64::consts::PI;
 
     #[test]
     fn multiplying_by_translation_matrix() {
-        let transform = translation(5, -3, 2);
-        let p = point(-3, 4, 5);
-        assert_eq!(transform * p, point(2, 1, 7))
+        let transform = translation(5.0, -3.0, 2.0);
+        let p = point(-3.0, 4.0, 5.0);
+        assert_eq!(transform * p, point(2.0, 1.0, 7.0))
     }
 
     #[test]
@@ -101,23 +81,23 @@ mod tests {
 
     #[test]
     fn translation_does_not_affect_vectors() {
-        let transform = translation(5, -3, 2);
-        let v = vector(-3, 4, 5);
+        let transform = translation(5.0, -3.0, 2.0);
+        let v = vector(-3.0, 4.0, 5.0);
         assert_eq!(transform * v, v);
     }
 
     #[test]
     fn scaling_matrix_applied_to_a_point() {
-        let transform = scaling(2, 3, 4);
-        let p = point(-4, 6, 8);
-        assert_eq!(transform * p, point(-8, 18, 32));
+        let transform = scaling(2.0, 3.0, 4.0);
+        let p = point(-4.0, 6.0, 8.0);
+        assert_eq!(transform * p, point(-8.0, 18.0, 32.0));
     }
 
     #[test]
     fn scaling_matrix_applied_to_a_vector() {
-        let transform = scaling(2, 3, 4);
-        let v = vector(-4, 6, 8);
-        assert_eq!(transform * v, vector(-8, 18, 32));
+        let transform = scaling(2.0, 3.0, 4.0);
+        let v = vector(-4.0, 6.0, 8.0);
+        assert_eq!(transform * v, vector(-8.0, 18.0, 32.0));
     }
 
     #[test]
@@ -130,9 +110,9 @@ mod tests {
 
     #[test]
     fn reflection() {
-        let transform = scaling(-1, 1, 1);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(-2, 3, 4))
+        let transform = scaling(-1.0, 1.0, 1.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(-2.0, 3.0, 4.0))
     }
 
     #[test]
@@ -141,8 +121,7 @@ mod tests {
         let half_quarter = rotation_x(PI / 4.0);
         assert_abs_diff_eq!(
             half_quarter * p,
-            point(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0),
-            epsilon = EPSILON
+            point(0.0, f64::sqrt(2.0) / 2.0, f64::sqrt(2.0) / 2.0)
         );
 
         let full_quarter = rotation_x(PI / 2.0);
@@ -188,44 +167,44 @@ mod tests {
 
     #[test]
     fn shearing_moves_x_proportional_to_y() {
-        let transform = shearing(1, 0, 0, 0, 0, 0);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(5, 3, 4));
+        let transform = shearing(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(5.0, 3.0, 4.0));
     }
 
     #[test]
     fn shearing_moves_x_proportional_to_z() {
-        let transform = shearing(0, 1, 0, 0, 0, 0);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(6, 3, 4));
+        let transform = shearing(0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(6.0, 3.0, 4.0));
     }
 
     #[test]
     fn shearing_moves_y_proportional_to_x() {
-        let transform = shearing(0, 0, 1, 0, 0, 0);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(2, 5, 4));
+        let transform = shearing(0.0, 0.0, 1.0, 0.0, 0.0, 0.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(2.0, 5.0, 4.0));
     }
 
     #[test]
     fn shearing_moves_y_proportional_to_z() {
-        let transform = shearing(0, 0, 0, 1, 0, 0);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(2, 7, 4));
+        let transform = shearing(0.0, 0.0, 0.0, 1.0, 0.0, 0.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(2.0, 7.0, 4.0));
     }
 
     #[test]
     fn shearing_moves_z_proportional_to_x() {
-        let transform = shearing(0, 0, 0, 0, 1, 0);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(2, 3, 6));
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(2.0, 3.0, 6.0));
     }
 
     #[test]
     fn shearing_moves_z_proportional_to_y() {
-        let transform = shearing(0, 0, 0, 0, 0, 1);
-        let p = point(2, 3, 4);
-        assert_eq!(transform * p, point(2, 3, 7));
+        let transform = shearing(0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(transform * p, point(2.0, 3.0, 7.0));
     }
 
     #[test]
@@ -236,13 +215,13 @@ mod tests {
         let c = translation(10.0, 5.0, 7.0);
 
         let p2 = a * p;
-        assert_abs_diff_eq!(p2, point(1.0, -1.0, 0.0), epsilon = EPSILON);
+        assert_abs_diff_eq!(p2, point(1.0, -1.0, 0.0));
 
         let p3 = b * p2;
-        assert_abs_diff_eq!(p3, point(5.0, -5.0, 0.0), epsilon = EPSILON);
+        assert_abs_diff_eq!(p3, point(5.0, -5.0, 0.0));
 
         let p4 = c * p3;
-        assert_abs_diff_eq!(p4, point(15.0, 0.0, 7.0), epsilon = EPSILON);
+        assert_abs_diff_eq!(p4, point(15.0, 0.0, 7.0));
     }
 
     #[test]
@@ -252,6 +231,6 @@ mod tests {
         let b = scaling(5.0, 5.0, 5.0);
         let c = translation(10.0, 5.0, 7.0);
         let transform = c * b * a;
-        assert_abs_diff_eq!(transform * p, point(15.0, 0.0, 7.0), epsilon = EPSILON);
+        assert_abs_diff_eq!(transform * p, point(15.0, 0.0, 7.0));
     }
 }

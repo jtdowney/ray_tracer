@@ -1,11 +1,11 @@
-use ray_tracer::{color, transformations, Canvas, Point};
+use ray_tracer::{color, point, transformations, Canvas};
 use std::f64::consts::PI;
 
 fn main() -> anyhow::Result<()> {
     let width = 500;
     let half_width = f64::from(width as i16 / 2);
     let mut canvas = Canvas::new(width, width);
-    let mut p = transformations::translation(0.0, -215.0, 0.0) * Point::new(0.0, 0.0, 0.0);
+    let mut p = transformations::translation(0.0, -215.0, 0.0) * point::ORIGIN;
     let transform = transformations::rotation_z(PI / 6.0);
 
     for _ in 0..12 {

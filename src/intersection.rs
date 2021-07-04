@@ -1,77 +1,53 @@
 use crate::Sphere;
-use num::Float;
-use ord_subset::{OrdSubset, OrdSubsetIterExt};
+use ord_subset::OrdSubsetIterExt;
 use std::{iter::FromIterator, slice, vec};
 
-pub fn intersection<'o, T>(time: T, object: &'o Sphere<T>) -> Intersection<T>
-where
-    T: Copy + Float + PartialEq,
-{
+pub fn intersection(time: f64, object: &Sphere) -> Intersection {
     Intersection { time, object }
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Intersection<'o, T>
-where
-    T: Copy + Float + PartialEq,
-{
-    pub time: T,
-    pub object: &'o Sphere<T>,
+pub struct Intersection<'o> {
+    pub time: f64,
+    pub object: &'o Sphere,
 }
 
-pub struct Intersections<'o, T>(Vec<Intersection<'o, T>>)
-where
-    T: Copy + Float + PartialEq;
+pub struct Intersections<'o>(Vec<Intersection<'o>>);
 
-impl<'o, T> Intersections<'o, T>
-where
-    T: Copy + Float + PartialEq,
-{
+impl<'o> Intersections<'o> {
     pub fn empty() -> Self {
         Intersections(vec![])
     }
 
-    pub fn iter(&self) -> slice::Iter<Intersection<'o, T>> {
+    pub fn iter(&self) -> slice::Iter<Intersection<'o>> {
         self.0.iter()
     }
 }
 
-impl<'o, T> Intersections<'o, T>
-where
-    T: Copy + PartialEq + OrdSubset + Float,
-{
-    pub fn hit(&self) -> Option<&Intersection<'o, T>> {
+impl<'o> Intersections<'o> {
+    pub fn hit(&self) -> Option<&Intersection<'o>> {
         self.iter()
-            .filter(|i| i.time >= T::zero())
+            .filter(|i| i.time >= 0.0)
             .ord_subset_min_by_key(|i| i.time)
     }
 }
 
-impl<'o, T> From<Vec<Intersection<'o, T>>> for Intersections<'o, T>
-where
-    T: Copy + Float + PartialEq,
-{
-    fn from(intersections: Vec<Intersection<'o, T>>) -> Self {
+impl<'o> From<Vec<Intersection<'o>>> for Intersections<'o> {
+    fn from(intersections: Vec<Intersection<'o>>) -> Self {
         Intersections(intersections)
     }
 }
 
-impl<'o, T> FromIterator<Intersection<'o, T>> for Intersections<'o, T>
-where
-    T: Copy + Float + PartialEq,
-{
-    fn from_iter<I: IntoIterator<Item = Intersection<'o, T>>>(iter: I) -> Self {
+impl<'o> FromIterator<Intersection<'o>> for Intersections<'o> {
+    fn from_iter<I: IntoIterator<Item = Intersection<'o>>>(iter: I) -> Self {
         let intersections = iter.into_iter().collect();
         Intersections(intersections)
     }
 }
 
-impl<'o, T> IntoIterator for Intersections<'o, T>
-where
-    T: Copy + Float + PartialEq,
-{
-    type Item = Intersection<'o, T>;
-    type IntoIter = vec::IntoIter<Intersection<'o, T>>;
+impl<'o> IntoIterator for Intersections<'o> {
+    type Item = Intersection<'o>;
+    type IntoIter = vec::IntoIter<Intersection<'o>>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()

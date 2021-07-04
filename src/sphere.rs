@@ -2,46 +2,34 @@ use crate::{intersection, material, point, Intersections, Material, Matrix4, Ray
 use derive_builder::Builder;
 use num::Float;
 use point::Point;
-use std::iter::Sum;
 
-pub fn sphere<T>() -> Sphere<T>
-where
-    T: Float + Copy,
-{
+pub fn sphere() -> Sphere {
     SphereBuilder::default().build().unwrap()
 }
 
 #[derive(Builder, Debug, PartialEq, Clone, Copy)]
-pub struct Sphere<T>
-where
-    T: Float + Copy,
-{
+pub struct Sphere {
     #[builder(default = "Matrix4::identity()")]
-    pub transform: Matrix4<T>,
+    pub transform: Matrix4,
     #[builder(default = "material()")]
-    pub material: Material<T>,
+    pub material: Material,
 }
 
-impl<T> Sphere<T>
-where
-    T: Float + PartialOrd + Sum + Copy,
-{
-    pub fn intersect(&self, ray: Ray<T>) -> Intersections<T> {
+impl Sphere {
+    pub fn intersect(&self, ray: Ray) -> Intersections {
         let ray = ray.transform(self.transform.inverse());
-        let diameter = T::one() + T::one();
-        let two_diameter = diameter + diameter;
-        let sphere_to_ray = ray.origin - Point::origin();
+        let sphere_to_ray = ray.origin - point::ORIGIN;
         let a = ray.direction.dot(ray.direction);
-        let b = diameter * ray.direction.dot(sphere_to_ray);
-        let c = sphere_to_ray.dot(sphere_to_ray) - T::one();
-        let discriminant = (b * b) - two_diameter * a * c;
+        let b = 2.0 * ray.direction.dot(sphere_to_ray);
+        let c = sphere_to_ray.dot(sphere_to_ray) - 1.0;
+        let discriminant = (b * b) - 4.0 * a * c;
 
         if discriminant.is_sign_negative() {
             Intersections::empty()
         } else {
             let discriminant_root = Float::sqrt(discriminant);
-            let t1 = (-b - discriminant_root) / (diameter * a);
-            let t2 = (-b + discriminant_root) / (diameter * a);
+            let t1 = (-b - discriminant_root) / (2.0 * a);
+            let t2 = (-b + discriminant_root) / (2.0 * a);
 
             let intersections = vec![intersection(t1, self), intersection(t2, self)];
 
@@ -49,10 +37,10 @@ where
         }
     }
 
-    pub fn normal_at(&self, world_point: Point<T>) -> Vector<T> {
+    pub fn normal_at(&self, world_point: Point) -> Vector {
         let transform_inverse = self.transform.inverse();
         let object_point = transform_inverse * world_point;
-        let object_normal = object_point - Point::origin();
+        let object_normal = object_point - point::ORIGIN;
         let world_normal = transform_inverse.transpose() * object_normal;
         world_normal.normalize()
     }
@@ -61,7 +49,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{point, ray, transformations, vector, MaterialBuilder, EPSILON};
+    use crate::{point, ray, transformations, vector, MaterialBuilder};
     use approx::assert_abs_diff_eq;
     use std::f64::consts::PI;
 
@@ -96,7 +84,7 @@ mod tests {
     #[test]
     fn ray_originates_inside_sphere() {
         let s = sphere();
-        let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
+        let r = ray(point::ORIGIN, vector(0.0, 0.0, 1.0));
         let mut xs = s.intersect(r).into_iter();
         assert_eq!(-1.0, xs.next().unwrap().time);
         assert_eq!(1.0, xs.next().unwrap().time);
@@ -115,7 +103,7 @@ mod tests {
 
     #[test]
     fn spheres_default_transformation() {
-        let s: Sphere<f64> = sphere();
+        let s = sphere();
         assert_eq!(Matrix4::identity(), s.transform);
     }
 
@@ -197,8 +185,7 @@ mod tests {
             .unwrap();
         assert_abs_diff_eq!(
             s.normal_at(point(0.0, 1.70711, -0.70711)),
-            vector(0.0, 0.70711, -0.70711),
-            epsilon = EPSILON
+            vector(0.0, 0.70711, -0.70711)
         );
     }
 
@@ -212,14 +199,13 @@ mod tests {
             .unwrap();
         assert_abs_diff_eq!(
             s.normal_at(point(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0),),
-            vector(0.0, 0.97014, -0.24254),
-            epsilon = EPSILON
+            vector(0.0, 0.97014, -0.24254)
         );
     }
 
     #[test]
     fn sphere_gets_a_default_material() {
-        let s = sphere::<f64>();
+        let s = sphere();
         assert_eq!(s.material, material());
     }
 

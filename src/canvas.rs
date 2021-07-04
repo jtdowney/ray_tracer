@@ -1,5 +1,4 @@
-use crate::{ByteScale, Color};
-use num::Float;
+use crate::Color;
 use std::fmt::{self, Write};
 use thiserror::Error;
 
@@ -11,19 +10,13 @@ pub enum CanvasError {
     Format(#[from] fmt::Error),
 }
 
-pub struct Canvas<T>
-where
-    T: Copy,
-{
+pub struct Canvas {
     pub width: usize,
     pub height: usize,
-    pixels: Vec<Color<T>>,
+    pixels: Vec<Color>,
 }
 
-impl<T> Canvas<T>
-where
-    T: Copy + Default,
-{
+impl Canvas {
     pub fn new(width: usize, height: usize) -> Self {
         let pixels = vec![Default::default(); width * height];
         Self {
@@ -32,13 +25,8 @@ where
             pixels,
         }
     }
-}
 
-impl<T> Canvas<T>
-where
-    T: Copy,
-{
-    pub fn write_pixel(&mut self, x: usize, y: usize, pixel: Color<T>) -> Result<(), CanvasError> {
+    pub fn write_pixel(&mut self, x: usize, y: usize, pixel: Color) -> Result<(), CanvasError> {
         if x >= self.width || y >= self.height {
             Err(CanvasError::PixelOutOfBounds(x, y))
         } else {
@@ -48,7 +36,7 @@ where
         }
     }
 
-    pub fn pixel_at(&mut self, x: usize, y: usize) -> Result<Color<T>, CanvasError> {
+    pub fn pixel_at(&mut self, x: usize, y: usize) -> Result<Color, CanvasError> {
         if x >= self.width || y >= self.height {
             Err(CanvasError::PixelOutOfBounds(x, y))
         } else {
@@ -58,7 +46,7 @@ where
         }
     }
 
-    pub fn fill(&mut self, pixel: Color<T>) -> Result<(), CanvasError> {
+    pub fn fill(&mut self, pixel: Color) -> Result<(), CanvasError> {
         for y in 0..self.height {
             for x in 0..self.width {
                 self.write_pixel(x, y, pixel)?;
@@ -67,12 +55,7 @@ where
 
         Ok(())
     }
-}
 
-impl<T> Canvas<T>
-where
-    T: Float + ByteScale + Copy,
-{
     pub fn to_ppm(&self) -> Result<String, CanvasError> {
         let mut output = String::new();
         writeln!(output, "P3")?;
@@ -86,8 +69,7 @@ where
                 .take(self.width as usize)
                 .flat_map(|&p| p)
                 .map(|n| {
-                    let clamped = num::clamp(n, T::zero(), T::one());
-                    let scaled = clamped.byte_scale();
+                    let scaled = num::clamp(n * 255.0, 0.0, 255.0).round();
                     scaled.to_string()
                 })
                 .collect::<Vec<String>>();
@@ -114,21 +96,21 @@ mod tests {
         assert_eq!(canvas.height, 20);
 
         for pixel in canvas.pixels {
-            assert_eq!(pixel, color(0, 0, 0));
+            assert_eq!(pixel, color::BLACK);
         }
     }
 
     #[test]
     fn writing_pixels_to_canvas() {
         let mut canvas = Canvas::new(10, 20);
-        let red = color(1, 0, 0);
+        let red = color(1.0, 0.0, 0.0);
         canvas.write_pixel(2, 3, red).unwrap();
         assert_eq!(canvas.pixel_at(2, 3), Ok(red));
     }
 
     #[test]
     fn constructing_ppm_header() {
-        let canvas: Canvas<f32> = Canvas::new(5, 3);
+        let canvas: Canvas = Canvas::new(5, 3);
         let ppm = canvas.to_ppm().unwrap();
         let mut lines = ppm.lines();
         assert_eq!(lines.next(), Some("P3"));
@@ -181,7 +163,7 @@ mod tests {
 
     #[test]
     fn ppm_files_are_newline_terminated() {
-        let canvas: Canvas<f32> = Canvas::new(5, 3);
+        let canvas: Canvas = Canvas::new(5, 3);
         let ppm = canvas.to_ppm().unwrap();
         let line = ppm.lines().last();
         assert_eq!(Some(""), line);

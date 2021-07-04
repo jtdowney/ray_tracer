@@ -1,103 +1,79 @@
+use crate::EPSILON;
 use approx::AbsDiffEq;
 use std::ops::{Add, Mul, Sub};
 
-pub const BLACK: Color<f64> = Color {
+pub const BLACK: Color = Color {
     r: 0.0,
     g: 0.0,
     b: 0.0,
 };
 
-pub const WHITE: Color<f64> = Color {
+pub const WHITE: Color = Color {
     r: 1.0,
     g: 1.0,
     b: 1.0,
 };
 
-pub fn color<T>(r: T, g: T, b: T) -> Color<T>
-where
-    T: Copy,
-{
+pub fn color(r: f64, g: f64, b: f64) -> Color {
     Color { r, g, b }
 }
 
 #[derive(Debug, Default, PartialEq, Copy, Clone)]
-pub struct Color<T>
-where
-    T: Copy,
-{
-    pub r: T,
-    pub g: T,
-    pub b: T,
+pub struct Color {
+    pub r: f64,
+    pub g: f64,
+    pub b: f64,
 }
 
-impl<T> AbsDiffEq for Color<T>
-where
-    T: AbsDiffEq + Copy,
-    T::Epsilon: Copy,
-{
-    type Epsilon = T::Epsilon;
+impl AbsDiffEq for Color {
+    type Epsilon = f64;
 
-    fn default_epsilon() -> T::Epsilon {
-        T::default_epsilon()
+    fn default_epsilon() -> Self::Epsilon {
+        EPSILON
     }
 
-    fn abs_diff_eq(&self, other: &Self, epsilon: T::Epsilon) -> bool {
-        T::abs_diff_eq(&self.r, &other.r, epsilon)
-            && T::abs_diff_eq(&self.g, &other.g, epsilon)
-            && T::abs_diff_eq(&self.b, &other.b, epsilon)
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        f64::abs_diff_eq(&self.r, &other.r, epsilon)
+            && f64::abs_diff_eq(&self.g, &other.g, epsilon)
+            && f64::abs_diff_eq(&self.b, &other.b, epsilon)
     }
 }
 
-impl<T> Add for Color<T>
-where
-    T: Add<Output = T> + Copy,
-{
-    type Output = Color<T>;
+impl Add for Color {
+    type Output = Color;
 
     fn add(self, rhs: Self) -> Self::Output {
         color(self.r + rhs.r, self.g + rhs.g, self.b + rhs.b)
     }
 }
 
-impl<T> Sub for Color<T>
-where
-    T: Sub<Output = T> + Copy,
-{
-    type Output = Color<T>;
+impl Sub for Color {
+    type Output = Color;
 
     fn sub(self, rhs: Self) -> Self::Output {
         color(self.r - rhs.r, self.g - rhs.g, self.b - rhs.b)
     }
 }
 
-impl<T> Mul<T> for Color<T>
-where
-    T: Mul<Output = T> + Copy,
-{
-    type Output = Color<T>;
+impl Mul<f64> for Color {
+    type Output = Color;
 
-    fn mul(self, rhs: T) -> Self::Output {
+    fn mul(self, rhs: f64) -> Self::Output {
         color(self.r * rhs, self.g * rhs, self.b * rhs)
     }
 }
 
-impl<T> Mul for Color<T>
-where
-    T: Mul<Output = T> + Copy,
-{
-    type Output = Color<T>;
+impl Mul for Color {
+    type Output = Color;
 
     fn mul(self, rhs: Self) -> Self::Output {
         color(self.r * rhs.r, self.g * rhs.g, self.b * rhs.b)
     }
 }
 
-impl<T> IntoIterator for Color<T>
-where
-    T: Copy,
-{
-    type Item = T;
-    type IntoIter = ColorIterator<T>;
+impl IntoIterator for Color {
+    type Item = f64;
+    type IntoIter = ColorIterator;
 
     fn into_iter(self) -> Self::IntoIter {
         ColorIterator {
@@ -107,19 +83,13 @@ where
     }
 }
 
-pub struct ColorIterator<T>
-where
-    T: Copy,
-{
-    color: Color<T>,
+pub struct ColorIterator {
+    color: Color,
     index: usize,
 }
 
-impl<T> Iterator for ColorIterator<T>
-where
-    T: Copy,
-{
-    type Item = T;
+impl Iterator for ColorIterator {
+    type Item = f64;
 
     fn next(&mut self) -> Option<Self::Item> {
         let item = match self.index {
@@ -137,7 +107,6 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::EPSILON;
     use approx::assert_abs_diff_eq;
 
     #[test]
@@ -151,19 +120,19 @@ mod tests {
     fn subtracting_colors() {
         let c1 = color(0.9, 0.6, 0.75);
         let c2 = color(0.7, 0.1, 0.25);
-        assert_abs_diff_eq!(c1 - c2, color(0.2, 0.5, 0.5), epsilon = EPSILON);
+        assert_abs_diff_eq!(c1 - c2, color(0.2, 0.5, 0.5));
     }
 
     #[test]
     fn multiplying_color_by_scalar() {
         let c = color(0.2, 0.3, 0.4);
-        assert_abs_diff_eq!(c * 2.0, color(0.4, 0.6, 0.8), epsilon = EPSILON);
+        assert_abs_diff_eq!(c * 2.0, color(0.4, 0.6, 0.8));
     }
 
     #[test]
     fn multiplying_colors() {
         let c1 = color(1.0, 0.2, 0.4);
         let c2 = color(0.9, 1.0, 0.1);
-        assert_abs_diff_eq!(c1 * c2, color(0.9, 0.2, 0.04), epsilon = EPSILON);
+        assert_abs_diff_eq!(c1 * c2, color(0.9, 0.2, 0.04));
     }
 }

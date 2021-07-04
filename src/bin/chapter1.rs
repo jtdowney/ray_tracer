@@ -1,17 +1,15 @@
 use ray_tracer::{point, vector, Point, Vector};
 use std::fmt;
 
-type N = f32;
-
 #[derive(Copy, Clone)]
 struct Projectile {
-    position: Point<N>,
-    velocity: Vector<N>,
+    position: Point,
+    velocity: Vector,
 }
 
 struct Simulation {
-    gravity: Vector<N>,
-    wind: Vector<N>,
+    gravity: Vector,
+    wind: Vector,
     projectile: Projectile,
 }
 

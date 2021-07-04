@@ -1,21 +1,16 @@
 use crate::{Color, Point};
 
-pub fn point_light<T>(position: Point<T>, intensity: Color<T>) -> PointLight<T>
-where
-    T: Copy,
-{
+pub fn point_light(position: Point, intensity: Color) -> PointLight {
     PointLight {
         position,
         intensity,
     }
 }
 
-pub struct PointLight<T>
-where
-    T: Copy,
-{
-    pub position: Point<T>,
-    pub intensity: Color<T>,
+#[derive(Clone, Copy)]
+pub struct PointLight {
+    pub position: Point,
+    pub intensity: Color,
 }
 
 #[cfg(test)]
@@ -25,8 +20,8 @@ mod tests {
 
     #[test]
     fn creating_point_light() {
-        let intensity = color(1, 1, 1);
-        let position = point(0, 0, 0);
+        let intensity = color::WHITE;
+        let position = point::ORIGIN;
         let light = point_light(position, intensity);
         assert_eq!(light.position, position);
         assert_eq!(light.intensity, intensity);

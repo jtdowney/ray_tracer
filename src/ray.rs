@@ -1,31 +1,21 @@
 use crate::{Matrix4, Point, Vector};
-use std::ops::{Add, Mul};
 
-pub fn ray<T>(origin: Point<T>, direction: Vector<T>) -> Ray<T>
-where
-    T: Copy,
-{
+pub fn ray(origin: Point, direction: Vector) -> Ray {
     Ray { origin, direction }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Ray<T>
-where
-    T: Copy,
-{
-    pub origin: Point<T>,
-    pub direction: Vector<T>,
+pub struct Ray {
+    pub origin: Point,
+    pub direction: Vector,
 }
 
-impl<T> Ray<T>
-where
-    T: Mul<Output = T> + Add<Output = T> + Copy,
-{
-    pub fn position(&self, time: T) -> Point<T> {
+impl Ray {
+    pub fn position(&self, time: f64) -> Point {
         self.origin + self.direction * time
     }
 
-    pub fn transform(&self, transform: Matrix4<T>) -> Ray<T> {
+    pub fn transform(&self, transform: Matrix4) -> Ray {
         Ray {
             origin: transform * self.origin,
             direction: transform * self.direction,
@@ -50,10 +40,10 @@ mod tests {
     #[test]
     fn computing_point_from_distance() {
         let r = ray(point(2.0, 3.0, 4.0), vector(1.0, 0.0, 0.0));
-        assert_eq!(Point::new(2.0, 3.0, 4.0), r.position(0.0));
-        assert_eq!(Point::new(3.0, 3.0, 4.0), r.position(1.0));
-        assert_eq!(Point::new(1.0, 3.0, 4.0), r.position(-1.0));
-        assert_eq!(Point::new(4.5, 3.0, 4.0), r.position(2.5));
+        assert_eq!(point(2.0, 3.0, 4.0), r.position(0.0));
+        assert_eq!(point(3.0, 3.0, 4.0), r.position(1.0));
+        assert_eq!(point(1.0, 3.0, 4.0), r.position(-1.0));
+        assert_eq!(point(4.5, 3.0, 4.0), r.position(2.5));
     }
 
     #[test]
