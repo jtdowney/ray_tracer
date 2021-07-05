@@ -1,6 +1,5 @@
 use crate::{intersection, material, point, Intersections, Material, Matrix4, Ray, Vector};
 use derive_builder::Builder;
-use num::Float;
 use point::Point;
 
 pub fn sphere() -> Sphere {
@@ -27,7 +26,7 @@ impl Sphere {
         if discriminant.is_sign_negative() {
             Intersections::empty()
         } else {
-            let discriminant_root = Float::sqrt(discriminant);
+            let discriminant_root = discriminant.sqrt();
             let t1 = (-b - discriminant_root) / (2.0 * a);
             let t2 = (-b + discriminant_root) / (2.0 * a);
 

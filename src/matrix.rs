@@ -1,9 +1,7 @@
 use crate::{point, vector, Point, Vector, EPSILON};
 use approx::AbsDiffEq;
-use core::f64;
 use generic_array::{ArrayLength, GenericArray};
-use num::Integer;
-use num::Zero;
+use num::{Integer, Zero};
 use std::{
     iter::{self, FromIterator},
     marker::PhantomData,
