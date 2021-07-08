@@ -1,4 +1,4 @@
-use crate::{Point, Ray, Sphere, Vector};
+use crate::{Point, Ray, Sphere, Vector, EPSILON};
 use ord_subset::OrdSubsetIterExt;
 use std::{iter::FromIterator, slice, vec};
 
@@ -16,6 +16,7 @@ pub struct Computations<'o> {
     pub time: f64,
     pub object: &'o Sphere,
     pub point: Point,
+    pub over_point: Point,
     pub eye_vector: Vector,
     pub normal_vector: Vector,
     pub inside: bool,
@@ -37,10 +38,13 @@ impl<'o> Intersection<'o> {
             inside = false;
         }
 
+        let over_point = point + normal_vector * EPSILON;
+
         Computations {
             time,
             object,
             point,
+            over_point,
             eye_vector,
             normal_vector,
             inside,
@@ -93,7 +97,7 @@ impl<'o> IntoIterator for Intersections<'o> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{point, ray, sphere, vector};
+    use crate::{point, ray, sphere, transformations, vector, SphereBuilder};
 
     #[test]
     fn intersection_has_time_and_object() {
@@ -210,5 +214,18 @@ mod tests {
         assert_eq!(comps.point, point(0.0, 0.0, 1.0));
         assert_eq!(comps.eye_vector, vector(0.0, 0.0, -1.0));
         assert_eq!(comps.normal_vector, vector(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn hit_should_offset_point() {
+        let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
+        let shape = SphereBuilder::default()
+            .transform(transformations::translation(0.0, 0.0, 1.0))
+            .build()
+            .unwrap();
+        let i = intersection(5.0, &shape);
+        let comps = i.prepare_computations(r);
+        assert!(comps.over_point.z < -EPSILON / 2.0);
+        assert!(comps.point.z > comps.over_point.z);
     }
 }

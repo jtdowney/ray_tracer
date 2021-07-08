@@ -1,4 +1,6 @@
-use crate::{color, Color, Computations, Intersection, Intersections, PointLight, Ray, Sphere};
+use crate::{
+    color, ray, Color, Computations, Intersection, Intersections, Point, PointLight, Ray, Sphere,
+};
 use derive_builder::Builder;
 use ord_subset::OrdSubsetSliceExt;
 
@@ -63,11 +65,13 @@ impl World {
 
     pub fn shade_hit<'o>(&'o self, comps: Computations<'o>) -> Color {
         if let Some(light) = self.light {
+            let in_shadow = self.is_shadowed(comps.over_point);
             comps.object.material.lighting(
                 &light,
-                comps.point,
+                comps.over_point,
                 comps.eye_vector,
                 comps.normal_vector,
+                in_shadow,
             )
         } else {
             color::BLACK
@@ -83,14 +87,32 @@ impl World {
             color::BLACK
         }
     }
+
+    pub fn is_shadowed(&self, point: Point) -> bool {
+        if let Some(light) = self.light {
+            let v = light.position - point;
+            let distance = v.magnitude();
+            let direction = v.normalize();
+            let ray = ray(point, direction);
+            let intersections = self.intersect(ray);
+
+            if let Some(hit) = intersections.hit() {
+                hit.time < distance
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
-        color, intersection, point, point_light, ray, transformations, vector, MaterialBuilder,
-        SphereBuilder,
+        color, intersection, point, point_light, ray, sphere, transformations, vector,
+        MaterialBuilder, SphereBuilder,
     };
     use approx::assert_abs_diff_eq;
 
@@ -195,5 +217,53 @@ mod tests {
         let r = ray(point(0.0, 0.0, 0.75), vector(0.0, 0.0, -1.0));
         let c = w.color_at(r);
         assert_abs_diff_eq!(c, inner.material.color);
+    }
+
+    #[test]
+    fn no_shadow_when_nothing_is_colinear_with_point_and_light() {
+        let w = default_world();
+        let p = point(0.0, 10.0, 0.0);
+        assert!(!w.is_shadowed(p));
+    }
+
+    #[test]
+    fn shadow_when_an_object_is_between_point_and_light() {
+        let w = default_world();
+        let p = point(10.0, -10.0, 10.0);
+        assert!(w.is_shadowed(p));
+    }
+
+    #[test]
+    fn no_shadow_when_object_is_behind_light() {
+        let w = default_world();
+        let p = point(-20.0, 20.0, -20.0);
+        assert!(!w.is_shadowed(p));
+    }
+
+    #[test]
+    fn no_shadow_when_object_is_behind_point() {
+        let w = default_world();
+        let p = point(-2.0, 2.0, -2.0);
+        assert!(!w.is_shadowed(p));
+    }
+
+    #[test]
+    fn shade_hit_when_in_shadow() {
+        let w = WorldBuilder::default()
+            .light(point_light(point(0.0, 0.0, -10.0), color::WHITE))
+            .object(sphere())
+            .object(
+                SphereBuilder::default()
+                    .transform(transformations::translation(0.0, 0.0, 10.0))
+                    .build()
+                    .unwrap(),
+            )
+            .build()
+            .unwrap();
+
+        let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
+        let i = intersection(4.0, &w.objects[1]);
+        let comps = i.prepare_computations(r);
+        assert_eq!(w.shade_hit(comps), color(0.1, 0.1, 0.1));
     }
 }

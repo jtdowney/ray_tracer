@@ -26,6 +26,7 @@ impl Material {
         position: Point,
         eye_vector: Vector,
         normal_vector: Vector,
+        in_shadow: bool,
     ) -> Color {
         let effective_color = self.color * light.intensity;
         let light_vector = (light.position - position).normalize();
@@ -49,14 +50,18 @@ impl Material {
             }
         }
 
-        ambient + diffuse + specular
+        if in_shadow {
+            ambient
+        } else {
+            ambient + diffuse + specular
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{point, point_light, vector};
+    use crate::{color, point, point_light, vector};
     use approx::assert_abs_diff_eq;
 
     #[test]
@@ -78,7 +83,7 @@ mod tests {
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             color(1.9, 1.9, 1.9),
-            m.lighting(&light, position, eyev, normalv)
+            m.lighting(&light, position, eyev, normalv, false)
         );
     }
 
@@ -89,7 +94,10 @@ mod tests {
         let eyev = vector(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0);
         let normalv = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
-        assert_eq!(color::WHITE, m.lighting(&light, position, eyev, normalv));
+        assert_eq!(
+            color::WHITE,
+            m.lighting(&light, position, eyev, normalv, false)
+        );
     }
 
     #[test]
@@ -101,7 +109,7 @@ mod tests {
         let light = point_light(point(0.0, 10.0, -10.0), color::WHITE);
         assert_abs_diff_eq!(
             color(0.7364, 0.7364, 0.7364),
-            m.lighting(&light, position, eyev, normalv)
+            m.lighting(&light, position, eyev, normalv, false)
         );
     }
 
@@ -114,7 +122,7 @@ mod tests {
         let light = point_light(point(0.0, 10.0, -10.0), color::WHITE);
         assert_abs_diff_eq!(
             color(1.63639, 1.63639, 1.63639),
-            m.lighting(&light, position, eyev, normalv)
+            m.lighting(&light, position, eyev, normalv, false)
         );
     }
 
@@ -127,7 +135,19 @@ mod tests {
         let light = point_light(point(0.0, 0.0, 10.0), color::WHITE);
         assert_eq!(
             color(0.1, 0.1, 0.1),
-            m.lighting(&light, position, eyev, normalv)
+            m.lighting(&light, position, eyev, normalv, false)
         );
+    }
+
+    #[test]
+    fn lighting_with_the_surface_in_shadow() {
+        let m = material();
+        let position = point::ORIGIN;
+        let eye_vector = vector(0.0, 0.0, -1.0);
+        let normal_vector = vector(0.0, 0.0, -1.0);
+        let light = point_light(point(0.0, 0.0, -10.0), color(1.0, 1.0, 1.0));
+        let in_shadow = true;
+        let c = m.lighting(&light, position, eye_vector, normal_vector, in_shadow);
+        assert_abs_diff_eq!(c, color(0.1, 0.1, 0.1));
     }
 }
