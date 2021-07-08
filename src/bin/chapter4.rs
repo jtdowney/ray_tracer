@@ -10,8 +10,8 @@ fn main() -> anyhow::Result<()> {
 
     for _ in 0..12 {
         canvas.write_pixel(
-            (p.x + half_width).round() as usize,
-            (p.y + half_width).round() as usize,
+            (p.x + half_width).round() as u16,
+            (p.y + half_width).round() as u16,
             color(1.0, 0.5, 0.0),
         )?;
 

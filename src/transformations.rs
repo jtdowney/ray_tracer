@@ -1,4 +1,4 @@
-use crate::Matrix4;
+use crate::{matrix, Matrix4, Point, Vector};
 
 pub fn translation(x: f64, y: f64, z: f64) -> Matrix4 {
     let mut transform = Matrix4::identity();
@@ -55,6 +55,18 @@ pub fn shearing(x1: f64, x2: f64, y1: f64, y2: f64, z1: f64, z2: f64) -> Matrix4
     transform[(2, 0)] = z1;
     transform[(2, 1)] = z2;
     transform
+}
+
+pub fn view(from: Point, to: Point, up: Vector) -> Matrix4 {
+    let forward = (to - from).normalize();
+    let upn = up.normalize();
+    let left = forward.cross(upn);
+    let true_up = left.cross(forward);
+    let orientation = matrix(&[
+        left.x, left.y, left.z, 0.0, true_up.x, true_up.y, true_up.z, 0.0, -forward.x, -forward.y,
+        -forward.z, 0.0, 0.0, 0.0, 0.0, 1.0,
+    ]);
+    orientation * translation(-from.x, -from.y, -from.z)
 }
 
 #[cfg(test)]
@@ -232,5 +244,43 @@ mod tests {
         let c = translation(10.0, 5.0, 7.0);
         let transform = c * b * a;
         assert_abs_diff_eq!(transform * p, point(15.0, 0.0, 7.0));
+    }
+
+    #[test]
+    fn view_transform_for_default_orientation() {
+        let from = point(0.0, 0.0, 0.0);
+        let to = point(0.0, 0.0, -1.0);
+        let up = vector(0.0, 1.0, 0.0);
+        assert_eq!(Matrix4::identity(), view(from, to, up));
+    }
+
+    #[test]
+    fn view_transform_looks_positive_z_direction() {
+        let from = point(0.0, 0.0, 0.0);
+        let to = point(0.0, 0.0, 1.0);
+        let up = vector(0.0, 1.0, 0.0);
+        assert_eq!(scaling(-1.0, 1.0, -1.0), view(from, to, up));
+    }
+
+    #[test]
+    fn view_transform_moves_the_world() {
+        let from = point(0.0, 0.0, 8.0);
+        let to = point(0.0, 0.0, 0.0);
+        let up = vector(0.0, 1.0, 0.0);
+        assert_eq!(translation(0.0, 0.0, -8.0), view(from, to, up));
+    }
+
+    #[test]
+    fn view_transformation() {
+        let from = point(1.0, 3.0, 2.0);
+        let to = point(4.0, -2.0, 8.0);
+        let up = vector(1.0, 1.0, 0.0);
+        assert_abs_diff_eq!(
+            matrix(&[
+                -0.50709, 0.50709, 0.67612, -2.36643, 0.76772, 0.60609, 0.12122, -2.82843,
+                -0.35857, 0.59761, -0.71714, 0.0, 0.0, 0.0, 0.0, 1.0
+            ]),
+            view(from, to, up)
+        );
     }
 }

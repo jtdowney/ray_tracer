@@ -1,4 +1,4 @@
-use crate::Sphere;
+use crate::{Point, Ray, Sphere, Vector};
 use ord_subset::OrdSubsetIterExt;
 use std::{iter::FromIterator, slice, vec};
 
@@ -10,6 +10,42 @@ pub fn intersection(time: f64, object: &Sphere) -> Intersection {
 pub struct Intersection<'o> {
     pub time: f64,
     pub object: &'o Sphere,
+}
+
+pub struct Computations<'o> {
+    pub time: f64,
+    pub object: &'o Sphere,
+    pub point: Point,
+    pub eye_vector: Vector,
+    pub normal_vector: Vector,
+    pub inside: bool,
+}
+
+impl<'o> Intersection<'o> {
+    pub fn prepare_computations(&self, ray: Ray) -> Computations<'o> {
+        let time = self.time;
+        let object = self.object;
+        let point = ray.position(time);
+        let eye_vector = -ray.direction;
+        let mut normal_vector = object.normal_at(point);
+        let inside;
+
+        if normal_vector.dot(eye_vector).is_sign_negative() {
+            inside = true;
+            normal_vector = -normal_vector;
+        } else {
+            inside = false;
+        }
+
+        Computations {
+            time,
+            object,
+            point,
+            eye_vector,
+            normal_vector,
+            inside,
+        }
+    }
 }
 
 pub struct Intersections<'o>(Vec<Intersection<'o>>);
@@ -57,7 +93,7 @@ impl<'o> IntoIterator for Intersections<'o> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sphere;
+    use crate::{point, ray, sphere, vector};
 
     #[test]
     fn intersection_has_time_and_object() {
@@ -137,5 +173,42 @@ mod tests {
         let xs = Intersections(vec![i1, i2, i3, i4.clone()]);
         let i = xs.hit().unwrap();
         assert_eq!(i, &i4);
+    }
+
+    #[test]
+    fn precomputing_the_state_of_an_intersection() {
+        let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
+        let shape = sphere();
+        let i = intersection(4.0, &shape);
+        let comps = i.prepare_computations(r);
+
+        assert_eq!(comps.time, i.time);
+        assert_eq!(comps.object, i.object);
+        assert_eq!(comps.point, point(0.0, 0.0, -1.0));
+        assert_eq!(comps.eye_vector, vector(0.0, 0.0, -1.0));
+        assert_eq!(comps.normal_vector, vector(0.0, 0.0, -1.0));
+    }
+
+    #[test]
+    fn hit_when_an_intersection_occurs_on_the_outside() {
+        let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
+        let shape = sphere();
+        let i = intersection(4.0, &shape);
+        let comps = i.prepare_computations(r);
+
+        assert!(!comps.inside);
+    }
+
+    #[test]
+    fn hit_when_an_intersection_occurs_on_the_inside() {
+        let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
+        let shape = sphere();
+        let i = intersection(1.0, &shape);
+        let comps = i.prepare_computations(r);
+
+        assert!(comps.inside);
+        assert_eq!(comps.point, point(0.0, 0.0, 1.0));
+        assert_eq!(comps.eye_vector, vector(0.0, 0.0, -1.0));
+        assert_eq!(comps.normal_vector, vector(0.0, 0.0, -1.0));
     }
 }

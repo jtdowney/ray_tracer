@@ -1,3 +1,4 @@
+mod camera;
 mod canvas;
 pub mod color;
 mod intersection;
@@ -9,7 +10,9 @@ mod ray;
 mod sphere;
 pub mod transformations;
 mod vector;
+mod world;
 
+pub use camera::*;
 pub use canvas::*;
 pub use color::*;
 pub use intersection::*;
@@ -20,5 +23,6 @@ pub use point::*;
 pub use ray::*;
 pub use sphere::*;
 pub use vector::*;
+pub use world::*;
 
 pub const EPSILON: f64 = 0.0001;

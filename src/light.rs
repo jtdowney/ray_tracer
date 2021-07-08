@@ -7,7 +7,7 @@ pub fn point_light(position: Point, intensity: Color) -> PointLight {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PointLight {
     pub position: Point,
     pub intensity: Color,

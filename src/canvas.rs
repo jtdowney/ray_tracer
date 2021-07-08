@@ -5,20 +5,20 @@ use thiserror::Error;
 #[derive(Error, Debug, PartialEq)]
 pub enum CanvasError {
     #[error("out out bounds pixel write at {0}, {1}")]
-    PixelOutOfBounds(usize, usize),
+    PixelOutOfBounds(u16, u16),
     #[error("unable to format PPM")]
     Format(#[from] fmt::Error),
 }
 
 pub struct Canvas {
-    pub width: usize,
-    pub height: usize,
+    pub width: u16,
+    pub height: u16,
     pixels: Vec<Color>,
 }
 
 impl Canvas {
-    pub fn new(width: usize, height: usize) -> Self {
-        let pixels = vec![Default::default(); width * height];
+    pub fn new(width: u16, height: u16) -> Self {
+        let pixels = vec![Default::default(); width as usize * height as usize];
         Self {
             width,
             height,
@@ -26,21 +26,21 @@ impl Canvas {
         }
     }
 
-    pub fn write_pixel(&mut self, x: usize, y: usize, pixel: Color) -> Result<(), CanvasError> {
+    pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color) -> Result<(), CanvasError> {
         if x >= self.width || y >= self.height {
             Err(CanvasError::PixelOutOfBounds(x, y))
         } else {
-            let index = y * self.width + x;
+            let index = y as usize * self.width as usize + x as usize;
             self.pixels[index] = pixel;
             Ok(())
         }
     }
 
-    pub fn pixel_at(&mut self, x: usize, y: usize) -> Result<Color, CanvasError> {
+    pub fn pixel_at(&self, x: u16, y: u16) -> Result<Color, CanvasError> {
         if x >= self.width || y >= self.height {
             Err(CanvasError::PixelOutOfBounds(x, y))
         } else {
-            let index = y * self.width + x;
+            let index = y as usize * self.width as usize + x as usize;
             let pixel = self.pixels[index];
             Ok(pixel)
         }
