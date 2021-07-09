@@ -1,8 +1,9 @@
 use crate::{
-    color, ray, Color, Computations, Intersection, Intersections, Point, PointLight, Ray, Sphere,
+    color, ray, Color, Computations, Intersection, Intersections, Point, PointLight, Ray, Shape,
 };
 use derive_builder::Builder;
 use ord_subset::OrdSubsetSliceExt;
+use std::rc::Rc;
 
 #[cfg(test)]
 pub fn default_world() -> World {
@@ -33,16 +34,20 @@ pub fn default_world() -> World {
         .unwrap()
 }
 
-#[derive(Debug, Clone, Builder, Default)]
+#[derive(Clone, Builder)]
 pub struct World {
     #[builder(setter(strip_option), default)]
     light: Option<PointLight>,
     #[builder(default)]
-    objects: Vec<Sphere>,
+    objects: Vec<Rc<dyn Shape>>,
 }
 
 impl WorldBuilder {
-    pub fn object(&mut self, object: Sphere) -> &mut WorldBuilder {
+    pub fn object<S>(&mut self, object: S) -> &mut WorldBuilder
+    where
+        S: Shape + 'static,
+    {
+        let object = Rc::new(object) as Rc<dyn Shape>;
         if let Some(ref mut objects) = self.objects {
             objects.push(object);
         } else {
@@ -66,7 +71,7 @@ impl World {
     pub fn shade_hit<'o>(&'o self, comps: Computations<'o>) -> Color {
         if let Some(light) = self.light {
             let in_shadow = self.is_shadowed(comps.over_point);
-            comps.object.material.lighting(
+            comps.object.material().lighting(
                 &light,
                 comps.over_point,
                 comps.eye_vector,
@@ -112,7 +117,7 @@ mod tests {
     use super::*;
     use crate::{
         color, intersection, point, point_light, ray, sphere, transformations, vector,
-        MaterialBuilder, SphereBuilder,
+        SphereBuilder,
     };
     use approx::assert_abs_diff_eq;
 
@@ -130,27 +135,7 @@ mod tests {
             w.light,
             Some(point_light(point(-10.0, 10.0, -10.0), color::WHITE))
         );
-        assert_eq!(
-            w.objects[0],
-            SphereBuilder::default()
-                .material(
-                    MaterialBuilder::default()
-                        .color(color(0.8, 1.0, 0.6))
-                        .diffuse(0.7)
-                        .specular(0.2)
-                        .build()
-                        .unwrap(),
-                )
-                .build()
-                .unwrap()
-        );
-        assert_eq!(
-            w.objects[1],
-            SphereBuilder::default()
-                .transform(transformations::scaling(0.5, 0.5, 0.5))
-                .build()
-                .unwrap(),
-        );
+        assert_eq!(w.objects.len(), 2);
     }
 
     #[test]
@@ -170,7 +155,7 @@ mod tests {
         let w = default_world();
         let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[0];
-        let i = intersection(4.0, shape);
+        let i = intersection(4.0, shape.as_ref());
         let comps = i.prepare_computations(r);
         let c = w.shade_hit(comps);
         assert_abs_diff_eq!(c, color(0.38066, 0.47583, 0.2855));
@@ -183,7 +168,7 @@ mod tests {
 
         let r = ray(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
         let shape = &w.objects[1];
-        let i = intersection(0.5, shape);
+        let i = intersection(0.5, shape.as_ref());
         let comps = i.prepare_computations(r);
         let c = w.shade_hit(comps);
         assert_abs_diff_eq!(c, color(0.90498, 0.90498, 0.90498));
@@ -208,15 +193,20 @@ mod tests {
     #[test]
     fn color_with_an_intersection_behind_the_ray() {
         let mut w = default_world();
-        let outer = &mut w.objects[0];
-        outer.material.ambient = 1.0;
-        let mut inner = &mut w.objects[1];
-        inner.material.ambient = 1.0;
+        let outer = Rc::get_mut(&mut w.objects[0]).unwrap();
+        let mut material = outer.material();
+        material.ambient = 1.0;
+        outer.set_material(material);
+
+        let inner = Rc::get_mut(&mut w.objects[1]).unwrap();
+        let mut material = inner.material();
+        material.ambient = 1.0;
+        inner.set_material(material);
 
         let inner = &w.objects[1];
         let r = ray(point(0.0, 0.0, 0.75), vector(0.0, 0.0, -1.0));
         let c = w.color_at(r);
-        assert_abs_diff_eq!(c, inner.material.color);
+        assert_abs_diff_eq!(c, inner.material().color);
     }
 
     #[test]
@@ -262,7 +252,7 @@ mod tests {
             .unwrap();
 
         let r = ray(point(0.0, 0.0, 5.0), vector(0.0, 0.0, 1.0));
-        let i = intersection(4.0, &w.objects[1]);
+        let i = intersection(4.0, w.objects[1].as_ref());
         let comps = i.prepare_computations(r);
         assert_eq!(w.shade_hit(comps), color(0.1, 0.1, 0.1));
     }

@@ -1,4 +1,4 @@
-use ray_tracer::{color, point, ray, Canvas, SphereBuilder};
+use ray_tracer::{color, point, ray, Canvas, Shape, SphereBuilder};
 
 fn main() -> anyhow::Result<()> {
     let ray_origin = point(0.0, 0.0, -5.0);

@@ -1,4 +1,4 @@
-use crate::{intersection, material, point, Intersections, Material, Matrix4, Ray, Vector};
+use crate::{intersection, material, point, Intersections, Material, Matrix4, Ray, Shape, Vector};
 use derive_builder::Builder;
 use point::Point;
 
@@ -14,9 +14,24 @@ pub struct Sphere {
     pub material: Material,
 }
 
-impl Sphere {
-    pub fn intersect(&self, ray: Ray) -> Intersections {
-        let ray = ray.transform(self.transform.inverse());
+impl Shape for Sphere {
+    fn transform(&self) -> Matrix4 {
+        self.transform
+    }
+
+    fn set_transform(&mut self, transform: Matrix4) {
+        self.transform = transform;
+    }
+
+    fn material(&self) -> Material {
+        self.material
+    }
+
+    fn set_material(&mut self, material: Material) {
+        self.material = material;
+    }
+
+    fn local_intersect(&self, ray: Ray) -> Intersections {
         let sphere_to_ray = ray.origin - point::ORIGIN;
         let a = ray.direction.dot(ray.direction);
         let b = 2.0 * ray.direction.dot(sphere_to_ray);
@@ -31,17 +46,12 @@ impl Sphere {
             let t2 = (-b + discriminant_root) / (2.0 * a);
 
             let intersections = vec![intersection(t1, self), intersection(t2, self)];
-
             intersections.into()
         }
     }
 
-    pub fn normal_at(&self, world_point: Point) -> Vector {
-        let transform_inverse = self.transform.inverse();
-        let object_point = transform_inverse * world_point;
-        let object_normal = object_point - point::ORIGIN;
-        let world_normal = transform_inverse.transpose() * object_normal;
-        world_normal.normalize()
+    fn local_normal_at(&self, point: Point) -> Vector {
+        point - point::ORIGIN
     }
 }
 

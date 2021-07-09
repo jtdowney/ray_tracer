@@ -1,20 +1,39 @@
-use crate::{Point, Ray, Sphere, Vector, EPSILON};
+use crate::{Point, Ray, Shape, Vector, EPSILON};
 use ord_subset::OrdSubsetIterExt;
-use std::{iter::FromIterator, slice, vec};
+use std::{
+    fmt::{self, Debug, Formatter},
+    iter::FromIterator,
+    ptr, slice, vec,
+};
 
-pub fn intersection(time: f64, object: &Sphere) -> Intersection {
+pub fn intersection(time: f64, object: &dyn Shape) -> Intersection {
     Intersection { time, object }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone)]
 pub struct Intersection<'o> {
     pub time: f64,
-    pub object: &'o Sphere,
+    pub object: &'o dyn Shape,
+}
+
+impl<'o> Debug for Intersection<'o> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Intersection")
+            .field("time", &self.time)
+            .field("object", &format!("{:p}", self.object))
+            .finish()
+    }
+}
+
+impl<'o> PartialEq for Intersection<'o> {
+    fn eq(&self, other: &Self) -> bool {
+        self.time == other.time && ptr::eq(self.object, other.object)
+    }
 }
 
 pub struct Computations<'o> {
     pub time: f64,
-    pub object: &'o Sphere,
+    pub object: &'o dyn Shape,
     pub point: Point,
     pub over_point: Point,
     pub eye_vector: Vector,
@@ -105,7 +124,7 @@ mod tests {
         let i = intersection(3.5, &s);
 
         assert_eq!(i.time, 3.5);
-        assert_eq!(i.object, &s);
+        assert!(ptr::eq(i.object, &s as &dyn Shape));
     }
 
     #[test]
@@ -187,7 +206,7 @@ mod tests {
         let comps = i.prepare_computations(r);
 
         assert_eq!(comps.time, i.time);
-        assert_eq!(comps.object, i.object);
+        assert!(ptr::eq(comps.object, i.object));
         assert_eq!(comps.point, point(0.0, 0.0, -1.0));
         assert_eq!(comps.eye_vector, vector(0.0, 0.0, -1.0));
         assert_eq!(comps.normal_vector, vector(0.0, 0.0, -1.0));

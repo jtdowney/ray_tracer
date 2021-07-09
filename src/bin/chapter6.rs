@@ -1,4 +1,4 @@
-use ray_tracer::{color, point, point_light, ray, Canvas, MaterialBuilder, SphereBuilder};
+use ray_tracer::{color, point, point_light, ray, Canvas, MaterialBuilder, Shape, SphereBuilder};
 
 fn main() -> anyhow::Result<()> {
     let ray_origin = point(0.0, 0.0, -5.0);
@@ -37,7 +37,7 @@ fn main() -> anyhow::Result<()> {
                 let eye = -ray.direction;
                 let color = hit
                     .object
-                    .material
+                    .material()
                     .lighting(&light, point, eye, normal, false);
                 canvas.write_pixel(x, y, color)?;
             }
