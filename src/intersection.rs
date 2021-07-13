@@ -27,7 +27,9 @@ impl<'o> Debug for Intersection<'o> {
 
 impl<'o> PartialEq for Intersection<'o> {
     fn eq(&self, other: &Self) -> bool {
-        self.time == other.time && ptr::eq(self.object, other.object)
+        let self_ptr = self.object as *const _ as *const u8;
+        let other_ptr = other.object as *const _ as *const u8;
+        self.time == other.time && ptr::eq(self_ptr, other_ptr)
     }
 }
 
