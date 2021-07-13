@@ -6,9 +6,9 @@ pub use plane::*;
 pub use sphere::*;
 
 pub trait Shape {
-    fn transform(&self) -> Matrix4;
+    fn transform(&self) -> &Matrix4;
     fn set_transform(&mut self, transform: Matrix4);
-    fn material(&self) -> Material;
+    fn material(&self) -> &Material;
     fn set_material(&mut self, material: Material);
     fn local_intersect(&self, ray: Ray) -> Intersections;
     fn local_normal_at(&self, point: Point) -> Vector;
@@ -40,7 +40,7 @@ mod tests {
         TestShapeBuilder::default().build().unwrap()
     }
 
-    #[derive(Debug, Clone, Builder)]
+    #[derive(Builder)]
     struct TestShape {
         #[builder(default = "Matrix4::identity()")]
         pub transform: Matrix4,
@@ -51,12 +51,12 @@ mod tests {
     }
 
     impl Shape for TestShape {
-        fn transform(&self) -> Matrix4 {
-            self.transform
+        fn transform(&self) -> &Matrix4 {
+            &self.transform
         }
 
-        fn material(&self) -> Material {
-            self.material
+        fn material(&self) -> &Material {
+            &self.material
         }
 
         fn local_intersect(&self, ray: Ray) -> Intersections {
@@ -80,8 +80,7 @@ mod tests {
     #[test]
     fn default_transformation() {
         let s = test_shape();
-        assert_eq!(s.transform(), Matrix4::identity());
-        assert_eq!(s.material(), material());
+        assert_eq!(s.transform(), &Matrix4::identity());
     }
 
     #[test]

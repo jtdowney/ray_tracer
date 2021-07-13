@@ -5,7 +5,7 @@ pub fn plane() -> Plane {
     PlaneBuilder::default().build().unwrap()
 }
 
-#[derive(Builder, Debug, PartialEq, Clone, Copy)]
+#[derive(Builder, Clone)]
 pub struct Plane {
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
@@ -14,16 +14,16 @@ pub struct Plane {
 }
 
 impl Shape for Plane {
-    fn transform(&self) -> Matrix4 {
-        self.transform
+    fn transform(&self) -> &Matrix4 {
+        &self.transform
     }
 
     fn set_transform(&mut self, transform: Matrix4) {
         self.transform = transform;
     }
 
-    fn material(&self) -> Material {
-        self.material
+    fn material(&self) -> &Material {
+        &self.material
     }
 
     fn set_material(&mut self, material: Material) {

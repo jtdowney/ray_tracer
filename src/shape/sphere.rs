@@ -6,7 +6,7 @@ pub fn sphere() -> Sphere {
     SphereBuilder::default().build().unwrap()
 }
 
-#[derive(Builder, Debug, PartialEq, Clone, Copy)]
+#[derive(Builder, Clone)]
 pub struct Sphere {
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
@@ -15,16 +15,16 @@ pub struct Sphere {
 }
 
 impl Shape for Sphere {
-    fn transform(&self) -> Matrix4 {
-        self.transform
+    fn transform(&self) -> &Matrix4 {
+        &self.transform
     }
 
     fn set_transform(&mut self, transform: Matrix4) {
         self.transform = transform;
     }
 
-    fn material(&self) -> Material {
-        self.material
+    fn material(&self) -> &Material {
+        &self.material
     }
 
     fn set_material(&mut self, material: Material) {
@@ -210,12 +210,6 @@ mod tests {
             s.normal_at(point(0.0, f64::sqrt(2.0) / 2.0, -f64::sqrt(2.0) / 2.0),),
             vector(0.0, 0.97014, -0.24254)
         );
-    }
-
-    #[test]
-    fn sphere_gets_a_default_material() {
-        let s = sphere();
-        assert_eq!(s.material, material());
     }
 
     #[test]

@@ -194,12 +194,12 @@ mod tests {
     fn color_with_an_intersection_behind_the_ray() {
         let mut w = default_world();
         let outer = Rc::get_mut(&mut w.objects[0]).unwrap();
-        let mut material = outer.material();
+        let mut material = outer.material().clone();
         material.ambient = 1.0;
         outer.set_material(material);
 
         let inner = Rc::get_mut(&mut w.objects[1]).unwrap();
-        let mut material = inner.material();
+        let mut material = inner.material().clone();
         material.ambient = 1.0;
         inner.set_material(material);
 
