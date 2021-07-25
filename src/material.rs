@@ -18,8 +18,14 @@ pub struct Material {
     pub specular: f64,
     #[builder(default = "200.0")]
     pub shininess: f64,
+    #[builder(default = "0.0")]
+    pub reflective: f64,
+    #[builder(default = "0.0")]
+    pub transparency: f64,
+    #[builder(default = "1.0")]
+    pub refractive_index: f64,
     #[builder(default, setter(strip_option, prefix = "internal"))]
-    pattern: Option<Rc<dyn Pattern>>,
+    pub pattern: Option<Rc<dyn Pattern>>,
 }
 
 impl MaterialBuilder {
@@ -198,5 +204,18 @@ mod tests {
         );
         assert_eq!(c1, color::WHITE);
         assert_eq!(c2, color::BLACK);
+    }
+
+    #[test]
+    fn reflectivity_for_default_material() {
+        let m = material();
+        assert_eq!(m.reflective, 0.0);
+    }
+
+    #[test]
+    fn transparency_and_refractive_index_for_default_material() {
+        let m = material();
+        assert_eq!(m.transparency, 0.0);
+        assert_eq!(m.refractive_index, 1.0);
     }
 }

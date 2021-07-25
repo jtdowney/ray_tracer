@@ -8,6 +8,8 @@ pub fn sphere() -> Sphere {
 
 #[derive(Builder, Clone)]
 pub struct Sphere {
+    #[builder(default)]
+    id: usize,
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
     #[builder(default = "material()")]

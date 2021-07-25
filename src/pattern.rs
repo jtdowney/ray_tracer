@@ -24,18 +24,18 @@ pub trait Pattern {
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use crate::{color, point, sphere, transformations};
 
     use super::*;
     use derive_builder::Builder;
 
-    fn test_pattern() -> TestPattern {
+    pub fn test_pattern() -> TestPattern {
         TestPatternBuilder::default().build().unwrap()
     }
 
     #[derive(Builder)]
-    struct TestPattern {
+    pub struct TestPattern {
         #[builder(default = "Matrix4::identity()")]
         transform: Matrix4,
     }

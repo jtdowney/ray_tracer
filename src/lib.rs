@@ -28,3 +28,4 @@ pub use vector::*;
 pub use world::*;
 
 pub const EPSILON: f64 = 0.0001;
+pub const REFLECTION_LIMIT: usize = 4;

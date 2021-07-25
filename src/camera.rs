@@ -1,4 +1,4 @@
-use crate::{point, ray, world::World, Canvas, CanvasError, Matrix4, Ray};
+use crate::{point, ray, world::World, Canvas, CanvasError, Matrix4, Ray, REFLECTION_LIMIT};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Camera {
@@ -58,7 +58,7 @@ impl Camera {
         for y in 0..self.vertical_size {
             for x in 0..self.horizontal_size {
                 let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(ray);
+                let color = world.color_at(ray, REFLECTION_LIMIT);
                 canvas.write_pixel(x, y, color)?;
             }
         }

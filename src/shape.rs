@@ -55,8 +55,16 @@ mod tests {
             &self.transform
         }
 
+        fn set_transform(&mut self, _transform: Matrix4) {
+            todo!()
+        }
+
         fn material(&self) -> &Material {
             &self.material
+        }
+
+        fn set_material(&mut self, _material: Material) {
+            todo!()
         }
 
         fn local_intersect(&self, ray: Ray) -> Intersections {
@@ -66,14 +74,6 @@ mod tests {
 
         fn local_normal_at(&self, point: Point) -> Vector {
             vector(point.x, point.y, point.z)
-        }
-
-        fn set_transform(&mut self, _transform: Matrix4) {
-            todo!()
-        }
-
-        fn set_material(&mut self, _material: Material) {
-            todo!()
         }
     }
 

@@ -7,6 +7,8 @@ pub fn plane() -> Plane {
 
 #[derive(Builder, Clone)]
 pub struct Plane {
+    #[builder(default)]
+    id: usize,
     #[builder(default = "Matrix4::identity()")]
     pub transform: Matrix4,
     #[builder(default = "material()")]
