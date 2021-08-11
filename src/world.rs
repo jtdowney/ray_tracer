@@ -74,6 +74,7 @@ impl World {
             let in_shadow = self.is_shadowed(comps.over_point);
             let material = comps.object.material();
             let surface = material.lighting(
+                comps.object,
                 &light,
                 comps.over_point,
                 comps.eye_vector,

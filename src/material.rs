@@ -1,4 +1,4 @@
-use crate::{color, Color, Pattern, Point, PointLight, Vector};
+use crate::{color, Color, Pattern, Point, PointLight, Shape, Vector};
 use derive_builder::Builder;
 use std::rc::Rc;
 
@@ -41,6 +41,7 @@ impl MaterialBuilder {
 impl Material {
     pub fn lighting(
         &self,
+        object: &dyn Shape,
         light: &PointLight,
         position: Point,
         eye_vector: Vector,
@@ -49,7 +50,7 @@ impl Material {
     ) -> Color {
         let color;
         if let Some(ref pattern) = self.pattern {
-            color = pattern.pattern_at(position);
+            color = pattern.pattern_at_shape(object, position);
         } else {
             color = self.color;
         }
@@ -86,7 +87,7 @@ impl Material {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{color, point, point_light, stripe_pattern, vector};
+    use crate::{color, point, point_light, sphere, stripe_pattern, vector};
     use approx::assert_abs_diff_eq;
 
     #[test]
@@ -108,7 +109,7 @@ mod tests {
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             color(1.9, 1.9, 1.9),
-            m.lighting(&light, position, eyev, normalv, false)
+            m.lighting(&sphere(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -121,7 +122,7 @@ mod tests {
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
         assert_eq!(
             color::WHITE,
-            m.lighting(&light, position, eyev, normalv, false)
+            m.lighting(&sphere(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -134,7 +135,7 @@ mod tests {
         let light = point_light(point(0.0, 10.0, -10.0), color::WHITE);
         assert_abs_diff_eq!(
             color(0.7364, 0.7364, 0.7364),
-            m.lighting(&light, position, eyev, normalv, false)
+            m.lighting(&sphere(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -147,7 +148,7 @@ mod tests {
         let light = point_light(point(0.0, 10.0, -10.0), color::WHITE);
         assert_abs_diff_eq!(
             color(1.63639, 1.63639, 1.63639),
-            m.lighting(&light, position, eyev, normalv, false)
+            m.lighting(&sphere(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -160,7 +161,7 @@ mod tests {
         let light = point_light(point(0.0, 0.0, 10.0), color::WHITE);
         assert_eq!(
             color(0.1, 0.1, 0.1),
-            m.lighting(&light, position, eyev, normalv, false)
+            m.lighting(&sphere(), &light, position, eyev, normalv, false)
         );
     }
 
@@ -172,7 +173,14 @@ mod tests {
         let normal_vector = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
         let in_shadow = true;
-        let c = m.lighting(&light, position, eye_vector, normal_vector, in_shadow);
+        let c = m.lighting(
+            &sphere(),
+            &light,
+            position,
+            eye_vector,
+            normal_vector,
+            in_shadow,
+        );
         assert_abs_diff_eq!(c, color(0.1, 0.1, 0.1));
     }
 
@@ -189,6 +197,7 @@ mod tests {
         let normal_vector = vector(0.0, 0.0, -1.0);
         let light = point_light(point(0.0, 0.0, -10.0), color::WHITE);
         let c1 = m.lighting(
+            &sphere(),
             &light,
             point(0.9, 0.0, 0.0),
             eye_vector,
@@ -196,6 +205,7 @@ mod tests {
             false,
         );
         let c2 = m.lighting(
+            &sphere(),
             &light,
             point(1.1, 0.0, 0.0),
             eye_vector,
