@@ -24,7 +24,7 @@ impl Pattern for CheckersPattern {
     }
 
     fn pattern_at(&self, point: crate::Point) -> Color {
-        let value = (point.x.floor() + point.y.floor() + point.z.floor()) as i32;
+        let value = point.iter().map(|n| n.floor()).sum::<f64>() as i64;
         if value.is_even() {
             self.a
         } else {

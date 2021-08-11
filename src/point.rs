@@ -19,6 +19,15 @@ pub struct Point {
     pub z: f64,
 }
 
+impl Point {
+    pub fn iter(&self) -> PointIter {
+        PointIter {
+            point: *self,
+            index: 0,
+        }
+    }
+}
+
 impl AbsDiffEq for Point {
     type Epsilon = f64;
 
@@ -54,6 +63,37 @@ impl Sub<Vector> for Point {
 
     fn sub(self, rhs: Vector) -> Self::Output {
         point(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+impl IntoIterator for Point {
+    type Item = f64;
+    type IntoIter = PointIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+pub struct PointIter {
+    point: Point,
+    index: u8,
+}
+
+impl Iterator for PointIter {
+    type Item = f64;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = match self.index {
+            0 => self.point.x,
+            1 => self.point.y,
+            2 => self.point.z,
+            _ => return None,
+        };
+
+        self.index += 1;
+
+        Some(value)
     }
 }
 
