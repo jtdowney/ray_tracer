@@ -1,7 +1,9 @@
+mod cube;
 mod plane;
 mod sphere;
 
 use crate::{Intersections, Material, Matrix4, Point, Ray, Vector};
+pub use cube::*;
 pub use plane::*;
 pub use sphere::*;
 
