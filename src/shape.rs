@@ -1,9 +1,13 @@
+mod cone;
 mod cube;
+mod cylinder;
 mod plane;
 mod sphere;
 
 use crate::{Intersections, Material, Matrix4, Point, Ray, Vector};
+pub use cone::*;
 pub use cube::*;
+pub use cylinder::*;
 pub use plane::*;
 pub use sphere::*;
 

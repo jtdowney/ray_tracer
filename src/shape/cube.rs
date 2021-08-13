@@ -1,10 +1,9 @@
 use crate::{
-    intersection, material, point, vector, Intersections, Material, Matrix4, Ray, Shape, Vector,
+    intersection, material, vector, Intersections, Material, Matrix4, Point, Ray, Shape, Vector,
     EPSILON,
 };
 use derive_builder::Builder;
 use ord_subset::OrdSubsetIterExt;
-use point::Point;
 
 pub fn cube() -> Cube {
     CubeBuilder::default().build().unwrap()
@@ -61,13 +60,18 @@ impl Shape for Cube {
     }
 
     fn local_normal_at(&self, Point { x, y, z }: Point) -> Vector {
-        let max = [x, y, z].iter().map(|n| n.abs()).ord_subset_max().unwrap();
-        if max == x.abs() {
-            vector(x, 0.0, 0.0)
-        } else if max == y.abs() {
-            vector(0.0, y, 0.0)
-        } else {
-            vector(0.0, 0.0, z)
+        let (i, _) = [x, y, z]
+            .iter()
+            .map(|n| n.abs())
+            .enumerate()
+            .rev()
+            .ord_subset_max_by_key(|&(_, n)| n)
+            .unwrap();
+        match i {
+            0 => vector(x, 0.0, 0.0),
+            1 => vector(0.0, y, 0.0),
+            2 => vector(0.0, 0.0, z),
+            _ => unreachable!(),
         }
     }
 }
@@ -96,7 +100,7 @@ impl Cube {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{ray, vector};
+    use crate::{point, ray, vector};
 
     #[test]
     fn ray_intersects_cube() {

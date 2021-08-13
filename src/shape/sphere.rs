@@ -1,6 +1,7 @@
-use crate::{intersection, material, point, Intersections, Material, Matrix4, Ray, Shape, Vector};
+use crate::{
+    intersection, material, point, Intersections, Material, Matrix4, Point, Ray, Shape, Vector,
+};
 use derive_builder::Builder;
-use point::Point;
 
 pub fn sphere() -> Sphere {
     SphereBuilder::default().build().unwrap()
