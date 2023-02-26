@@ -8,7 +8,7 @@ pub fn vector<T: Into<f64>>(x: T, y: T, z: T) -> Vector {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vector {
     pub x: f64,
     pub y: f64,
