@@ -1,6 +1,8 @@
 use std::ops::{Add, Sub};
 
-use crate::{vector, Vector};
+use approx::AbsDiffEq;
+
+use crate::{vector, Vector, EPSILON};
 
 pub fn point<T: Into<f64>>(x: T, y: T, z: T) -> Point {
     Point {
@@ -15,6 +17,20 @@ pub struct Point {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+}
+
+impl AbsDiffEq for Point {
+    type Epsilon = f64;
+
+    fn default_epsilon() -> Self::Epsilon {
+        EPSILON
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        f64::abs_diff_eq(&self.x, &other.x, epsilon)
+            && f64::abs_diff_eq(&self.y, &other.y, epsilon)
+            && f64::abs_diff_eq(&self.z, &other.z, epsilon)
+    }
 }
 
 impl Add<Vector> for Point {
