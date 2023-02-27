@@ -1,4 +1,7 @@
-use crate::{identity_matrix, intersection::Intersection, Matrix4, Ray, ORIGIN};
+use crate::{
+    identity_matrix, intersection::Intersection, material, Material, Matrix4, Point, Ray, Vector,
+    ORIGIN,
+};
 
 pub fn sphere() -> Sphere {
     Sphere::default()
@@ -6,7 +9,8 @@ pub fn sphere() -> Sphere {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Sphere {
-    transform: Matrix4,
+    pub transform: Matrix4,
+    pub material: Material,
 }
 
 impl Sphere {
@@ -24,16 +28,24 @@ impl Sphere {
             let t2 = (-b + discriminant.sqrt()) / (2.0 * a);
 
             intersections.push(Intersection {
-                t: t1,
+                time: t1,
                 object: self,
             });
             intersections.push(Intersection {
-                t: t2,
+                time: t2,
                 object: self,
             });
         }
 
         intersections
+    }
+
+    pub fn normal_at(&self, world_point: Point) -> Vector {
+        let inv = self.transform.inverse();
+        let object_point = inv * world_point;
+        let object_normal = object_point - ORIGIN;
+        let world_normal = inv.transpose() * object_normal;
+        world_normal.normalize()
     }
 }
 
@@ -41,15 +53,20 @@ impl Default for Sphere {
     fn default() -> Self {
         Self {
             transform: identity_matrix(),
+            material: material(),
         }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::f64::consts::PI;
+
+    use approx::assert_abs_diff_eq;
+
     use crate::{
         point, ray,
-        transform::{scaling, translation},
+        transform::{rotation_z, scaling, translation},
         vector,
     };
 
@@ -61,8 +78,8 @@ mod tests {
         let s = sphere();
         let xs = s.intersect(r);
         assert_eq!(2, xs.len());
-        assert_eq!(4.0, xs[0].t);
-        assert_eq!(6.0, xs[1].t);
+        assert_eq!(4.0, xs[0].time);
+        assert_eq!(6.0, xs[1].time);
     }
 
     #[test]
@@ -71,8 +88,8 @@ mod tests {
         let s = sphere();
         let xs = s.intersect(r);
         assert_eq!(2, xs.len());
-        assert_eq!(5.0, xs[0].t);
-        assert_eq!(5.0, xs[1].t);
+        assert_eq!(5.0, xs[0].time);
+        assert_eq!(5.0, xs[1].time);
     }
 
     #[test]
@@ -89,8 +106,8 @@ mod tests {
         let s = sphere();
         let xs = s.intersect(r);
         assert_eq!(2, xs.len());
-        assert_eq!(-1.0, xs[0].t);
-        assert_eq!(1.0, xs[1].t);
+        assert_eq!(-1.0, xs[0].time);
+        assert_eq!(1.0, xs[1].time);
     }
 
     #[test]
@@ -99,8 +116,8 @@ mod tests {
         let s = sphere();
         let xs = s.intersect(r);
         assert_eq!(2, xs.len());
-        assert_eq!(-6.0, xs[0].t);
-        assert_eq!(-4.0, xs[1].t);
+        assert_eq!(-6.0, xs[0].time);
+        assert_eq!(-4.0, xs[1].time);
     }
 
     #[test]
@@ -126,8 +143,8 @@ mod tests {
         s.transform = scaling(2, 2, 2);
         let xs = s.intersect(r);
         assert_eq!(2, xs.len());
-        assert_eq!(3.0, xs[0].t);
-        assert_eq!(7.0, xs[1].t);
+        assert_eq!(3.0, xs[0].time);
+        assert_eq!(7.0, xs[1].time);
     }
 
     #[test]
@@ -137,5 +154,69 @@ mod tests {
         s.transform = translation(5, 0, 0);
         let xs = s.intersect(r);
         assert!(xs.is_empty());
+    }
+
+    #[test]
+    fn normal_at_x_axis_point() {
+        let s = sphere();
+        assert_eq!(vector(1, 0, 0), s.normal_at(point(1, 0, 0)));
+    }
+
+    #[test]
+    fn normal_at_y_axis_point() {
+        let s = sphere();
+        assert_eq!(vector(0, 1, 0), s.normal_at(point(0, 1, 0)));
+    }
+
+    #[test]
+    fn normal_at_z_axis_point() {
+        let s = sphere();
+        assert_eq!(vector(0, 0, 1), s.normal_at(point(0, 0, 1)));
+    }
+
+    #[test]
+    fn normal_at_nonaxial_point() {
+        let s = sphere();
+        let p = point(
+            3.0_f64.sqrt() / 3.0,
+            3.0_f64.sqrt() / 3.0,
+            3.0_f64.sqrt() / 3.0,
+        );
+        assert_eq!(
+            vector(
+                3.0_f64.sqrt() / 3.0,
+                3.0_f64.sqrt() / 3.0,
+                3.0_f64.sqrt() / 3.0
+            ),
+            s.normal_at(p)
+        )
+    }
+
+    #[test]
+    fn normal_is_normalized() {
+        let s = sphere();
+        let p = point(
+            3.0_f64.sqrt() / 3.0,
+            3.0_f64.sqrt() / 3.0,
+            3.0_f64.sqrt() / 3.0,
+        );
+        let n = s.normal_at(p);
+        assert_eq!(n, n.normalize());
+    }
+
+    #[test]
+    fn normal_on_translated_sphere() {
+        let mut s = sphere();
+        s.transform = translation(0, 1, 0);
+        let p = point(0.0, 1.70711, -0.70711);
+        assert_abs_diff_eq!(vector(0.0, 0.70711, -0.70711), s.normal_at(p));
+    }
+
+    #[test]
+    fn normal_on_transformed_sphere() {
+        let mut s = sphere();
+        s.transform = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
+        let p = point(0.0, 2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0);
+        assert_abs_diff_eq!(vector(0.0, 0.97014, -0.24254), s.normal_at(p));
     }
 }

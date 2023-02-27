@@ -87,7 +87,7 @@ impl Canvas {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::color;
+    use crate::{color, BLACK};
 
     #[test]
     fn creating_blank_canvas() {
@@ -96,7 +96,7 @@ mod tests {
         assert_eq!(canvas.height, 20);
 
         for pixel in canvas.pixels {
-            assert_eq!(pixel, color::BLACK);
+            assert_eq!(pixel, BLACK);
         }
     }
 

@@ -7,7 +7,7 @@ where
     T: Into<f64>,
 {
     Intersection {
-        t: t.into(),
+        time: t.into(),
         object,
     }
 }
@@ -17,14 +17,14 @@ where
     T: IntoIterator<Item = Intersection<'a>>,
 {
     iter.into_iter()
-        .filter(|i| i.t >= 0.0)
-        .ord_subset_min_by_key(|i| i.t)
+        .filter(|i| i.time >= 0.0)
+        .ord_subset_min_by_key(|i| i.time)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Intersection<'a> {
-    pub(crate) t: f64,
-    pub(crate) object: &'a Sphere,
+    pub time: f64,
+    pub object: &'a Sphere,
 }
 
 #[cfg(test)]

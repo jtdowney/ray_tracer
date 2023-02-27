@@ -1,6 +1,8 @@
 mod canvas;
 mod color;
 mod intersection;
+mod light;
+mod material;
 mod matrix;
 mod point;
 mod ray;
@@ -11,6 +13,8 @@ mod vector;
 pub use canvas::Canvas;
 pub use color::{color, Color};
 pub use intersection::{hit, intersection};
+pub use light::{point_light, PointLight};
+pub use material::{material, Material};
 pub use matrix::{identity_matrix, matrix, Matrix, Matrix2, Matrix3, Matrix4};
 pub use point::{point, Point};
 pub use ray::{ray, Ray};
@@ -22,6 +26,16 @@ pub const ORIGIN: Point = Point {
     x: 0.0,
     y: 0.0,
     z: 0.0,
+};
+pub const BLACK: Color = Color {
+    red: 0.0,
+    green: 0.0,
+    blue: 0.0,
+};
+pub const WHITE: Color = Color {
+    red: 1.0,
+    green: 1.0,
+    blue: 1.0,
 };
 
 pub fn clamp(value: f64, min: f64, max: f64) -> f64 {

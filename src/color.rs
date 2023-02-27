@@ -1,5 +1,9 @@
 use std::ops::{Add, Mul, Sub};
 
+use approx::AbsDiffEq;
+
+use crate::EPSILON;
+
 pub fn color<T: Into<f64>>(red: T, green: T, blue: T) -> Color {
     Color {
         red: red.into(),
@@ -8,18 +12,25 @@ pub fn color<T: Into<f64>>(red: T, green: T, blue: T) -> Color {
     }
 }
 
-#[cfg(test)]
-pub const BLACK: Color = Color {
-    red: 0.0,
-    green: 0.0,
-    blue: 0.0,
-};
-
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Color {
     pub red: f64,
     pub green: f64,
     pub blue: f64,
+}
+
+impl AbsDiffEq for Color {
+    type Epsilon = f64;
+
+    fn default_epsilon() -> Self::Epsilon {
+        EPSILON
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        f64::abs_diff_eq(&self.red, &other.red, epsilon)
+            && f64::abs_diff_eq(&self.green, &other.green, epsilon)
+            && f64::abs_diff_eq(&self.blue, &other.blue, epsilon)
+    }
 }
 
 impl Add for Color {

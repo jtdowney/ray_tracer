@@ -1,5 +1,9 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
+use approx::AbsDiffEq;
+
+use crate::EPSILON;
+
 pub fn vector<T: Into<f64>>(x: T, y: T, z: T) -> Vector {
     Vector {
         x: x.into(),
@@ -38,6 +42,24 @@ impl Vector {
         let y = self.z * other.x - self.x * other.z;
         let z = self.x * other.y - self.y * other.x;
         Self { x, y, z }
+    }
+
+    pub fn reflect(self, normal: Vector) -> Vector {
+        self - normal * 2.0 * self.dot(normal)
+    }
+}
+
+impl AbsDiffEq for Vector {
+    type Epsilon = f64;
+
+    fn default_epsilon() -> Self::Epsilon {
+        EPSILON
+    }
+
+    fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
+        f64::abs_diff_eq(&self.x, &other.x, epsilon)
+            && f64::abs_diff_eq(&self.y, &other.y, epsilon)
+            && f64::abs_diff_eq(&self.z, &other.z, epsilon)
     }
 }
 
@@ -108,6 +130,7 @@ impl quickcheck::Arbitrary for Vector {
 
 #[cfg(test)]
 mod tests {
+    use approx::assert_abs_diff_eq;
     use quickcheck::TestResult;
     use quickcheck_macros::quickcheck;
 
@@ -203,5 +226,19 @@ mod tests {
         assert_eq!(a.y * b.z - a.z * b.y, cross.x);
         assert_eq!(a.z * b.x - a.x * b.z, cross.y);
         assert_eq!(a.x * b.y - a.y * b.x, cross.z);
+    }
+
+    #[test]
+    fn reflecting_vector_at_45() {
+        let v = vector(1, -1, 0);
+        let n = vector(0, 1, 0);
+        assert_eq!(vector(1, 1, 0), v.reflect(n));
+    }
+
+    #[test]
+    fn reflecting_vector_off_slant() {
+        let v = vector(0, -1, 0);
+        let n = vector(2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0, 0.0);
+        assert_abs_diff_eq!(vector(1, 0, 0), v.reflect(n));
     }
 }
