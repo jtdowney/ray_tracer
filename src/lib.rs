@@ -1,3 +1,4 @@
+mod camera;
 mod canvas;
 mod color;
 mod intersection;
@@ -9,7 +10,9 @@ mod ray;
 mod sphere;
 pub mod transform;
 mod vector;
+mod world;
 
+pub use camera::{camera, Camera};
 pub use canvas::Canvas;
 pub use color::{color, Color};
 pub use intersection::{hit, intersection};
@@ -20,6 +23,7 @@ pub use point::{point, Point};
 pub use ray::{ray, Ray};
 pub use sphere::{sphere, Sphere};
 pub use vector::{vector, Vector};
+pub use world::{default_world, world, World};
 
 pub const EPSILON: f64 = 0.00001;
 pub const ORIGIN: Point = Point {

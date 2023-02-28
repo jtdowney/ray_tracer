@@ -23,12 +23,12 @@ impl Material {
     pub fn lighting(
         &self,
         light: PointLight,
-        position: Point,
+        point: Point,
         eye_vector: Vector,
         normal_vector: Vector,
     ) -> Color {
         let effective_color = self.color * light.intensity;
-        let light_vector = (light.position - position).normalize();
+        let light_vector = (light.position - point).normalize();
         let ambient = effective_color * self.ambient;
         let light_dot_normal = light_vector.dot(normal_vector);
 

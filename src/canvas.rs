@@ -1,15 +1,13 @@
-use crate::{clamp, Color};
-use std::fmt::{self, Write};
-use thiserror::Error;
+use anyhow::bail;
 
-#[derive(Error, Debug, PartialEq)]
-pub enum CanvasError {
-    #[error("out out bounds pixel write at {0}, {1}")]
-    PixelOutOfBounds(u16, u16),
-    #[error("unable to format PPM")]
-    Format(#[from] fmt::Error),
+use crate::{clamp, Color};
+use std::fmt::Write;
+
+pub fn canvas(width: u16, height: u16) -> Canvas {
+    Canvas::new(width, height)
 }
 
+#[derive(Clone, Debug)]
 pub struct Canvas {
     pub width: u16,
     pub height: u16,
@@ -26,9 +24,9 @@ impl Canvas {
         }
     }
 
-    pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color) -> Result<(), CanvasError> {
+    pub fn write_pixel(&mut self, x: u16, y: u16, pixel: Color) -> anyhow::Result<()> {
         if x >= self.width || y >= self.height {
-            Err(CanvasError::PixelOutOfBounds(x, y))
+            bail!("out of bounds pixel write");
         } else {
             let index = y as usize * self.width as usize + x as usize;
             self.pixels[index] = pixel;
@@ -36,9 +34,9 @@ impl Canvas {
         }
     }
 
-    pub fn pixel_at(&self, x: u16, y: u16) -> Result<Color, CanvasError> {
+    pub fn pixel_at(&self, x: u16, y: u16) -> anyhow::Result<Color> {
         if x >= self.width || y >= self.height {
-            Err(CanvasError::PixelOutOfBounds(x, y))
+            bail!("out of bounds pixel read");
         } else {
             let index = y as usize * self.width as usize + x as usize;
             let pixel = self.pixels[index];
@@ -46,7 +44,7 @@ impl Canvas {
         }
     }
 
-    pub fn fill(&mut self, pixel: Color) -> Result<(), CanvasError> {
+    pub fn fill(&mut self, pixel: Color) -> anyhow::Result<()> {
         for y in 0..self.height {
             for x in 0..self.width {
                 self.write_pixel(x, y, pixel)?;
@@ -56,7 +54,7 @@ impl Canvas {
         Ok(())
     }
 
-    pub fn to_ppm(&self) -> Result<String, CanvasError> {
+    pub fn to_ppm(&self) -> anyhow::Result<String> {
         let mut output = String::new();
         writeln!(output, "P3")?;
         writeln!(output, "{} {}", self.width, self.height)?;
@@ -105,7 +103,7 @@ mod tests {
         let mut canvas = Canvas::new(10, 20);
         let red = color(1.0, 0.0, 0.0);
         canvas.write_pixel(2, 3, red).unwrap();
-        assert_eq!(canvas.pixel_at(2, 3), Ok(red));
+        assert_eq!(canvas.pixel_at(2, 3).unwrap(), red);
     }
 
     #[test]
