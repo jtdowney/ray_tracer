@@ -1,6 +1,6 @@
 use ord_subset::OrdSubsetIterExt;
 
-use crate::{Point, Ray, Sphere, Vector};
+use crate::{Point, Ray, Sphere, Vector, EPSILON};
 
 pub fn intersection<T>(t: T, object: &Sphere) -> Intersection
 where
@@ -32,6 +32,7 @@ pub struct Computations<'a> {
     pub time: f64,
     pub object: &'a Sphere,
     pub point: Point,
+    pub over_point: Point,
     pub eye_vector: Vector,
     pub normal_vector: Vector,
     pub inside: bool,
@@ -50,10 +51,13 @@ impl<'a> Intersection<'a> {
             normal_vector = -normal_vector;
         }
 
+        let over_point = point + normal_vector * EPSILON;
+
         Computations {
             time,
             object,
             point,
+            over_point,
             eye_vector,
             normal_vector,
             inside,
@@ -63,7 +67,7 @@ impl<'a> Intersection<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{point, ray, sphere, vector};
+    use crate::{point, ray, sphere, transform::translation, vector, EPSILON};
 
     use super::*;
 
@@ -137,5 +141,17 @@ mod tests {
         assert_eq!(point(0, 0, 1), comps.point);
         assert_eq!(vector(0, 0, -1), comps.eye_vector);
         assert_eq!(vector(0, 0, -1), comps.normal_vector);
+    }
+
+    #[test]
+    fn hit_should_offset_point() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let mut shape = sphere();
+        shape.transform = translation(0, 0, 1);
+        let i = intersection(5, &shape);
+        let comps = i.prepare_computations(r);
+
+        assert!(comps.over_point.z < -EPSILON / 2.0);
+        assert!(comps.point.z > comps.over_point.z)
     }
 }
