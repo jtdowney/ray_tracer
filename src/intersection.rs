@@ -1,8 +1,10 @@
+use std::ptr;
+
 use ord_subset::OrdSubsetIterExt;
 
-use crate::{Point, Ray, Sphere, Vector, EPSILON};
+use crate::{Point, Ray, Shape, Vector, EPSILON};
 
-pub fn intersection<T>(t: T, object: &Sphere) -> Intersection
+pub fn intersection<T>(t: T, object: &Shape) -> Intersection
 where
     T: Into<f64>,
 {
@@ -21,16 +23,22 @@ where
         .ord_subset_min_by_key(|i| i.time)
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Copy, Clone, Debug)]
 pub struct Intersection<'a> {
     pub time: f64,
-    pub object: &'a Sphere,
+    pub object: &'a Shape,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+impl PartialEq for Intersection<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.time == other.time && ptr::eq(self.object, other.object)
+    }
+}
+
+#[derive(Debug)]
 pub struct Computations<'a> {
     pub time: f64,
-    pub object: &'a Sphere,
+    pub object: &'a Shape,
     pub point: Point,
     pub over_point: Point,
     pub eye_vector: Vector,

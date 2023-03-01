@@ -5,7 +5,7 @@ use crate::{
     intersection::{Computations, Intersection},
     point, point_light, ray, sphere,
     transform::scaling,
-    Color, Point, PointLight, Ray, Sphere, BLACK,
+    Color, Point, PointLight, Ray, Shape, BLACK,
 };
 
 pub fn world() -> World {
@@ -30,10 +30,10 @@ pub fn default_world() -> World {
     world
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Debug, Default)]
 pub struct World {
     pub light: Option<PointLight>,
-    pub objects: Vec<Sphere>,
+    pub objects: Vec<Shape>,
 }
 
 impl World {
@@ -116,7 +116,7 @@ mod tests {
     fn shading_intersection() {
         let w = default_world();
         let r = ray(point(0, 0, -5), vector(0, 0, 1));
-        let shape = w.objects[0];
+        let shape = &w.objects[0];
         let i = intersection(4, &shape);
         let comps = i.prepare_computations(r);
         assert_abs_diff_eq!(color(0.38066, 0.47583, 0.2855), w.shade_hit(comps));
@@ -127,7 +127,7 @@ mod tests {
         let mut w = default_world();
         w.light = Some(point_light(point(0.0, 0.25, 0.0), color(1, 1, 1)));
         let r = ray(point(0, 0, 0), vector(0, 0, 1));
-        let shape = w.objects[1];
+        let shape = &w.objects[1];
         let i = intersection(0.5, &shape);
         let comps = i.prepare_computations(r);
         assert_abs_diff_eq!(color(0.90498, 0.90498, 0.90498), w.shade_hit(comps));
@@ -156,7 +156,7 @@ mod tests {
             let inner = &mut w.objects[1];
             inner.material.ambient = 1.0;
         }
-        let inner = w.objects[1];
+        let inner = &w.objects[1];
         let r = ray(point(0.0, 0.0, 0.75), vector(0, 0, -1));
         assert_eq!(inner.material.color, w.color_at(r));
     }
@@ -200,7 +200,7 @@ mod tests {
         w.objects.push(s);
 
         let r = ray(point(0, 0, 5), vector(0, 0, 1));
-        let i = intersection(4, &s);
+        let i = intersection(4, &w.objects[0]);
         let comps = i.prepare_computations(r);
 
         assert_eq!(color(0.1, 0.1, 0.1), w.shade_hit(comps));

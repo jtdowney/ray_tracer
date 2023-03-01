@@ -1,8 +1,8 @@
 use std::f64::consts::PI;
 
 use ray_tracer::{
-    camera, color, material, point, point_light, sphere,
-    transform::{rotation_x, rotation_y, scaling, translation, view_transform},
+    camera, color, material, plane, point, point_light, sphere,
+    transform::{scaling, translation, view_transform},
     vector, world, WHITE,
 };
 
@@ -13,26 +13,8 @@ fn main() -> anyhow::Result<()> {
     material.color = color(1.0, 0.9, 0.9);
     material.specular = 0.0;
 
-    let mut floor = sphere();
-    floor.transform = scaling(10.0, 0.01, 10.0);
-    floor.material = material;
+    let floor = plane();
     world.objects.push(floor);
-
-    let mut left_wall = sphere();
-    left_wall.transform = translation(0, 0, 5)
-        * rotation_y(-PI / 4.0)
-        * rotation_x(PI / 2.0)
-        * scaling(10.0, 0.01, 10.0);
-    left_wall.material = material;
-    world.objects.push(left_wall);
-
-    let mut right_wall = sphere();
-    right_wall.transform = translation(0, 0, 5)
-        * rotation_y(PI / 4.0)
-        * rotation_x(PI / 2.0)
-        * scaling(10.0, 0.01, 10.0);
-    right_wall.material = material;
-    world.objects.push(right_wall);
 
     let mut middle = sphere();
     middle.transform = translation(-0.5, 1.0, 0.5);

@@ -1,21 +1,18 @@
-use crate::{
-    identity_matrix, intersection::Intersection, material, Material, Matrix4, Point, Ray, Vector,
-    ORIGIN,
-};
+use std::any::Any;
 
-pub fn sphere() -> Sphere {
-    Sphere::default()
+use crate::{intersection::Intersection, Point, Ray, Vector, ORIGIN};
+
+use super::{Geometry, Shape};
+
+pub fn sphere() -> Shape {
+    Sphere.into()
 }
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Sphere {
-    pub transform: Matrix4,
-    pub material: Material,
-}
+#[derive(Debug)]
+pub struct Sphere;
 
-impl Sphere {
-    pub fn intersect(&self, ray: Ray) -> Vec<Intersection> {
-        let ray = ray.transform(self.transform.inverse());
+impl Geometry for Sphere {
+    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection> {
         let sphere_to_ray = ray.origin - ORIGIN;
         let a = ray.direction.dot(ray.direction);
         let b = 2.0 * ray.direction.dot(sphere_to_ray);
@@ -29,32 +26,23 @@ impl Sphere {
 
             intersections.push(Intersection {
                 time: t1,
-                object: self,
+                object: shape,
             });
             intersections.push(Intersection {
                 time: t2,
-                object: self,
+                object: shape,
             });
         }
 
         intersections
     }
 
-    pub fn normal_at(&self, world_point: Point) -> Vector {
-        let inv = self.transform.inverse();
-        let object_point = inv * world_point;
-        let object_normal = object_point - ORIGIN;
-        let world_normal = inv.transpose() * object_normal;
-        world_normal.normalize()
+    fn local_normal_at(&self, point: Point) -> Vector {
+        point - ORIGIN
     }
-}
 
-impl Default for Sphere {
-    fn default() -> Self {
-        Self {
-            transform: identity_matrix(),
-            material: material(),
-        }
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
@@ -65,7 +53,7 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        point, ray,
+        identity_matrix, point, ray,
         transform::{rotation_z, scaling, translation},
         vector,
     };
