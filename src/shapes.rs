@@ -22,9 +22,7 @@ pub struct Shape {
 
 impl PartialEq for Shape {
     fn eq(&self, other: &Self) -> bool {
-        self.transform == other.transform
-            && self.material == other.material
-            && ptr::eq(&self.geometry, &other.geometry)
+        self.transform == other.transform && ptr::eq(&self.geometry, &other.geometry)
     }
 }
 

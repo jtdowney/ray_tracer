@@ -15,7 +15,7 @@ fn main() -> anyhow::Result<()> {
 
     let mut floor = sphere();
     floor.transform = scaling(10.0, 0.01, 10.0);
-    floor.material = material;
+    floor.material = material.clone();
     world.objects.push(floor);
 
     let mut left_wall = sphere();
@@ -23,7 +23,7 @@ fn main() -> anyhow::Result<()> {
         * rotation_y(-PI / 4.0)
         * rotation_x(PI / 2.0)
         * scaling(10.0, 0.01, 10.0);
-    left_wall.material = material;
+    left_wall.material = material.clone();
     world.objects.push(left_wall);
 
     let mut right_wall = sphere();
@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
         * rotation_y(PI / 4.0)
         * rotation_x(PI / 2.0)
         * scaling(10.0, 0.01, 10.0);
-    right_wall.material = material;
+    right_wall.material = material.clone();
     world.objects.push(right_wall);
 
     let mut middle = sphere();

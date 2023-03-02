@@ -5,6 +5,7 @@ mod intersection;
 mod light;
 mod material;
 mod matrix;
+mod pattern;
 mod point;
 mod ray;
 mod shapes;
@@ -19,6 +20,7 @@ pub use intersection::{hit, intersection};
 pub use light::{point_light, PointLight};
 pub use material::{material, Material};
 pub use matrix::{identity_matrix, matrix, Matrix, Matrix2, Matrix3, Matrix4};
+pub use pattern::{checkers_pattern, gradiant_pattern, ring_pattern, stripe_pattern, Pattern};
 pub use point::{point, Point};
 pub use ray::{ray, Ray};
 pub use shapes::plane::{plane, Plane};
@@ -27,7 +29,7 @@ pub use shapes::Shape;
 pub use vector::{vector, Vector};
 pub use world::{default_world, world, World};
 
-pub const EPSILON: f64 = 0.00001;
+pub const EPSILON: f64 = 0.0001;
 pub const ORIGIN: Point = Point {
     x: 0.0,
     y: 0.0,

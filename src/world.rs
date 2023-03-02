@@ -52,8 +52,9 @@ impl World {
         if let Some(light) = self.light {
             let shadowed = self.is_shadowed(comps.over_point);
             comps.object.material.lighting(
+                comps.object,
                 light,
-                comps.point,
+                comps.over_point,
                 comps.eye_vector,
                 comps.normal_vector,
                 shadowed,
