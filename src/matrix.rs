@@ -96,9 +96,7 @@ impl Matrix4 {
 
     pub fn inverse(self) -> Matrix4 {
         let determinant = self.determinant();
-        if determinant == 0.0 {
-            panic!("matrix is not invertable");
-        }
+        debug_assert!(determinant != 0.0, "matrix is not invertable");
 
         let mut result = Matrix4::default();
         for i in 0..4 {
