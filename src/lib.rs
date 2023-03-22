@@ -23,6 +23,7 @@ pub use matrix::{identity_matrix, matrix, Matrix, Matrix2, Matrix3, Matrix4};
 pub use pattern::{checkers_pattern, gradiant_pattern, ring_pattern, stripe_pattern, Pattern};
 pub use point::{point, Point};
 pub use ray::{ray, Ray};
+pub use shapes::cube::{cube, Cube};
 pub use shapes::plane::{plane, Plane};
 pub use shapes::sphere::{sphere, Sphere};
 pub use shapes::Shape;

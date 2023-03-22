@@ -11,7 +11,7 @@ pub fn plane() -> Shape {
     Plane.into()
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Plane;
 
 impl Geometry for Plane {

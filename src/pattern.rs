@@ -78,6 +78,7 @@ impl Pattern {
     pub fn pattern_at_shape(&self, shape: &Shape, world_point: Point) -> Color {
         let object_point = shape.transform.inverse() * world_point;
         let pattern_point = self.transform.inverse() * object_point;
+
         self.pattern_at(pattern_point)
     }
 

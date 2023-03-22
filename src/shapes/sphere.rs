@@ -16,7 +16,7 @@ pub fn glass_sphere() -> Shape {
     sphere
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Sphere;
 
 impl Geometry for Sphere {
