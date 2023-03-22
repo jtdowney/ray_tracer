@@ -7,6 +7,9 @@ pub fn material() -> Material {
         diffuse: 0.9,
         specular: 0.9,
         shininess: 200.0,
+        reflective: 0.0,
+        transparency: 0.0,
+        refractive_index: 1.0,
         pattern: None,
     }
 }
@@ -18,6 +21,9 @@ pub struct Material {
     pub diffuse: f64,
     pub specular: f64,
     pub shininess: f64,
+    pub reflective: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
     pub pattern: Option<Pattern>,
 }
 
@@ -73,7 +79,13 @@ impl Material {
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::{point, point_light, sphere, vector, ORIGIN, WHITE};
+    use crate::{
+        intersection, point, point_light, ray,
+        shapes::sphere::glass_sphere,
+        sphere,
+        transform::{scaling, translation},
+        vector, ORIGIN, WHITE,
+    };
 
     use super::*;
 
@@ -154,5 +166,51 @@ mod tests {
             color(0.1, 0.1, 0.1),
             m.lighting(&sphere(), light, position, eyev, normalv, in_shadow)
         );
+    }
+
+    #[test]
+    fn finding_n1_and_n2() {
+        let mut a = glass_sphere();
+        a.transform = scaling(2.0, 2.0, 2.0);
+        a.material.refractive_index = 1.5;
+        let mut b = glass_sphere();
+        b.transform = translation(0.0, 0.0, -0.25);
+        b.material.refractive_index = 2.0;
+        let mut c = glass_sphere();
+        c.transform = translation(0.0, 0.0, 0.25);
+        c.material.refractive_index = 2.5;
+        let r = ray(point(0, 0, -4), vector(0, 0, 1));
+        let xs = vec![
+            intersection(2, &a),
+            intersection(2.75, &b),
+            intersection(3.25, &c),
+            intersection(4.75, &b),
+            intersection(5.25, &c),
+            intersection(6, &a),
+        ];
+
+        let comps = xs[0].prepare_computations(r, &xs);
+        assert_eq!(1.0, comps.n1);
+        assert_eq!(1.5, comps.n2);
+
+        let comps = xs[1].prepare_computations(r, &xs);
+        assert_eq!(1.5, comps.n1);
+        assert_eq!(2.0, comps.n2);
+
+        let comps = xs[2].prepare_computations(r, &xs);
+        assert_eq!(2.0, comps.n1);
+        assert_eq!(2.5, comps.n2);
+
+        let comps = xs[3].prepare_computations(r, &xs);
+        assert_eq!(2.5, comps.n1);
+        assert_eq!(2.5, comps.n2);
+
+        let comps = xs[4].prepare_computations(r, &xs);
+        assert_eq!(2.5, comps.n1);
+        assert_eq!(1.5, comps.n2);
+
+        let comps = xs[5].prepare_computations(r, &xs);
+        assert_eq!(1.5, comps.n1);
+        assert_eq!(1.0, comps.n2);
     }
 }

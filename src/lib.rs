@@ -30,6 +30,8 @@ pub use vector::{vector, Vector};
 pub use world::{default_world, world, World};
 
 pub const EPSILON: f64 = 0.0001;
+pub const REFLECTION_DEPTH: u8 = 5;
+
 pub const ORIGIN: Point = Point {
     x: 0.0,
     y: 0.0,

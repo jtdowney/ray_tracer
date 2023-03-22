@@ -1,7 +1,10 @@
 use itertools::iproduct;
 use rayon::prelude::*;
 
-use crate::{canvas::canvas, identity_matrix, point, ray, Canvas, Matrix4, Ray, World, ORIGIN};
+use crate::{
+    canvas::canvas, identity_matrix, point, ray, Canvas, Matrix4, Ray, World, ORIGIN,
+    REFLECTION_DEPTH,
+};
 
 pub fn camera(horizontal_size: u16, vertical_size: u16, field_of_view: f64) -> Camera {
     let half_view = (field_of_view / 2.0).tan();
@@ -62,7 +65,7 @@ impl Camera {
             .par_bridge()
             .map(|(x, y)| {
                 let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(ray);
+                let color = world.color_at(ray, REFLECTION_DEPTH);
                 (x, y, color)
             })
             .collect::<Vec<_>>();

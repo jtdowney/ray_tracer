@@ -24,7 +24,7 @@ fn main() -> anyhow::Result<()> {
             let position = point(world_x, world_y, wall_z);
             let ray = ray(ray_origin, (position - ray_origin).normalize());
             let xs = shape.intersect(ray);
-            if let Some(hit) = hit(xs) {
+            if let Some(hit) = hit(&xs) {
                 let point = ray.position(hit.time);
                 let normal = hit.object.normal_at(point);
                 let eye = -ray.direction;

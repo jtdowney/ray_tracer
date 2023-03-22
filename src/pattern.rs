@@ -3,6 +3,13 @@ use std::{
     sync::Arc,
 };
 
+#[cfg(test)]
+pub fn test_pattern() -> Pattern {
+    use crate::color;
+
+    Pattern::new(|Point { x, y, z }| color(x, y, z))
+}
+
 use crate::{identity_matrix, Color, Matrix4, Point, Shape};
 
 pub fn stripe_pattern(a: Color, b: Color) -> Pattern {
@@ -88,10 +95,6 @@ mod tests {
     };
 
     use super::*;
-
-    fn test_pattern() -> Pattern {
-        Pattern::new(|Point { x, y, z }| color(x, y, z))
-    }
 
     #[test]
     fn stripe_pattern_is_constant_in_y() {

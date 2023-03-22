@@ -55,6 +55,17 @@ impl Sub for Point {
     }
 }
 
+impl Sub<Vector> for Point {
+    type Output = Point;
+
+    fn sub(self, other: Vector) -> Self::Output {
+        let x = self.x - other.x;
+        let y = self.y - other.y;
+        let z = self.z - other.z;
+        Self { x, y, z }
+    }
+}
+
 #[cfg(test)]
 impl quickcheck::Arbitrary for Point {
     fn arbitrary(g: &mut quickcheck::Gen) -> Self {
@@ -77,6 +88,14 @@ mod tests {
         assert_eq!(a.x + b.x, c.x);
         assert_eq!(a.y + b.y, c.y);
         assert_eq!(a.z + b.z, c.z);
+    }
+
+    #[quickcheck]
+    fn subtracting_point_and_vector(a: Point, b: Vector) {
+        let c = a - b;
+        assert_eq!(a.x - b.x, c.x);
+        assert_eq!(a.y - b.y, c.y);
+        assert_eq!(a.z - b.z, c.z);
     }
 
     #[quickcheck]

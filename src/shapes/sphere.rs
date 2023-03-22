@@ -8,6 +8,14 @@ pub fn sphere() -> Shape {
     Sphere.into()
 }
 
+#[cfg(test)]
+pub fn glass_sphere() -> Shape {
+    let mut sphere = sphere();
+    sphere.material.transparency = 1.0;
+    sphere.material.refractive_index = 1.5;
+    sphere
+}
+
 #[derive(Debug)]
 pub struct Sphere;
 
