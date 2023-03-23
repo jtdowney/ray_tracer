@@ -4,7 +4,9 @@ use crate::{
     identity_matrix, intersection::Intersection, material, Material, Matrix4, Point, Ray, Vector,
 };
 
+pub mod cone;
 pub mod cube;
+pub mod cylinder;
 pub mod plane;
 pub mod sphere;
 
