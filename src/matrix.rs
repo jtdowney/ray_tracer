@@ -132,7 +132,7 @@ impl<const N: usize> AbsDiffEq for Matrix<N> {
 
     fn abs_diff_eq(&self, other: &Self, epsilon: Self::Epsilon) -> bool {
         self.into_iter()
-            .zip(other.into_iter())
+            .zip(*other)
             .all(|(a, b)| f64::abs_diff_eq(&a, &b, epsilon))
     }
 }
