@@ -1,0 +1,21 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install latest rust toolchain
+      uses: https://github.com/dtolnay/rust-toolchain@stable
+    - name: Cache rust crates
+      uses: https://github.com/Swatinem/rust-cache@v2
+    - name: Run tests
+      run: cargo test --verbose
