@@ -57,7 +57,7 @@ impl<G: Geometry> From<G> for Shape {
 #[cfg(test)]
 mod tests {
     use std::{
-        f64::consts::PI,
+        f64::consts::{FRAC_1_SQRT_2, PI},
         sync::{Arc, Mutex},
     };
 
@@ -123,13 +123,12 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::approx_constant)]
     fn computing_normal_on_translated_shape() {
         let mut s = test_shape();
         s.transform = translation(0, 1, 0);
         assert_abs_diff_eq!(
-            vector(0.0, 0.70711, -0.70711),
-            s.normal_at(point(0.0, 1.70711, -0.70711))
+            vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2),
+            s.normal_at(point(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2))
         );
     }
 

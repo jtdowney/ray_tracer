@@ -56,7 +56,7 @@ impl Geometry for Sphere {
 
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::PI;
+    use std::f64::consts::{FRAC_1_SQRT_2, PI};
 
     use approx::assert_abs_diff_eq;
 
@@ -201,12 +201,11 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::approx_constant)]
     fn normal_on_translated_sphere() {
         let mut s = sphere();
         s.transform = translation(0, 1, 0);
-        let p = point(0.0, 1.70711, -0.70711);
-        assert_abs_diff_eq!(vector(0.0, 0.70711, -0.70711), s.normal_at(p));
+        let p = point(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2);
+        assert_abs_diff_eq!(vector(0.0, FRAC_1_SQRT_2, -FRAC_1_SQRT_2), s.normal_at(p));
     }
 
     #[test]
