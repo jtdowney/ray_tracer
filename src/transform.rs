@@ -155,7 +155,7 @@ mod tests {
         let half_quarter = rotation_x(PI / 4.0);
         let inv = half_quarter.inverse();
         assert_abs_diff_eq!(
-            point(0.0, 2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0),
+            point(0.0, 2.0_f64.sqrt() / 2.0, -(2.0_f64.sqrt()) / 2.0),
             inv * p
         );
     }
@@ -178,7 +178,7 @@ mod tests {
         let half_quarter = rotation_z(PI / 4.0);
         let full_quarter = rotation_z(PI / 2.0);
         assert_abs_diff_eq!(
-            point(-2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0, 0.0),
+            point(-(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0, 0.0),
             half_quarter * p
         );
         assert_abs_diff_eq!(point(-1, 0, 0), full_quarter * p);

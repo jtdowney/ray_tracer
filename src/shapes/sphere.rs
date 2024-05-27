@@ -201,6 +201,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn normal_on_translated_sphere() {
         let mut s = sphere();
         s.transform = translation(0, 1, 0);
@@ -212,7 +213,7 @@ mod tests {
     fn normal_on_transformed_sphere() {
         let mut s = sphere();
         s.transform = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
-        let p = point(0.0, 2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0);
+        let p = point(0.0, 2.0_f64.sqrt() / 2.0, -(2.0_f64.sqrt()) / 2.0);
         assert_abs_diff_eq!(vector(0.0, 0.97014, -0.24254), s.normal_at(p));
     }
 }

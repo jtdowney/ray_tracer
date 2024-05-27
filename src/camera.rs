@@ -130,7 +130,7 @@ mod tests {
         let r = c.ray_for_pixel(100, 50);
         assert_eq!(point(0, 2, -5), r.origin);
         assert_abs_diff_eq!(
-            vector(2.0_f64.sqrt() / 2.0, 0.0, -2.0_f64.sqrt() / 2.0),
+            vector(2.0_f64.sqrt() / 2.0, 0.0, -(2.0_f64.sqrt()) / 2.0),
             r.direction
         );
     }

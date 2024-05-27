@@ -123,6 +123,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::approx_constant)]
     fn computing_normal_on_translated_shape() {
         let mut s = test_shape();
         s.transform = translation(0, 1, 0);
@@ -138,7 +139,7 @@ mod tests {
         s.transform = scaling(1.0, 0.5, 1.0) * rotation_z(PI / 5.0);
         assert_abs_diff_eq!(
             vector(0.0, 0.97014, -0.24254),
-            s.normal_at(point(0.0, 2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0))
+            s.normal_at(point(0.0, 2.0_f64.sqrt() / 2.0, -(2.0_f64.sqrt()) / 2.0))
         );
     }
 }

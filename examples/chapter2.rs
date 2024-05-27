@@ -42,7 +42,7 @@ fn main() -> anyhow::Result<()> {
         simulation.tick();
 
         let x = simulation.projectile.position.x.round() as u16;
-        let y = (f64::from(canvas.height as u16) - simulation.projectile.position.y).round() as u16;
+        let y = (f64::from(canvas.height) - simulation.projectile.position.y).round() as u16;
 
         if x > canvas.width || y > canvas.height {
             continue;

@@ -232,7 +232,7 @@ mod tests {
         let shape = plane();
         let r = ray(
             point(0, 1, -1),
-            vector(0.0, -2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0),
+            vector(0.0, -(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0),
         );
         let i = intersection(2.0_f64.sqrt(), &shape);
         let comps = i.prepare_computations(r, &[i]);
@@ -259,7 +259,7 @@ mod tests {
         let shape = glass_sphere();
         let r = ray(point(0.0, 0.0, 2_f64.sqrt() / 2.0), vector(0, 1, 0));
         let xs = vec![
-            intersection(-2_f64.sqrt() / 2.0, &shape),
+            intersection(-(2_f64.sqrt()) / 2.0, &shape),
             intersection(2_f64.sqrt() / 2.0, &shape),
         ];
         let comps = xs[1].prepare_computations(r, &xs);

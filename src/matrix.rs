@@ -257,9 +257,9 @@ impl<const N: usize> Iterator for Iter<N> {
 impl<const N: usize> quickcheck::Arbitrary for Matrix<N> {
     fn arbitrary(g: &mut quickcheck::Gen) -> Self {
         let mut values = [[0.0; N]; N];
-        for i in 0..N {
-            for j in 0..N {
-                values[i][j] = f64::from(i32::arbitrary(g));
+        for row in values.iter_mut() {
+            for value in row.iter_mut() {
+                *value = f64::from(i32::arbitrary(g));
             }
         }
 

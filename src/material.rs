@@ -106,7 +106,7 @@ mod tests {
     fn lighting_with_eye_between_light_and_surface_and_with_eye_offset_45() {
         let m = material();
         let position = ORIGIN;
-        let eyev = vector(0.0, 2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0);
+        let eyev = vector(0.0, 2.0_f64.sqrt() / 2.0, -(2.0_f64.sqrt()) / 2.0);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
         assert_abs_diff_eq!(
@@ -132,7 +132,7 @@ mod tests {
     fn lighting_with_eye_in_path_of_reflection_vector() {
         let m = material();
         let position = ORIGIN;
-        let eyev = vector(0.0, -2.0_f64.sqrt() / 2.0, -2.0_f64.sqrt() / 2.0);
+        let eyev = vector(0.0, -(2.0_f64.sqrt()) / 2.0, -(2.0_f64.sqrt()) / 2.0);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
         assert_abs_diff_eq!(

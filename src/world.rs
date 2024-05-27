@@ -162,7 +162,7 @@ mod tests {
         let w = default_world();
         let r = ray(point(0, 0, -5), vector(0, 0, 1));
         let shape = &w.objects[0];
-        let i = intersection(4, &shape);
+        let i = intersection(4, shape);
         let comps = i.prepare_computations(r, &[i]);
         assert_abs_diff_eq!(
             color(0.38066, 0.47583, 0.2855),
@@ -176,7 +176,7 @@ mod tests {
         w.light = Some(point_light(point(0.0, 0.25, 0.0), color(1, 1, 1)));
         let r = ray(point(0, 0, 0), vector(0, 0, 1));
         let shape = &w.objects[1];
-        let i = intersection(0.5, &shape);
+        let i = intersection(0.5, shape);
         let comps = i.prepare_computations(r, &[i]);
         assert_abs_diff_eq!(
             color(0.90498, 0.90498, 0.90498),
@@ -279,7 +279,7 @@ mod tests {
         let mut w = default_world();
         let r = ray(
             point(0, 0, -3),
-            vector(0.0, -2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0),
+            vector(0.0, -(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0),
         );
         let mut shape = plane();
         shape.material.reflective = 0.5;
@@ -304,7 +304,7 @@ mod tests {
         let shape = &w.objects[2];
         let r = ray(
             point(0, 0, -3),
-            vector(0.0, -2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0),
+            vector(0.0, -(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0),
         );
         let i = intersection(2.0_f64.sqrt(), shape);
         let comps = i.prepare_computations(r, &[i]);
@@ -340,7 +340,7 @@ mod tests {
         let shape = &w.objects[2];
         let r = ray(
             point(0, 0, -3),
-            vector(0.0, -2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0),
+            vector(0.0, -(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0),
         );
         let i = intersection(2.0_f64.sqrt(), shape);
         let comps = i.prepare_computations(r, &[i]);
@@ -383,7 +383,7 @@ mod tests {
         let shape = &w.objects[0];
         let r = ray(point(0.0, 0.0, 2.0_f64.sqrt() / 2.0), vector(0, 1, 0));
         let xs = vec![
-            intersection(-2.0_f64.sqrt() / 2.0, shape),
+            intersection(-(2.0_f64.sqrt()) / 2.0, shape),
             intersection(2.0_f64.sqrt() / 2.0, shape),
         ];
         let comps = xs[1].prepare_computations(r, &xs);
@@ -438,7 +438,7 @@ mod tests {
 
         let r = ray(
             point(0, 0, -3),
-            vector(0.0, -2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0),
+            vector(0.0, -(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0),
         );
         let xs = vec![intersection(2.0_f64.sqrt(), floor)];
         let comps = xs[0].prepare_computations(r, &xs);
@@ -467,7 +467,7 @@ mod tests {
         let floor = &w.objects[2];
         let r = ray(
             point(0, 0, -3),
-            vector(0.0, -2.0_f64.sqrt() / 2.0, 2.0_f64.sqrt() / 2.0),
+            vector(0.0, -(2.0_f64.sqrt()) / 2.0, 2.0_f64.sqrt() / 2.0),
         );
         let xs = vec![intersection(2.0_f64.sqrt(), floor)];
         let comps = xs[0].prepare_computations(r, &xs);

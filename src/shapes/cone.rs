@@ -196,7 +196,7 @@ mod tests {
     fn normal_vector_on_cone() {
         let tests = [
             (point(0, 0, 0), vector(0, 0, 0)),
-            (point(1, 1, 1), vector(1.0, -2_f64.sqrt(), 1.0)),
+            (point(1, 1, 1), vector(1.0, -(2_f64.sqrt()), 1.0)),
             (point(-1, -1, 0), vector(-1, 1, 0)),
         ];
 
