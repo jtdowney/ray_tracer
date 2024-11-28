@@ -9,13 +9,13 @@ lto = true
 panic = "abort"
 
 [dependencies]
-anyhow = "1.0.69"
+anyhow = "1"
 approx = "0.5.1"
 itertools = "0.13.0"
-ord_subset = "3.1.1"
-rayon = "1.6.1"
-thiserror = "1.0.38"
+ord_subset = "3"
+rayon = "1"
+thiserror = "2"
 
 [dev-dependencies]
-quickcheck = "1.0.3"
-quickcheck_macros = "1.0.0"
+quickcheck = "1"
+quickcheck_macros = "1"
