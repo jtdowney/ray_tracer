@@ -51,7 +51,7 @@ pub struct Computations<'a> {
     pub n2: f64,
 }
 
-impl<'a> Computations<'a> {
+impl Computations<'_> {
     pub fn schlick(&self) -> f64 {
         let mut cos = self.eye_vector.dot(self.normal_vector);
         if self.n1 > self.n2 {

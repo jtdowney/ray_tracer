@@ -11,7 +11,7 @@ pub mod plane;
 pub mod sphere;
 
 pub trait Geometry: 'static + Debug + Sync {
-    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection>;
+    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection<'a>>;
     fn local_normal_at(&self, point: Point) -> Vector;
     fn as_any(&self) -> &dyn Any;
 }
@@ -77,7 +77,7 @@ mod tests {
     }
 
     impl Geometry for TestShape {
-        fn local_intersection<'a>(&'a self, _shape: &'a Shape, ray: Ray) -> Vec<Intersection> {
+        fn local_intersection<'a>(&'a self, _shape: &'a Shape, ray: Ray) -> Vec<Intersection<'a>> {
             let mut saved_ray = self.saved_ray.lock().unwrap();
             *saved_ray = Some(ray);
             vec![]

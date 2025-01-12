@@ -20,7 +20,7 @@ pub fn glass_sphere() -> Shape {
 pub struct Sphere;
 
 impl Geometry for Sphere {
-    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection> {
+    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection<'a>> {
         let sphere_to_ray = ray.origin - ORIGIN;
         let a = ray.direction.dot(ray.direction);
         let b = 2.0 * ray.direction.dot(sphere_to_ray);

@@ -15,7 +15,11 @@ pub fn plane() -> Shape {
 pub struct Plane;
 
 impl Geometry for Plane {
-    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: crate::Ray) -> Vec<Intersection> {
+    fn local_intersection<'a>(
+        &'a self,
+        shape: &'a Shape,
+        ray: crate::Ray,
+    ) -> Vec<Intersection<'a>> {
         let mut xs = vec![];
         if ray.direction.y.abs() < EPSILON {
             return xs;

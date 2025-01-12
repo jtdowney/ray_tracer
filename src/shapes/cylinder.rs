@@ -57,7 +57,11 @@ fn intersect_caps(cylinder: &Cylinder, ray: Ray) -> Vec<f64> {
 }
 
 impl Geometry for Cylinder {
-    fn local_intersection<'a>(&'a self, shape: &'a crate::Shape, ray: Ray) -> Vec<Intersection> {
+    fn local_intersection<'a>(
+        &'a self,
+        shape: &'a crate::Shape,
+        ray: Ray,
+    ) -> Vec<Intersection<'a>> {
         let a = ray.direction.x.powi(2) + ray.direction.z.powi(2);
         let b = 2.0 * ray.origin.x * ray.direction.x + 2.0 * ray.origin.z * ray.direction.z;
         let c = ray.origin.x.powi(2) + ray.origin.z.powi(2) - 1.0;

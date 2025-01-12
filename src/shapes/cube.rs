@@ -1,5 +1,3 @@
-use std::f64::INFINITY;
-
 use crate::{intersection, intersection::Intersection, vector, Shape, EPSILON};
 
 use super::Geometry;
@@ -18,7 +16,10 @@ fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
     let (tmin, tmax) = if direction.abs() >= EPSILON {
         (tmin_numerator / direction, tmax_numerator / direction)
     } else {
-        (tmin_numerator * INFINITY, tmax_numerator * INFINITY)
+        (
+            tmin_numerator * f64::INFINITY,
+            tmax_numerator * f64::INFINITY,
+        )
     };
 
     if tmin > tmax {
@@ -29,7 +30,11 @@ fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
 }
 
 impl Geometry for Cube {
-    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: crate::Ray) -> Vec<Intersection> {
+    fn local_intersection<'a>(
+        &'a self,
+        shape: &'a Shape,
+        ray: crate::Ray,
+    ) -> Vec<Intersection<'a>> {
         let (xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
         let (ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
         let (ztmin, ztmax) = check_axis(ray.origin.z, ray.direction.z);

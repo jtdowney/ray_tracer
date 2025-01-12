@@ -57,7 +57,7 @@ fn intersect_caps(cone: &Cone, ray: Ray) -> Vec<f64> {
 }
 
 impl Geometry for Cone {
-    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection> {
+    fn local_intersection<'a>(&'a self, shape: &'a Shape, ray: Ray) -> Vec<Intersection<'a>> {
         let Point {
             x: ox,
             y: oy,
