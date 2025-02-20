@@ -2,7 +2,7 @@ use std::ops::{Index, IndexMut, Mul};
 
 use approx::AbsDiffEq;
 
-use crate::{point, vector, Point, Vector, EPSILON};
+use crate::{EPSILON, Point, Vector, point, vector};
 
 pub fn matrix<const N: usize, T: Into<f64> + Copy>(data: [[T; N]; N]) -> Matrix<N> {
     let mut values = [[0.0; N]; N];
@@ -54,11 +54,7 @@ impl Matrix3 {
 
     fn cofactor(self, i: usize, j: usize) -> f64 {
         let minor = self.minor(i, j);
-        if (i + j) % 2 == 0 {
-            minor
-        } else {
-            -minor
-        }
+        if (i + j) % 2 == 0 { minor } else { -minor }
     }
 
     fn determinant(self) -> f64 {
@@ -82,11 +78,7 @@ impl Matrix4 {
 
     fn cofactor(self, i: usize, j: usize) -> f64 {
         let minor = self.minor(i, j);
-        if (i + j) % 2 == 0 {
-            minor
-        } else {
-            -minor
-        }
+        if (i + j) % 2 == 0 { minor } else { -minor }
     }
 
     fn determinant(self) -> f64 {

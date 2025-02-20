@@ -1,4 +1,4 @@
-use crate::{intersection, intersection::Intersection, vector, Shape, EPSILON};
+use crate::{EPSILON, Shape, intersection, intersection::Intersection, vector};
 
 use super::Geometry;
 

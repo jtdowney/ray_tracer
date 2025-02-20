@@ -2,7 +2,7 @@ use std::ptr;
 
 use ord_subset::OrdSubsetIterExt;
 
-use crate::{Point, Ray, Shape, Vector, EPSILON};
+use crate::{EPSILON, Point, Ray, Shape, Vector};
 
 pub fn intersection<T>(t: T, object: &Shape) -> Intersection
 where
@@ -137,8 +137,8 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        plane, point, ray, shapes::sphere::glass_sphere, sphere, transform::translation, vector,
-        EPSILON, ORIGIN,
+        EPSILON, ORIGIN, plane, point, ray, shapes::sphere::glass_sphere, sphere,
+        transform::translation, vector,
     };
 
     use super::*;

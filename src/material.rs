@@ -1,4 +1,4 @@
-use crate::{color, pattern::Pattern, Color, Point, PointLight, Shape, Vector, BLACK};
+use crate::{BLACK, Color, Point, PointLight, Shape, Vector, color, pattern::Pattern};
 
 pub fn material() -> Material {
     Material {
@@ -37,10 +37,9 @@ impl Material {
         normal_vector: Vector,
         in_shadow: bool,
     ) -> Color {
-        let color = if let Some(pattern) = &self.pattern {
-            pattern.pattern_at_shape(shape, point)
-        } else {
-            self.color
+        let color = match &self.pattern {
+            Some(pattern) => pattern.pattern_at_shape(shape, point),
+            _ => self.color,
         };
 
         let effective_color = color * light.intensity;
@@ -80,11 +79,11 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        intersection, point, point_light, ray,
+        ORIGIN, WHITE, intersection, point, point_light, ray,
         shapes::sphere::glass_sphere,
         sphere,
         transform::{scaling, translation},
-        vector, ORIGIN, WHITE,
+        vector,
     };
 
     use super::*;

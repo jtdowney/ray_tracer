@@ -1,6 +1,6 @@
 use std::f64::consts::PI;
 
-use ray_tracer::{color, transform, Canvas, ORIGIN};
+use ray_tracer::{Canvas, ORIGIN, color, transform};
 
 fn main() -> anyhow::Result<()> {
     let width = 500;

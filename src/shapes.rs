@@ -1,7 +1,7 @@
 use std::{any::Any, fmt::Debug, ptr};
 
 use crate::{
-    identity_matrix, intersection::Intersection, material, Material, Matrix4, Point, Ray, Vector,
+    Material, Matrix4, Point, Ray, Vector, identity_matrix, intersection::Intersection, material,
 };
 
 pub mod cone;

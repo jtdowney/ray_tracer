@@ -10,16 +10,12 @@ pub fn test_pattern() -> Pattern {
     Pattern::new(|Point { x, y, z }| color(x, y, z))
 }
 
-use crate::{identity_matrix, Color, Matrix4, Point, Shape};
+use crate::{Color, Matrix4, Point, Shape, identity_matrix};
 
 pub fn stripe_pattern(a: Color, b: Color) -> Pattern {
     Pattern::new(move |Point { x, .. }| {
         let value = x.floor() as i32;
-        if value % 2 == 0 {
-            a
-        } else {
-            b
-        }
+        if value % 2 == 0 { a } else { b }
     })
 }
 
@@ -34,22 +30,14 @@ pub fn gradiant_pattern(a: Color, b: Color) -> Pattern {
 pub fn ring_pattern(a: Color, b: Color) -> Pattern {
     Pattern::new(move |Point { x, z, .. }| {
         let value = (x.powi(2) + z.powi(2)).sqrt().floor() as i32;
-        if value % 2 == 0 {
-            a
-        } else {
-            b
-        }
+        if value % 2 == 0 { a } else { b }
     })
 }
 
 pub fn checkers_pattern(a: Color, b: Color) -> Pattern {
     Pattern::new(move |Point { x, y, z }| {
         let value = (x.floor() + y.floor() + z.floor()) as i32;
-        if value % 2 == 0 {
-            a
-        } else {
-            b
-        }
+        if value % 2 == 0 { a } else { b }
     })
 }
 
@@ -90,9 +78,8 @@ impl Pattern {
 #[cfg(test)]
 mod tests {
     use crate::{
-        color, point, sphere,
+        BLACK, ORIGIN, WHITE, color, point, sphere,
         transform::{scaling, translation},
-        BLACK, ORIGIN, WHITE,
     };
 
     use super::*;

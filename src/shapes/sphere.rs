@@ -1,6 +1,6 @@
 use std::any::Any;
 
-use crate::{intersection::Intersection, Point, Ray, Vector, ORIGIN};
+use crate::{ORIGIN, Point, Ray, Vector, intersection::Intersection};
 
 use super::{Geometry, Shape};
 

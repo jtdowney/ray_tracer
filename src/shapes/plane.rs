@@ -1,8 +1,9 @@
 use std::any::Any;
 
 use crate::{
-    intersection::{intersection, Intersection},
-    vector, Shape, Vector, EPSILON,
+    EPSILON, Shape, Vector,
+    intersection::{Intersection, intersection},
+    vector,
 };
 
 use super::Geometry;

@@ -1,6 +1,6 @@
 use anyhow::bail;
 
-use crate::{clamp, Color};
+use crate::{Color, clamp};
 use std::fmt::Write;
 
 pub fn canvas(width: u16, height: u16) -> Canvas {
@@ -85,7 +85,7 @@ impl Canvas {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{color, BLACK};
+    use crate::{BLACK, color};
 
     #[test]
     fn creating_blank_canvas() {

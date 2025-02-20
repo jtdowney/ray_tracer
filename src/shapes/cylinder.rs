@@ -2,7 +2,7 @@ use std::mem;
 
 use approx::relative_eq;
 
-use crate::{intersection, intersection::Intersection, vector, Point, Ray, Shape, EPSILON};
+use crate::{EPSILON, Point, Ray, Shape, intersection, intersection::Intersection, vector};
 
 use super::Geometry;
 
@@ -115,7 +115,7 @@ impl Geometry for Cylinder {
 mod tests {
     use approx::assert_abs_diff_eq;
 
-    use crate::{point, ray, EPSILON};
+    use crate::{EPSILON, point, ray};
 
     use super::*;
 

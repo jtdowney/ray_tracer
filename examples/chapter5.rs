@@ -1,4 +1,4 @@
-use ray_tracer::{color, hit, point, ray, sphere, Canvas};
+use ray_tracer::{Canvas, color, hit, point, ray, sphere};
 
 fn main() -> anyhow::Result<()> {
     let ray_origin = point(0, 0, -5);

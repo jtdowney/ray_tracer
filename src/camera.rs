@@ -2,8 +2,8 @@ use itertools::iproduct;
 use rayon::prelude::*;
 
 use crate::{
-    canvas::canvas, identity_matrix, point, ray, Canvas, Matrix4, Ray, World, ORIGIN,
-    REFLECTION_DEPTH,
+    Canvas, Matrix4, ORIGIN, REFLECTION_DEPTH, Ray, World, canvas::canvas, identity_matrix, point,
+    ray,
 };
 
 pub fn camera(horizontal_size: u16, vertical_size: u16, field_of_view: f64) -> Camera {
@@ -86,11 +86,10 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        color,
+        ORIGIN, color,
         transform::{rotation_y, translation, view_transform},
         vector,
         world::default_world,
-        ORIGIN,
     };
 
     use super::*;

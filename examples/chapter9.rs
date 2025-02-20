@@ -1,9 +1,9 @@
 use std::f64::consts::PI;
 
 use ray_tracer::{
-    camera, color, plane, point, point_light, sphere,
+    WHITE, camera, color, plane, point, point_light, sphere,
     transform::{scaling, translation, view_transform},
-    vector, world, WHITE,
+    vector, world,
 };
 
 fn main() -> anyhow::Result<()> {

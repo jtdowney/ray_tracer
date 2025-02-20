@@ -2,7 +2,7 @@ use std::ops::{Add, Sub};
 
 use approx::AbsDiffEq;
 
-use crate::{vector, Vector, EPSILON};
+use crate::{EPSILON, Vector, vector};
 
 pub fn point<T: Into<f64>>(x: T, y: T, z: T) -> Point {
     Point {

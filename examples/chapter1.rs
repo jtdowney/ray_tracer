@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 
-use ray_tracer::{point, vector, Point, Vector};
+use ray_tracer::{Point, Vector, point, vector};
 
 #[derive(Copy, Clone)]
 struct Projectile {

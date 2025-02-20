@@ -1,4 +1,4 @@
-use ray_tracer::{color, point, vector, Canvas, Point, Vector};
+use ray_tracer::{Canvas, Point, Vector, color, point, vector};
 
 #[derive(Copy, Clone)]
 struct Projectile {

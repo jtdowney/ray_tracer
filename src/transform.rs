@@ -1,4 +1,4 @@
-use crate::{identity_matrix, matrix, Matrix4, Point, Vector};
+use crate::{Matrix4, Point, Vector, identity_matrix, matrix};
 
 pub fn translation<T: Into<f64>>(x: T, y: T, z: T) -> Matrix4 {
     let mut transform = identity_matrix();
@@ -82,7 +82,7 @@ mod tests {
 
     use approx::assert_abs_diff_eq;
 
-    use crate::{matrix, point, vector, ORIGIN};
+    use crate::{ORIGIN, matrix, point, vector};
 
     use super::*;
 

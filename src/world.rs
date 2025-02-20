@@ -1,11 +1,10 @@
 use ord_subset::OrdSubsetSliceExt;
 
 use crate::{
-    color, hit,
+    BLACK, Color, Point, PointLight, Ray, Shape, color, hit,
     intersection::{Computations, Intersection},
     point, point_light, ray, sphere,
     transform::scaling,
-    Color, Point, PointLight, Ray, Shape, BLACK,
 };
 
 pub fn world() -> World {
@@ -139,8 +138,8 @@ mod tests {
     use approx::assert_abs_diff_eq;
 
     use crate::{
-        intersection, pattern::test_pattern, plane, ray, transform::translation, vector, ORIGIN,
-        REFLECTION_DEPTH, WHITE,
+        ORIGIN, REFLECTION_DEPTH, WHITE, intersection, pattern::test_pattern, plane, ray,
+        transform::translation, vector,
     };
 
     use super::*;
