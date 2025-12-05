@@ -2,6 +2,12 @@ use std::ops::{Add, Sub};
 
 use crate::Vector;
 
+pub const ORIGIN: Point = Point {
+    x: 0.0,
+    y: 0.0,
+    z: 0.0,
+};
+
 pub fn point(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> Point {
     Point {
         x: x.into(),
