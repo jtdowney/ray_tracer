@@ -1,0 +1,272 @@
+use crate::{Matrix4, identity_matrix};
+
+pub fn translation(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> Matrix4 {
+    let mut transform = identity_matrix();
+    transform[(0, 3)] = x.into();
+    transform[(1, 3)] = y.into();
+    transform[(2, 3)] = z.into();
+    transform
+}
+
+pub fn scaling(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> Matrix4 {
+    let mut transform = identity_matrix();
+    transform[(0, 0)] = x.into();
+    transform[(1, 1)] = y.into();
+    transform[(2, 2)] = z.into();
+    transform
+}
+
+pub fn rotation_x(radians: impl Into<f64>) -> Matrix4 {
+    let mut transform = identity_matrix();
+    let (sin, cos) = radians.into().sin_cos();
+    transform[(1, 1)] = cos;
+    transform[(1, 2)] = -sin;
+    transform[(2, 1)] = sin;
+    transform[(2, 2)] = cos;
+    transform
+}
+
+pub fn rotation_y(radians: impl Into<f64>) -> Matrix4 {
+    let mut transform = identity_matrix();
+    let (sin, cos) = radians.into().sin_cos();
+    transform[(0, 0)] = cos;
+    transform[(0, 2)] = sin;
+    transform[(2, 0)] = -sin;
+    transform[(2, 2)] = cos;
+    transform
+}
+
+pub fn rotation_z(radians: impl Into<f64>) -> Matrix4 {
+    let mut transform = identity_matrix();
+    let (sin, cos) = radians.into().sin_cos();
+    transform[(0, 0)] = cos;
+    transform[(0, 1)] = -sin;
+    transform[(1, 0)] = sin;
+    transform[(1, 1)] = cos;
+    transform
+}
+
+pub fn shearing(
+    xy: impl Into<f64>,
+    xz: impl Into<f64>,
+    yx: impl Into<f64>,
+    yz: impl Into<f64>,
+    zx: impl Into<f64>,
+    zy: impl Into<f64>,
+) -> Matrix4 {
+    let mut transform = identity_matrix();
+    transform[(0, 1)] = xy.into();
+    transform[(0, 2)] = xz.into();
+    transform[(1, 0)] = yx.into();
+    transform[(1, 2)] = yz.into();
+    transform[(2, 0)] = zx.into();
+    transform[(2, 1)] = zy.into();
+    transform
+}
+
+#[cfg(test)]
+mod tests {
+    use std::f64::consts::PI;
+
+    use approx::assert_relative_eq;
+
+    use super::*;
+    use crate::{EPSILON, point, vector};
+
+    #[test]
+    fn multiplying_by_translation_matrix() {
+        let transform = translation(5, -3, 2);
+        let p = point(-3, 4, 5);
+        assert_eq!(transform * p, point(2, 1, 7));
+    }
+
+    #[test]
+    fn multiplying_by_inverse_of_translation_matrix() {
+        let transform = translation(5, -3, 2);
+        let inv = transform.inverse().unwrap();
+        let p = point(-3, 4, 5);
+        assert_eq!(inv * p, point(-8, 7, 3));
+    }
+
+    #[test]
+    fn translation_does_not_affect_vectors() {
+        let transform = translation(5, -3, 2);
+        let v = vector(-3, 4, 5);
+        assert_eq!(transform * v, v);
+    }
+
+    #[test]
+    fn scaling_matrix_applied_to_point() {
+        let transform = scaling(2, 3, 4);
+        let p = point(-4, 6, 8);
+        assert_eq!(transform * p, point(-8, 18, 32));
+    }
+
+    #[test]
+    fn scaling_matrix_applied_to_vector() {
+        let transform = scaling(2, 3, 4);
+        let v = vector(-4, 6, 8);
+        assert_eq!(transform * v, vector(-8, 18, 32));
+    }
+
+    #[test]
+    fn multiplying_by_inverse_of_scaling_matrix() {
+        let transform = scaling(2, 3, 4);
+        let inv = transform.inverse().unwrap();
+        let v = vector(-4, 6, 8);
+        assert_eq!(inv * v, vector(-2, 2, 2));
+    }
+
+    #[test]
+    fn reflection_is_scaling_by_negative_value() {
+        let transform = scaling(-1, 1, 1);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(-2, 3, 4));
+    }
+
+    #[test]
+    fn rotating_point_around_x_axis() {
+        let p = point(0, 1, 0);
+        let half_quarter = rotation_x(PI / 4.0);
+        let full_quarter = rotation_x(PI / 2.0);
+
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let result = half_quarter * p;
+        assert_relative_eq!(result.x, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.z, sqrt2_over_2, epsilon = EPSILON);
+
+        let result = full_quarter * p;
+        assert_relative_eq!(result.x, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z, 1.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn inverse_of_x_rotation_rotates_opposite_direction() {
+        let p = point(0, 1, 0);
+        let half_quarter = rotation_x(PI / 4.0);
+        let inv = half_quarter.inverse().unwrap();
+
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let result = inv * p;
+        assert_relative_eq!(result.x, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.z, -sqrt2_over_2, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn rotating_point_around_y_axis() {
+        let p = point(0, 0, 1);
+        let half_quarter = rotation_y(PI / 4.0);
+        let full_quarter = rotation_y(PI / 2.0);
+
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let result = half_quarter * p;
+        assert_relative_eq!(result.x, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z, sqrt2_over_2, epsilon = EPSILON);
+
+        let result = full_quarter * p;
+        assert_relative_eq!(result.x, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z, 0.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn rotating_point_around_z_axis() {
+        let p = point(0, 1, 0);
+        let half_quarter = rotation_z(PI / 4.0);
+        let full_quarter = rotation_z(PI / 2.0);
+
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let result = half_quarter * p;
+        assert_relative_eq!(result.x, -sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.y, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.z, 0.0, epsilon = EPSILON);
+
+        let result = full_quarter * p;
+        assert_relative_eq!(result.x, -1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z, 0.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn shearing_moves_x_in_proportion_to_y() {
+        let transform = shearing(1, 0, 0, 0, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(5, 3, 4));
+    }
+
+    #[test]
+    fn shearing_moves_x_in_proportion_to_z() {
+        let transform = shearing(0, 1, 0, 0, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(6, 3, 4));
+    }
+
+    #[test]
+    fn shearing_moves_y_in_proportion_to_x() {
+        let transform = shearing(0, 0, 1, 0, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(2, 5, 4));
+    }
+
+    #[test]
+    fn shearing_moves_y_in_proportion_to_z() {
+        let transform = shearing(0, 0, 0, 1, 0, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(2, 7, 4));
+    }
+
+    #[test]
+    fn shearing_moves_z_in_proportion_to_x() {
+        let transform = shearing(0, 0, 0, 0, 1, 0);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(2, 3, 6));
+    }
+
+    #[test]
+    fn shearing_moves_z_in_proportion_to_y() {
+        let transform = shearing(0, 0, 0, 0, 0, 1);
+        let p = point(2, 3, 4);
+        assert_eq!(transform * p, point(2, 3, 7));
+    }
+
+    #[test]
+    fn individual_transformations_applied_in_sequence() {
+        let p = point(1, 0, 1);
+        let a = rotation_x(PI / 2.0);
+        let b = scaling(5, 5, 5);
+        let c = translation(10, 5, 7);
+
+        let p2 = a * p;
+        assert_relative_eq!(p2.x, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(p2.y, -1.0, epsilon = EPSILON);
+        assert_relative_eq!(p2.z, 0.0, epsilon = EPSILON);
+
+        let p3 = b * p2;
+        assert_relative_eq!(p3.x, 5.0, epsilon = EPSILON);
+        assert_relative_eq!(p3.y, -5.0, epsilon = EPSILON);
+        assert_relative_eq!(p3.z, 0.0, epsilon = EPSILON);
+
+        let p4 = c * p3;
+        assert_relative_eq!(p4.x, 15.0, epsilon = EPSILON);
+        assert_relative_eq!(p4.y, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(p4.z, 7.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn chained_transformations_applied_in_reverse_order() {
+        let p = point(1, 0, 1);
+        let rotation = rotation_x(PI / 2.0);
+        let scale = scaling(5, 5, 5);
+        let translate = translation(10, 5, 7);
+
+        let transform = translate * scale * rotation;
+        let result = transform * p;
+        assert_relative_eq!(result.x, 15.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z, 7.0, epsilon = EPSILON);
+    }
+}

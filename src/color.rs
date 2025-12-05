@@ -6,6 +6,18 @@ pub const BLACK: Color = Color {
     blue: 0.0,
 };
 
+pub const WHITE: Color = Color {
+    red: 1.0,
+    green: 1.0,
+    blue: 1.0,
+};
+
+pub const RED: Color = Color {
+    red: 1.0,
+    green: 0.0,
+    blue: 0.0,
+};
+
 pub fn color(red: impl Into<f64>, green: impl Into<f64>, blue: impl Into<f64>) -> Color {
     Color {
         red: red.into(),
