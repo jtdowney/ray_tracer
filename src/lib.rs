@@ -1,6 +1,8 @@
 mod canvas;
 pub mod color;
 mod intersection;
+mod light;
+mod material;
 mod matrix;
 mod point;
 mod ray;
@@ -11,6 +13,8 @@ mod vector;
 pub use canvas::{Canvas, canvas};
 pub use color::{Color, color};
 pub use intersection::{Intersection, hit, intersection};
+pub use light::{PointLight, point_light};
+pub use material::{Material, material};
 pub use matrix::{Matrix, Matrix2, Matrix3, Matrix4, identity_matrix, matrix};
 pub use point::{ORIGIN, Point, point};
 pub use ray::{Ray, ray};

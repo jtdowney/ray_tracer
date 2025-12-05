@@ -33,12 +33,11 @@ mod tests {
     use approx::assert_relative_eq;
 
     use super::*;
-    use crate::shape::sphere;
-    use crate::EPSILON;
+    use crate::{EPSILON, shape::sphere};
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
-        let s = sphere();
+        let s = sphere().build();
         let i = intersection(3.5, &s);
         assert_relative_eq!(i.time, 3.5, epsilon = EPSILON);
         assert!(std::ptr::eq(i.object, &raw const s));
@@ -46,7 +45,7 @@ mod tests {
 
     #[test]
     fn aggregating_intersections() {
-        let s = sphere();
+        let s = sphere().build();
         let i1 = intersection(1, &s);
         let i2 = intersection(2, &s);
         let xs = [i1, i2];
@@ -57,7 +56,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_positive_t() {
-        let s = sphere();
+        let s = sphere().build();
         let i1 = intersection(1, &s);
         let i2 = intersection(2, &s);
         let xs = vec![i2, i1];
@@ -67,7 +66,7 @@ mod tests {
 
     #[test]
     fn hit_when_some_intersections_have_negative_t() {
-        let s = sphere();
+        let s = sphere().build();
         let i1 = intersection(-1, &s);
         let i2 = intersection(1, &s);
         let xs = vec![i2, i1];
@@ -77,7 +76,7 @@ mod tests {
 
     #[test]
     fn hit_when_all_intersections_have_negative_t() {
-        let s = sphere();
+        let s = sphere().build();
         let i1 = intersection(-2, &s);
         let i2 = intersection(-1, &s);
         let xs = vec![i2, i1];
@@ -87,7 +86,7 @@ mod tests {
 
     #[test]
     fn hit_is_always_lowest_nonnegative_intersection() {
-        let s = sphere();
+        let s = sphere().build();
         let i1 = intersection(5, &s);
         let i2 = intersection(7, &s);
         let i3 = intersection(-3, &s);

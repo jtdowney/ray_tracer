@@ -6,4 +6,5 @@ edition = "2024"
 [dependencies]
 anyhow = "1"
 approx = "0.5.1"
+bon = "3"
 ord_subset = "3"

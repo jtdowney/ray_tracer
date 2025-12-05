@@ -22,6 +22,11 @@ impl Vector {
     }
 
     #[must_use]
+    pub fn reflect(&self, normal: &Vector) -> Vector {
+        *self - *normal * 2.0 * self.dot(normal)
+    }
+
+    #[must_use]
     pub fn normalize(&self) -> Vector {
         let magnitude = self.magnitude();
         Vector {
@@ -231,5 +236,24 @@ mod tests {
         let b = vector(2, 3, 4);
         assert_eq!(a.cross(&b), vector(-1, 2, -1));
         assert_eq!(b.cross(&a), vector(1, -2, 1));
+    }
+
+    #[test]
+    fn reflecting_vector_approaching_at_45_degrees() {
+        let v = vector(1, -1, 0);
+        let n = vector(0, 1, 0);
+        let r = v.reflect(&n);
+        assert_eq!(r, vector(1, 1, 0));
+    }
+
+    #[test]
+    fn reflecting_vector_off_slanted_surface() {
+        let v = vector(0, -1, 0);
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let n = vector(sqrt2_over_2, sqrt2_over_2, 0);
+        let r = v.reflect(&n);
+        assert_relative_eq!(r.x, 1.0, epsilon = crate::EPSILON);
+        assert_relative_eq!(r.y, 0.0, epsilon = crate::EPSILON);
+        assert_relative_eq!(r.z, 0.0, epsilon = crate::EPSILON);
     }
 }

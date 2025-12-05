@@ -1,5 +1,5 @@
 use anyhow::Result;
-use ray_tracer::{canvas, color::RED, hit, point, ray, shape::sphere};
+use ray_tracer::{Material, canvas, color, hit, point, point_light, ray, shape::sphere};
 
 fn main() -> Result<()> {
     let ray_origin = point(0, 0, -5);
@@ -12,7 +12,11 @@ fn main() -> Result<()> {
     let half = wall_size / 2.0;
 
     let mut c = canvas(canvas_pixels, canvas_pixels);
-    let shape = sphere().build();
+
+    let material = Material::builder().color(color(1, 0.2, 1)).build();
+    let shape = sphere().material(material).build();
+
+    let light = point_light(point(-10, 10, -10), color(1, 1, 1));
 
     #[allow(
         clippy::cast_possible_truncation,
@@ -29,8 +33,15 @@ fn main() -> Result<()> {
             let r = ray(ray_origin, direction);
             let xs = shape.intersect(r);
 
-            if hit(&xs).is_some() {
-                c.write_pixel(x, y, RED)?;
+            if let Some(intersection) = hit(&xs) {
+                let hit_point = r.position(intersection.time);
+                let normal = intersection.object.normal_at(hit_point);
+                let eye = -r.direction;
+                let pixel_color = intersection
+                    .object
+                    .material
+                    .lighting(&light, hit_point, eye, normal);
+                c.write_pixel(x, y, pixel_color)?;
             }
         }
     }
