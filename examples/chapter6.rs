@@ -38,10 +38,14 @@ fn main() -> Result<()> {
                 let hit_point = r.position(intersection.time);
                 let normal = intersection.object.normal_at(hit_point);
                 let eye = -r.direction;
-                let pixel_color = intersection
-                    .object
-                    .material
-                    .lighting(&light, hit_point, eye, normal, false);
+                let pixel_color = intersection.object.material.lighting(
+                    intersection.object,
+                    &light,
+                    hit_point,
+                    eye,
+                    normal,
+                    false,
+                );
                 c.write_pixel(x, y, pixel_color)?;
             }
         }

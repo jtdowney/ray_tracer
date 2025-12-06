@@ -231,7 +231,7 @@ mod tests {
     #[test]
     fn sphere_may_be_assigned_material() {
         let m = Material::builder().ambient(1.0).build();
-        let s = sphere().material(m).build();
+        let s = sphere().material(m.clone()).build();
         assert_eq!(s.material, m);
     }
 }

@@ -1,8 +1,9 @@
 use bon::Builder;
 
 use crate::{
-    Color, Point, PointLight, Vector,
+    Color, Point, PointLight, Shape, Vector,
     color::{BLACK, WHITE},
+    pattern::Pattern,
 };
 
 #[must_use]
@@ -10,7 +11,7 @@ pub fn material() -> Material {
     Material::builder().build()
 }
 
-#[derive(Builder, Clone, Copy, Debug, PartialEq)]
+#[derive(Builder, Clone)]
 #[builder(on(f64, into), derive(Into))]
 pub struct Material {
     #[builder(default = WHITE)]
@@ -23,19 +24,48 @@ pub struct Material {
     pub specular: f64,
     #[builder(default = 200.0)]
     pub shininess: f64,
+    pub pattern: Option<Pattern>,
+}
+
+impl std::fmt::Debug for Material {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Material")
+            .field("color", &self.color)
+            .field("ambient", &self.ambient)
+            .field("diffuse", &self.diffuse)
+            .field("specular", &self.specular)
+            .field("shininess", &self.shininess)
+            .field("pattern", &self.pattern.as_ref().map(|_| "Pattern"))
+            .finish()
+    }
+}
+
+impl PartialEq for Material {
+    fn eq(&self, other: &Self) -> bool {
+        self.color == other.color
+            && (self.ambient - other.ambient).abs() < f64::EPSILON
+            && (self.diffuse - other.diffuse).abs() < f64::EPSILON
+            && (self.specular - other.specular).abs() < f64::EPSILON
+            && (self.shininess - other.shininess).abs() < f64::EPSILON
+    }
 }
 
 impl Material {
     #[must_use]
     pub fn lighting(
         &self,
+        object: &Shape,
         light: &PointLight,
         point: Point,
         eyev: Vector,
         normalv: Vector,
         in_shadow: bool,
     ) -> Color {
-        let effective_color = self.color * light.intensity;
+        let color = self
+            .pattern
+            .as_ref()
+            .map_or(self.color, |p| p.pattern_at_shape(object, point));
+        let effective_color = color * light.intensity;
         let lightv = (light.position - point).normalize();
         let ambient = effective_color * self.ambient;
 
@@ -71,7 +101,7 @@ mod tests {
     use approx::assert_relative_eq;
 
     use super::*;
-    use crate::{EPSILON, color, point, point_light, vector};
+    use crate::{EPSILON, color, pattern::stripe_pattern, point, point_light, sphere, vector};
 
     #[test]
     fn default_material() {
@@ -86,11 +116,12 @@ mod tests {
     #[test]
     fn lighting_with_eye_between_light_and_surface() {
         let m = material();
+        let object = sphere().build();
         let position = point(0, 0, 0);
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv, false);
+        let result = m.lighting(&object, &light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 1.9, epsilon = EPSILON);
         assert_relative_eq!(result.green, 1.9, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 1.9, epsilon = EPSILON);
@@ -99,12 +130,13 @@ mod tests {
     #[test]
     fn lighting_with_eye_between_light_and_surface_eye_offset_45_degrees() {
         let m = material();
+        let object = sphere().build();
         let position = point(0, 0, 0);
         let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
         let eyev = vector(0.0, sqrt2_over_2, -sqrt2_over_2);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv, false);
+        let result = m.lighting(&object, &light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 1.0, epsilon = EPSILON);
         assert_relative_eq!(result.green, 1.0, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 1.0, epsilon = EPSILON);
@@ -113,11 +145,12 @@ mod tests {
     #[test]
     fn lighting_with_eye_opposite_surface_light_offset_45_degrees() {
         let m = material();
+        let object = sphere().build();
         let position = point(0, 0, 0);
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv, false);
+        let result = m.lighting(&object, &light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 0.7364, epsilon = EPSILON);
         assert_relative_eq!(result.green, 0.7364, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 0.7364, epsilon = EPSILON);
@@ -126,12 +159,13 @@ mod tests {
     #[test]
     fn lighting_with_eye_in_path_of_reflection_vector() {
         let m = material();
+        let object = sphere().build();
         let position = point(0, 0, 0);
         let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
         let eyev = vector(0.0, -sqrt2_over_2, -sqrt2_over_2);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv, false);
+        let result = m.lighting(&object, &light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 1.6364, epsilon = EPSILON);
         assert_relative_eq!(result.green, 1.6364, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 1.6364, epsilon = EPSILON);
@@ -140,11 +174,12 @@ mod tests {
     #[test]
     fn lighting_with_light_behind_surface() {
         let m = material();
+        let object = sphere().build();
         let position = point(0, 0, 0);
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, 10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv, false);
+        let result = m.lighting(&object, &light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 0.1, epsilon = EPSILON);
         assert_relative_eq!(result.green, 0.1, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 0.1, epsilon = EPSILON);
@@ -153,14 +188,33 @@ mod tests {
     #[test]
     fn lighting_with_surface_in_shadow() {
         let m = material();
+        let object = sphere().build();
         let position = point(0, 0, 0);
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
         let in_shadow = true;
-        let result = m.lighting(&light, position, eyev, normalv, in_shadow);
+        let result = m.lighting(&object, &light, position, eyev, normalv, in_shadow);
         assert_relative_eq!(result.red, 0.1, epsilon = EPSILON);
         assert_relative_eq!(result.green, 0.1, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 0.1, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn lighting_with_pattern_applied() {
+        let m = Material::builder()
+            .pattern(stripe_pattern(color(1, 1, 1), color(0, 0, 0)).build())
+            .ambient(1)
+            .diffuse(0)
+            .specular(0)
+            .build();
+        let object = sphere().build();
+        let eyev = vector(0, 0, -1);
+        let normalv = vector(0, 0, -1);
+        let light = point_light(point(0, 0, -10), color(1, 1, 1));
+        let c1 = m.lighting(&object, &light, point(0.9, 0, 0), eyev, normalv, false);
+        let c2 = m.lighting(&object, &light, point(1.1, 0, 0), eyev, normalv, false);
+        assert_eq!(c1, color(1, 1, 1));
+        assert_eq!(c2, color(0, 0, 0));
     }
 }

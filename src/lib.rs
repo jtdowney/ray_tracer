@@ -5,6 +5,7 @@ mod intersection;
 mod light;
 mod material;
 mod matrix;
+pub mod pattern;
 mod point;
 mod ray;
 pub mod shape;

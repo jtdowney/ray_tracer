@@ -58,12 +58,11 @@ mod tests {
 
     use approx::assert_relative_eq;
 
+    use super::{Geometry, Shape};
     use crate::{
         EPSILON, Intersection, Material, Point, Ray, Vector, identity_matrix, material, point, ray,
         transform, vector,
     };
-
-    use super::{Geometry, Shape};
 
     struct TestShape {
         saved_ray: Rc<RefCell<Option<Ray>>>,
@@ -119,7 +118,7 @@ mod tests {
     fn assigning_material() {
         let (mut s, _) = test_shape();
         let m = Material::builder().ambient(1.0).build();
-        s.material = m;
+        s.material = m.clone();
         assert_eq!(s.material, m);
     }
 
