@@ -11,6 +11,7 @@ pub fn material() -> Material {
 }
 
 #[derive(Builder, Clone, Copy, Debug, PartialEq)]
+#[builder(on(f64, into), derive(Into))]
 pub struct Material {
     #[builder(default = WHITE)]
     pub color: Color,

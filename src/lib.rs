@@ -1,3 +1,4 @@
+mod camera;
 mod canvas;
 pub mod color;
 mod intersection;
@@ -9,7 +10,9 @@ mod ray;
 pub mod shape;
 pub mod transform;
 mod vector;
+mod world;
 
+pub use camera::{Camera, camera};
 pub use canvas::{Canvas, canvas};
 pub use color::{Color, color};
 pub use intersection::{Intersection, hit, intersection};
@@ -20,6 +23,7 @@ pub use point::{ORIGIN, Point, point};
 pub use ray::{Ray, ray};
 pub use shape::*;
 pub use vector::{Vector, vector};
+pub use world::{World, default_world};
 
 pub const EPSILON: f64 = 0.0001;
 

@@ -1,13 +1,21 @@
+use bon::builder;
+
 use crate::{
-    Intersection, Material, Matrix4, ORIGIN, Point, Ray, identity_matrix, material,
+    Material, ORIGIN, identity_matrix,
+    intersection::Intersection,
+    material,
+    matrix::Matrix4,
+    point::Point,
+    ray::Ray,
     shape::{Geometry, Shape},
+    vector::Vector,
 };
 
-#[bon::builder(finish_fn = build)]
+#[builder(finish_fn = build, derive(Into))]
 #[must_use]
 pub fn sphere(
     #[builder(default = identity_matrix())] transform: Matrix4,
-    #[builder(default = material())] material: Material,
+    #[builder(default = material(), into)] material: Material,
 ) -> Shape {
     let mut shape: Shape = Sphere.into();
     shape.transform = transform;
@@ -47,7 +55,7 @@ impl Geometry for Sphere {
         intersections
     }
 
-    fn local_normal_at(&self, point: Point) -> crate::Vector {
+    fn local_normal_at(&self, point: Point) -> Vector {
         point - ORIGIN
     }
 }

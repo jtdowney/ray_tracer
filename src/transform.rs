@@ -1,4 +1,21 @@
-use crate::{Matrix4, identity_matrix};
+use crate::{Matrix4, Point, Vector, identity_matrix, matrix};
+
+#[must_use]
+pub fn view_transform(from: Point, to: Point, up: Vector) -> Matrix4 {
+    let forward = (to - from).normalize();
+    let up = up.normalize();
+    let left = forward.cross(&up);
+    let true_up = left.cross(&forward);
+
+    let orientation = matrix([
+        [left.x, left.y, left.z, 0.0],
+        [true_up.x, true_up.y, true_up.z, 0.0],
+        [-forward.x, -forward.y, -forward.z, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]);
+
+    orientation * translation(-from.x, -from.y, -from.z)
+}
 
 pub fn translation(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> Matrix4 {
     let mut transform = identity_matrix();
@@ -268,5 +285,60 @@ mod tests {
         assert_relative_eq!(result.x, 15.0, epsilon = EPSILON);
         assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
         assert_relative_eq!(result.z, 7.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn view_transformation_for_default_orientation() {
+        let from = point(0, 0, 0);
+        let to = point(0, 0, -1);
+        let up = vector(0, 1, 0);
+        let t = view_transform(from, to, up);
+        assert_eq!(t, crate::identity_matrix());
+    }
+
+    #[test]
+    fn view_transformation_looking_in_positive_z() {
+        let from = point(0, 0, 0);
+        let to = point(0, 0, 1);
+        let up = vector(0, 1, 0);
+        let t = view_transform(from, to, up);
+        assert_eq!(t, scaling(-1, 1, -1));
+    }
+
+    #[test]
+    fn view_transformation_moves_the_world() {
+        let from = point(0, 0, 8);
+        let to = point(0, 0, 0);
+        let up = vector(0, 1, 0);
+        let t = view_transform(from, to, up);
+        assert_eq!(t, translation(0, 0, -8));
+    }
+
+    #[test]
+    fn arbitrary_view_transformation() {
+        let from = point(1, 3, 2);
+        let to = point(4, -2, 8);
+        let up = vector(1, 1, 0);
+        let t = view_transform(from, to, up);
+
+        assert_relative_eq!(t[(0, 0)], -0.50709, epsilon = EPSILON);
+        assert_relative_eq!(t[(0, 1)], 0.50709, epsilon = EPSILON);
+        assert_relative_eq!(t[(0, 2)], 0.67612, epsilon = EPSILON);
+        assert_relative_eq!(t[(0, 3)], -2.36643, epsilon = EPSILON);
+
+        assert_relative_eq!(t[(1, 0)], 0.76772, epsilon = EPSILON);
+        assert_relative_eq!(t[(1, 1)], 0.60609, epsilon = EPSILON);
+        assert_relative_eq!(t[(1, 2)], 0.12122, epsilon = EPSILON);
+        assert_relative_eq!(t[(1, 3)], -2.82843, epsilon = EPSILON);
+
+        assert_relative_eq!(t[(2, 0)], -0.35857, epsilon = EPSILON);
+        assert_relative_eq!(t[(2, 1)], 0.59761, epsilon = EPSILON);
+        assert_relative_eq!(t[(2, 2)], -0.71714, epsilon = EPSILON);
+        assert_relative_eq!(t[(2, 3)], 0.00000, epsilon = EPSILON);
+
+        assert_relative_eq!(t[(3, 0)], 0.00000, epsilon = EPSILON);
+        assert_relative_eq!(t[(3, 1)], 0.00000, epsilon = EPSILON);
+        assert_relative_eq!(t[(3, 2)], 0.00000, epsilon = EPSILON);
+        assert_relative_eq!(t[(3, 3)], 1.00000, epsilon = EPSILON);
     }
 }

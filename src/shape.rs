@@ -2,7 +2,7 @@ use crate::{Intersection, Material, Matrix4, Point, Ray, Vector, identity_matrix
 
 mod sphere;
 
-pub use sphere::{Sphere, sphere};
+pub use sphere::sphere;
 
 pub trait Geometry {
     fn local_intersection<'shape>(

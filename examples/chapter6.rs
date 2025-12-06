@@ -13,8 +13,9 @@ fn main() -> Result<()> {
 
     let mut c = canvas(canvas_pixels, canvas_pixels);
 
-    let material = Material::builder().color(color(1, 0.2, 1)).build();
-    let shape = sphere().material(material).build();
+    let shape = sphere()
+        .material(Material::builder().color(color(1, 0.2, 1)))
+        .build();
 
     let light = point_light(point(-10, 10, -10), color(1, 1, 1));
 

@@ -1,6 +1,6 @@
 use ord_subset::OrdSubsetIterExt;
 
-use crate::shape::Shape;
+use crate::{Point, Ray, Vector, shape::Shape};
 
 pub fn intersection<T>(t: T, object: &Shape) -> Intersection<'_>
 where
@@ -28,12 +28,41 @@ pub struct Intersection<'a> {
     pub object: &'a Shape,
 }
 
+impl Intersection<'_> {
+    #[must_use]
+    pub fn prepare_computations(&self, ray: Ray) -> Computations<'_> {
+        let point = ray.position(self.time);
+        let eyev = -ray.direction;
+        let normalv = self.object.normal_at(point);
+        let inside = normalv.dot(&eyev) < 0.0;
+        let normalv = if inside { -normalv } else { normalv };
+
+        Computations {
+            time: self.time,
+            object: self.object,
+            point,
+            eyev,
+            normalv,
+            inside,
+        }
+    }
+}
+
+pub struct Computations<'a> {
+    pub time: f64,
+    pub object: &'a Shape,
+    pub point: Point,
+    pub eyev: Vector,
+    pub normalv: Vector,
+    pub inside: bool,
+}
+
 #[cfg(test)]
 mod tests {
     use approx::assert_relative_eq;
 
     use super::*;
-    use crate::{EPSILON, shape::sphere};
+    use crate::{EPSILON, point, ray, shape::sphere, vector};
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
@@ -94,5 +123,39 @@ mod tests {
         let xs = vec![i1, i2, i3, i4];
         let i = hit(&xs).unwrap();
         assert_relative_eq!(i.time, i4.time, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn precomputing_state_of_intersection() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let shape = sphere().build();
+        let i = intersection(4, &shape);
+        let comps = i.prepare_computations(r);
+        assert_relative_eq!(comps.time, i.time, epsilon = EPSILON);
+        assert!(std::ptr::eq(comps.object, i.object));
+        assert_eq!(comps.point, point(0, 0, -1));
+        assert_eq!(comps.eyev, vector(0, 0, -1));
+        assert_eq!(comps.normalv, vector(0, 0, -1));
+    }
+
+    #[test]
+    fn hit_when_intersection_occurs_on_outside() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let shape = sphere().build();
+        let i = intersection(4, &shape);
+        let comps = i.prepare_computations(r);
+        assert!(!comps.inside);
+    }
+
+    #[test]
+    fn hit_when_intersection_occurs_on_inside() {
+        let r = ray(point(0, 0, 0), vector(0, 0, 1));
+        let shape = sphere().build();
+        let i = intersection(1, &shape);
+        let comps = i.prepare_computations(r);
+        assert_eq!(comps.point, point(0, 0, 1));
+        assert_eq!(comps.eyev, vector(0, 0, -1));
+        assert!(comps.inside);
+        assert_eq!(comps.normalv, vector(0, 0, -1));
     }
 }
