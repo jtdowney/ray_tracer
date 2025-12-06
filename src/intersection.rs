@@ -1,6 +1,6 @@
 use ord_subset::OrdSubsetIterExt;
 
-use crate::{Point, Ray, Vector, shape::Shape};
+use crate::{EPSILON, Point, Ray, Vector, shape::Shape};
 
 pub fn intersection<T>(t: T, object: &Shape) -> Intersection<'_>
 where
@@ -36,11 +36,13 @@ impl Intersection<'_> {
         let normalv = self.object.normal_at(point);
         let inside = normalv.dot(&eyev) < 0.0;
         let normalv = if inside { -normalv } else { normalv };
+        let over_point = point + normalv * EPSILON;
 
         Computations {
             time: self.time,
             object: self.object,
             point,
+            over_point,
             eyev,
             normalv,
             inside,
@@ -52,6 +54,7 @@ pub struct Computations<'a> {
     pub time: f64,
     pub object: &'a Shape,
     pub point: Point,
+    pub over_point: Point,
     pub eyev: Vector,
     pub normalv: Vector,
     pub inside: bool,
@@ -62,7 +65,7 @@ mod tests {
     use approx::assert_relative_eq;
 
     use super::*;
-    use crate::{EPSILON, point, ray, shape::sphere, vector};
+    use crate::{EPSILON, point, ray, shape::sphere, transform, vector};
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
@@ -157,5 +160,15 @@ mod tests {
         assert_eq!(comps.eyev, vector(0, 0, -1));
         assert!(comps.inside);
         assert_eq!(comps.normalv, vector(0, 0, -1));
+    }
+
+    #[test]
+    fn hit_should_offset_point() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let shape = sphere().transform(transform::translation(0, 0, 1)).build();
+        let i = intersection(5, &shape);
+        let comps = i.prepare_computations(r);
+        assert!(comps.over_point.z < -EPSILON / 2.0);
+        assert!(comps.point.z > comps.over_point.z);
     }
 }

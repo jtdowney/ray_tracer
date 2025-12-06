@@ -33,10 +33,15 @@ impl Material {
         point: Point,
         eyev: Vector,
         normalv: Vector,
+        in_shadow: bool,
     ) -> Color {
         let effective_color = self.color * light.intensity;
         let lightv = (light.position - point).normalize();
         let ambient = effective_color * self.ambient;
+
+        if in_shadow {
+            return ambient;
+        }
 
         let light_dot_normal = lightv.dot(&normalv);
         let (diffuse, specular) = if light_dot_normal < 0.0 {
@@ -85,7 +90,7 @@ mod tests {
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 1.9, epsilon = EPSILON);
         assert_relative_eq!(result.green, 1.9, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 1.9, epsilon = EPSILON);
@@ -99,7 +104,7 @@ mod tests {
         let eyev = vector(0.0, sqrt2_over_2, -sqrt2_over_2);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 1.0, epsilon = EPSILON);
         assert_relative_eq!(result.green, 1.0, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 1.0, epsilon = EPSILON);
@@ -112,7 +117,7 @@ mod tests {
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 0.7364, epsilon = EPSILON);
         assert_relative_eq!(result.green, 0.7364, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 0.7364, epsilon = EPSILON);
@@ -126,7 +131,7 @@ mod tests {
         let eyev = vector(0.0, -sqrt2_over_2, -sqrt2_over_2);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
         assert_relative_eq!(result.red, 1.6364, epsilon = EPSILON);
         assert_relative_eq!(result.green, 1.6364, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 1.6364, epsilon = EPSILON);
@@ -139,7 +144,21 @@ mod tests {
         let eyev = vector(0, 0, -1);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, 10), color(1, 1, 1));
-        let result = m.lighting(&light, position, eyev, normalv);
+        let result = m.lighting(&light, position, eyev, normalv, false);
+        assert_relative_eq!(result.red, 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.green, 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.blue, 0.1, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn lighting_with_surface_in_shadow() {
+        let m = material();
+        let position = point(0, 0, 0);
+        let eyev = vector(0, 0, -1);
+        let normalv = vector(0, 0, -1);
+        let light = point_light(point(0, 0, -10), color(1, 1, 1));
+        let in_shadow = true;
+        let result = m.lighting(&light, position, eyev, normalv, in_shadow);
         assert_relative_eq!(result.red, 0.1, epsilon = EPSILON);
         assert_relative_eq!(result.green, 0.1, epsilon = EPSILON);
         assert_relative_eq!(result.blue, 0.1, epsilon = EPSILON);

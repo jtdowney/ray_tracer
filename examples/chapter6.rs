@@ -41,7 +41,7 @@ fn main() -> Result<()> {
                 let pixel_color = intersection
                     .object
                     .material
-                    .lighting(&light, hit_point, eye, normal);
+                    .lighting(&light, hit_point, eye, normal, false);
                 c.write_pixel(x, y, pixel_color)?;
             }
         }
