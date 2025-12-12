@@ -24,6 +24,12 @@ pub struct Material {
     pub specular: f64,
     #[builder(default = 200.0)]
     pub shininess: f64,
+    #[builder(default = 0.0)]
+    pub reflective: f64,
+    #[builder(default = 0.0)]
+    pub transparency: f64,
+    #[builder(default = 1.0)]
+    pub refractive_index: f64,
     pub pattern: Option<Pattern>,
 }
 
@@ -35,6 +41,9 @@ impl std::fmt::Debug for Material {
             .field("diffuse", &self.diffuse)
             .field("specular", &self.specular)
             .field("shininess", &self.shininess)
+            .field("reflective", &self.reflective)
+            .field("transparency", &self.transparency)
+            .field("refractive_index", &self.refractive_index)
             .field("pattern", &self.pattern.as_ref().map(|_| "Pattern"))
             .finish()
     }
@@ -111,6 +120,19 @@ mod tests {
         assert_relative_eq!(m.diffuse, 0.9, epsilon = EPSILON);
         assert_relative_eq!(m.specular, 0.9, epsilon = EPSILON);
         assert_relative_eq!(m.shininess, 200.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn reflectivity_for_default_material() {
+        let m = material();
+        assert_relative_eq!(m.reflective, 0.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn transparency_and_refractive_index_for_default_material() {
+        let m = material();
+        assert_relative_eq!(m.transparency, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(m.refractive_index, 1.0, epsilon = EPSILON);
     }
 
     #[test]

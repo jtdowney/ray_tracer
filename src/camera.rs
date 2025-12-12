@@ -2,7 +2,9 @@ use std::f64::consts::FRAC_PI_2;
 
 use bon::builder;
 
-use crate::{Canvas, Matrix4, ORIGIN, Ray, World, canvas, identity_matrix, point, ray};
+use crate::{
+    Canvas, Matrix4, ORIGIN, REFLECTION_DEPTH, Ray, World, canvas, identity_matrix, point, ray,
+};
 
 #[must_use]
 #[builder(finish_fn = build, on(f64, into))]
@@ -79,7 +81,7 @@ impl Camera {
         for y in 0..self.height {
             for x in 0..self.width {
                 let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(ray);
+                let color = world.color_at(ray, REFLECTION_DEPTH);
                 canvas.write_pixel(x as usize, y as usize, color)?;
             }
         }

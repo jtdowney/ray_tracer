@@ -23,6 +23,13 @@ pub fn sphere(
     shape
 }
 
+#[must_use]
+pub fn glass_sphere() -> Shape {
+    sphere()
+        .material(Material::builder().transparency(1.0).refractive_index(1.5))
+        .build()
+}
+
 pub struct Sphere;
 
 impl Geometry for Sphere {
@@ -67,7 +74,9 @@ mod tests {
     use approx::assert_relative_eq;
 
     use crate::{
-        EPSILON, Material, identity_matrix, material, point, ray, shape::sphere, transform, vector,
+        EPSILON, Material, identity_matrix, material, point, ray,
+        shape::{glass_sphere, sphere},
+        transform, vector,
     };
 
     #[test]
@@ -233,5 +242,13 @@ mod tests {
         let m = Material::builder().ambient(1.0).build();
         let s = sphere().material(m.clone()).build();
         assert_eq!(s.material, m);
+    }
+
+    #[test]
+    fn glass_sphere_helper() {
+        let s = glass_sphere();
+        assert_eq!(s.transform, identity_matrix());
+        assert_relative_eq!(s.material.transparency, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(s.material.refractive_index, 1.5, epsilon = EPSILON);
     }
 }

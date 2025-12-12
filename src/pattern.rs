@@ -94,6 +94,16 @@ pub fn checkers_pattern(
     }
 }
 
+/// A test pattern that returns a color based on the point's coordinates.
+/// Used for testing pattern transformations.
+#[must_use]
+pub fn test_pattern() -> Pattern {
+    Pattern {
+        transform: identity_matrix(),
+        point_to_color: Arc::new(|Point { x, y, z }| crate::color(x, y, z)),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -102,13 +112,6 @@ mod tests {
         color::{BLACK, WHITE},
         point, sphere, transform,
     };
-
-    fn test_pattern() -> Pattern {
-        Pattern {
-            transform: identity_matrix(),
-            point_to_color: Arc::new(|Point { x, y, z }| color(x, y, z)),
-        }
-    }
 
     #[test]
     fn stripe_pattern_constant_in_y() {

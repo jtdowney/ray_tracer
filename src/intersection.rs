@@ -1,3 +1,5 @@
+use std::ptr;
+
 use ord_subset::OrdSubsetIterExt;
 
 use crate::{EPSILON, Point, Ray, Vector, shape::Shape};
@@ -28,23 +30,64 @@ pub struct Intersection<'a> {
     pub object: &'a Shape,
 }
 
+impl PartialEq for Intersection<'_> {
+    fn eq(&self, other: &Self) -> bool {
+        self.time == other.time && ptr::eq(self.object, other.object)
+    }
+}
+
 impl Intersection<'_> {
     #[must_use]
-    pub fn prepare_computations(&self, ray: Ray) -> Computations<'_> {
+    pub fn prepare_computations(&self, ray: Ray, xs: &[Intersection<'_>]) -> Computations<'_> {
         let point = ray.position(self.time);
         let eyev = -ray.direction;
         let normalv = self.object.normal_at(point);
         let inside = normalv.dot(&eyev) < 0.0;
         let normalv = if inside { -normalv } else { normalv };
         let over_point = point + normalv * EPSILON;
+        let under_point = point - normalv * EPSILON;
+        let reflectv = ray.direction.reflect(&normalv);
+
+        let (_, n1, n2) = xs.iter().fold(
+            (Vec::<&Shape>::new(), 1.0, 1.0),
+            |(mut containers, mut n1, mut n2), intersection| {
+                let is_hit = ptr::eq(intersection, self);
+                if ptr::eq(intersection, self) {
+                    n1 = containers
+                        .last()
+                        .map_or(1.0, |obj| obj.material.refractive_index);
+                }
+
+                if let Some(pos) = containers
+                    .iter()
+                    .position(|&obj| ptr::eq(obj, intersection.object))
+                {
+                    containers.remove(pos);
+                } else {
+                    containers.push(intersection.object);
+                }
+
+                if is_hit {
+                    n2 = containers
+                        .last()
+                        .map_or(1.0, |obj| obj.material.refractive_index);
+                }
+
+                (containers, n1, n2)
+            },
+        );
 
         Computations {
             time: self.time,
             object: self.object,
             point,
             over_point,
+            under_point,
             eyev,
             normalv,
+            reflectv,
+            n1,
+            n2,
             inside,
         }
     }
@@ -55,9 +98,30 @@ pub struct Computations<'a> {
     pub object: &'a Shape,
     pub point: Point,
     pub over_point: Point,
+    pub under_point: Point,
     pub eyev: Vector,
     pub normalv: Vector,
+    pub reflectv: Vector,
+    pub n1: f64,
+    pub n2: f64,
     pub inside: bool,
+}
+
+#[must_use]
+pub fn schlick(comps: &Computations<'_>) -> f64 {
+    let mut cos = comps.eyev.dot(&comps.normalv);
+
+    if comps.n1 > comps.n2 {
+        let n = comps.n1 / comps.n2;
+        let sin2_t = n.powi(2) * (1.0 - cos.powi(2));
+        if sin2_t > 1.0 {
+            return 1.0;
+        }
+        cos = (1.0 - sin2_t).sqrt();
+    }
+
+    let r0 = ((comps.n1 - comps.n2) / (comps.n1 + comps.n2)).powi(2);
+    r0 + (1.0 - r0) * (1.0 - cos).powi(5)
 }
 
 #[cfg(test)]
@@ -65,7 +129,11 @@ mod tests {
     use approx::assert_relative_eq;
 
     use super::*;
-    use crate::{EPSILON, point, ray, shape::sphere, transform, vector};
+    use crate::{
+        EPSILON, Material, point, ray,
+        shape::{glass_sphere, plane, sphere},
+        transform, vector,
+    };
 
     #[test]
     fn intersection_encapsulates_t_and_object() {
@@ -133,7 +201,7 @@ mod tests {
         let r = ray(point(0, 0, -5), vector(0, 0, 1));
         let shape = sphere().build();
         let i = intersection(4, &shape);
-        let comps = i.prepare_computations(r);
+        let comps = i.prepare_computations(r, &[i]);
         assert_relative_eq!(comps.time, i.time, epsilon = EPSILON);
         assert!(std::ptr::eq(comps.object, i.object));
         assert_eq!(comps.point, point(0, 0, -1));
@@ -146,7 +214,7 @@ mod tests {
         let r = ray(point(0, 0, -5), vector(0, 0, 1));
         let shape = sphere().build();
         let i = intersection(4, &shape);
-        let comps = i.prepare_computations(r);
+        let comps = i.prepare_computations(r, &[i]);
         assert!(!comps.inside);
     }
 
@@ -155,7 +223,7 @@ mod tests {
         let r = ray(point(0, 0, 0), vector(0, 0, 1));
         let shape = sphere().build();
         let i = intersection(1, &shape);
-        let comps = i.prepare_computations(r);
+        let comps = i.prepare_computations(r, &[i]);
         assert_eq!(comps.point, point(0, 0, 1));
         assert_eq!(comps.eyev, vector(0, 0, -1));
         assert!(comps.inside);
@@ -167,8 +235,108 @@ mod tests {
         let r = ray(point(0, 0, -5), vector(0, 0, 1));
         let shape = sphere().transform(transform::translation(0, 0, 1)).build();
         let i = intersection(5, &shape);
-        let comps = i.prepare_computations(r);
+        let comps = i.prepare_computations(r, &[i]);
         assert!(comps.over_point.z < -EPSILON / 2.0);
         assert!(comps.point.z > comps.over_point.z);
+    }
+
+    #[test]
+    fn precomputing_reflection_vector() {
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let shape = plane().build();
+        let r = ray(point(0, 1, -1), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
+        let i = intersection(2.0_f64.sqrt(), &shape);
+        let comps = i.prepare_computations(r, &[i]);
+        assert_relative_eq!(comps.reflectv.x, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(comps.reflectv.y, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(comps.reflectv.z, sqrt2_over_2, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn finding_n1_and_n2_at_various_intersections() {
+        let a = sphere()
+            .transform(transform::scaling(2, 2, 2))
+            .material(Material::builder().transparency(1.0).refractive_index(1.5))
+            .build();
+        let b = sphere()
+            .transform(transform::translation(0.0, 0.0, -0.25))
+            .material(Material::builder().transparency(1.0).refractive_index(2.0))
+            .build();
+        let c = sphere()
+            .transform(transform::translation(0.0, 0.0, 0.25))
+            .material(Material::builder().transparency(1.0).refractive_index(2.5))
+            .build();
+        let r = ray(point(0, 0, -4), vector(0, 0, 1));
+        let xs = [
+            intersection(2, &a),
+            intersection(2.75, &b),
+            intersection(3.25, &c),
+            intersection(4.75, &b),
+            intersection(5.25, &c),
+            intersection(6, &a),
+        ];
+
+        let test_cases = [
+            (0, 1.0, 1.5),
+            (1, 1.5, 2.0),
+            (2, 2.0, 2.5),
+            (3, 2.5, 2.5),
+            (4, 2.5, 1.5),
+            (5, 1.5, 1.0),
+        ];
+
+        for (index, expected_n1, expected_n2) in test_cases {
+            let comps = xs[index].prepare_computations(r, &xs);
+            assert_relative_eq!(comps.n1, expected_n1, epsilon = EPSILON);
+            assert_relative_eq!(comps.n2, expected_n2, epsilon = EPSILON);
+        }
+    }
+
+    #[test]
+    fn under_point_is_offset_below_surface() {
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let shape = sphere()
+            .transform(transform::translation(0, 0, 1))
+            .material(Material::builder().transparency(1.0).refractive_index(1.5))
+            .build();
+        let i = intersection(5, &shape);
+        let xs = [i];
+        let comps = i.prepare_computations(r, &xs);
+        assert!(comps.under_point.z > EPSILON / 2.0);
+        assert!(comps.point.z < comps.under_point.z);
+    }
+
+    #[test]
+    fn schlick_approximation_under_total_internal_reflection() {
+        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let shape = glass_sphere();
+        let r = ray(point(0.0, 0.0, sqrt2_over_2), vector(0, 1, 0));
+        let xs = [
+            intersection(-sqrt2_over_2, &shape),
+            intersection(sqrt2_over_2, &shape),
+        ];
+        let comps = xs[1].prepare_computations(r, &xs);
+        let reflectance = schlick(&comps);
+        assert_relative_eq!(reflectance, 1.0, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn schlick_approximation_with_perpendicular_viewing_angle() {
+        let shape = glass_sphere();
+        let r = ray(point(0, 0, 0), vector(0, 1, 0));
+        let xs = [intersection(-1, &shape), intersection(1, &shape)];
+        let comps = xs[1].prepare_computations(r, &xs);
+        let reflectance = schlick(&comps);
+        assert_relative_eq!(reflectance, 0.04, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn schlick_approximation_with_small_angle_and_n2_gt_n1() {
+        let shape = glass_sphere();
+        let r = ray(point(0.0, 0.99, -2.0), vector(0, 0, 1));
+        let xs = [intersection(1.8589, &shape)];
+        let comps = xs[0].prepare_computations(r, &xs);
+        let reflectance = schlick(&comps);
+        assert_relative_eq!(reflectance, 0.48873, epsilon = EPSILON);
     }
 }

@@ -4,7 +4,7 @@ mod plane;
 mod sphere;
 
 pub use plane::plane;
-pub use sphere::sphere;
+pub use sphere::{glass_sphere, sphere};
 
 pub trait Geometry {
     fn local_intersection<'shape>(

@@ -27,6 +27,7 @@ pub use vector::{Vector, vector};
 pub use world::{World, default_world};
 
 pub const EPSILON: f64 = 0.0001;
+pub const REFLECTION_DEPTH: usize = 5;
 
 #[must_use]
 pub fn clamp(value: f64, min: f64, max: f64) -> f64 {
