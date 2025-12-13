@@ -1,9 +1,9 @@
+use std::any::Any;
+
 use bon::builder;
 
 use crate::{
-    Material, ORIGIN, identity_matrix,
-    intersection::Intersection,
-    material,
+    Intersection, Material, ORIGIN, identity_matrix, material,
     matrix::Matrix4,
     point::Point,
     ray::Ray,
@@ -11,15 +11,15 @@ use crate::{
     vector::Vector,
 };
 
-#[builder(finish_fn = build, derive(Into))]
+#[builder(finish_fn = build)]
 #[must_use]
 pub fn sphere(
     #[builder(default = identity_matrix())] transform: Matrix4,
     #[builder(default = material(), into)] material: Material,
 ) -> Shape {
-    let mut shape: Shape = Sphere.into();
-    shape.transform = transform;
-    shape.material = material;
+    let shape = Shape::new(Sphere);
+    shape.set_transform(transform);
+    shape.set_material(material);
     shape
 }
 
@@ -33,11 +33,7 @@ pub fn glass_sphere() -> Shape {
 pub struct Sphere;
 
 impl Geometry for Sphere {
-    fn local_intersection<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-    ) -> Vec<Intersection<'shape>> {
+    fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         let sphere_to_ray = ray.origin - ORIGIN;
         let a = ray.direction.dot(&ray.direction);
         let b = 2.0 * ray.direction.dot(&sphere_to_ray);
@@ -51,11 +47,11 @@ impl Geometry for Sphere {
 
             intersections.push(Intersection {
                 time: t1,
-                object: shape,
+                object: shape.clone(),
             });
             intersections.push(Intersection {
                 time: t2,
-                object: shape,
+                object: shape.clone(),
             });
         }
 
@@ -64,6 +60,14 @@ impl Geometry for Sphere {
 
     fn local_normal_at(&self, point: Point) -> Vector {
         point - ORIGIN
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
 
@@ -133,22 +137,22 @@ mod tests {
         let s = sphere().build();
         let xs = s.intersect(r);
         assert_eq!(xs.len(), 2);
-        assert!(std::ptr::eq(xs[0].object, &raw const s));
-        assert!(std::ptr::eq(xs[1].object, &raw const s));
+        assert_eq!(xs[0].object, s);
+        assert_eq!(xs[1].object, s);
     }
 
     #[test]
     fn sphere_default_transformation() {
         let s = sphere().build();
-        assert_eq!(s.transform, identity_matrix());
+        assert_eq!(s.inner().transform, identity_matrix());
     }
 
     #[test]
     fn changing_sphere_transformation() {
-        let mut s = sphere().build();
+        let s = sphere().build();
         let t = transform::translation(2, 3, 4);
-        s.transform = t;
-        assert_eq!(s.transform, t);
+        s.set_transform(t);
+        assert_eq!(s.inner().transform, t);
     }
 
     #[test]
@@ -234,21 +238,21 @@ mod tests {
     #[test]
     fn sphere_has_default_material() {
         let s = sphere().build();
-        assert_eq!(s.material, material());
+        assert_eq!(s.inner().material, material());
     }
 
     #[test]
     fn sphere_may_be_assigned_material() {
         let m = Material::builder().ambient(1.0).build();
         let s = sphere().material(m.clone()).build();
-        assert_eq!(s.material, m);
+        assert_eq!(s.inner().material, m);
     }
 
     #[test]
     fn glass_sphere_helper() {
         let s = glass_sphere();
-        assert_eq!(s.transform, identity_matrix());
-        assert_relative_eq!(s.material.transparency, 1.0, epsilon = EPSILON);
-        assert_relative_eq!(s.material.refractive_index, 1.5, epsilon = EPSILON);
+        assert_eq!(s.inner().transform, identity_matrix());
+        assert_relative_eq!(s.inner().material.transparency, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(s.inner().material.refractive_index, 1.5, epsilon = EPSILON);
     }
 }

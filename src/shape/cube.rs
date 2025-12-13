@@ -1,9 +1,9 @@
-use std::vec;
+use std::any::Any;
 
 use bon::builder;
 
 use crate::{
-    EPSILON, Intersection, Material, Vector, identity_matrix, intersection, material,
+    EPSILON, Intersection, Material, Vector, identity_matrix, material,
     matrix::Matrix4,
     point::Point,
     ray::Ray,
@@ -11,15 +11,15 @@ use crate::{
     vector,
 };
 
-#[builder(finish_fn = build, derive(Into))]
+#[builder(finish_fn = build)]
 #[must_use]
 pub fn cube(
     #[builder(default = identity_matrix())] transform: Matrix4,
     #[builder(default = material(), into)] material: Material,
 ) -> Shape {
-    let mut shape: Shape = Cube.into();
-    shape.transform = transform;
-    shape.material = material;
+    let shape = Shape::new(Cube);
+    shape.set_transform(transform);
+    shape.set_material(material);
     shape
 }
 
@@ -48,11 +48,7 @@ impl Cube {
 }
 
 impl Geometry for Cube {
-    fn local_intersection<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-    ) -> Vec<Intersection<'shape>> {
+    fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         let (xtmin, xtmax) = Self::check_axis(ray.origin.x, ray.direction.x);
         let (ytmin, ytmax) = Self::check_axis(ray.origin.y, ray.direction.y);
         let (ztmin, ztmax) = Self::check_axis(ray.origin.z, ray.direction.z);
@@ -63,7 +59,16 @@ impl Geometry for Cube {
         if tmin > tmax {
             vec![]
         } else {
-            vec![intersection(tmin, shape), intersection(tmax, shape)]
+            vec![
+                Intersection {
+                    time: tmin,
+                    object: shape.clone(),
+                },
+                Intersection {
+                    time: tmax,
+                    object: shape.clone(),
+                },
+            ]
         }
     }
 
@@ -79,6 +84,14 @@ impl Geometry for Cube {
         } else {
             vector(0.0, 0.0, point.z)
         }
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
 

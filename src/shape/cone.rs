@@ -1,7 +1,9 @@
+use std::any::Any;
+
 use bon::builder;
 
 use crate::{
-    EPSILON, Intersection, Material, Vector, identity_matrix, intersection, material,
+    EPSILON, Intersection, Material, Vector, identity_matrix, material,
     matrix::Matrix4,
     point::Point,
     ray::Ray,
@@ -9,7 +11,7 @@ use crate::{
     vector,
 };
 
-#[builder(finish_fn = build, derive(Into))]
+#[builder(finish_fn = build)]
 #[must_use]
 pub fn cone(
     #[builder(default = identity_matrix())] transform: Matrix4,
@@ -18,14 +20,13 @@ pub fn cone(
     #[builder(default = f64::INFINITY)] maximum: f64,
     #[builder(default = false)] closed: bool,
 ) -> Shape {
-    let mut shape: Shape = Cone {
+    let shape = Shape::new(Cone {
         minimum,
         maximum,
         closed,
-    }
-    .into();
-    shape.transform = transform;
-    shape.material = material;
+    });
+    shape.set_transform(transform);
+    shape.set_material(material);
     shape
 }
 
@@ -42,35 +43,32 @@ impl Cone {
         (x.powi(2) + z.powi(2)) <= y.abs().powi(2)
     }
 
-    fn intersect_caps<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-        xs: &mut Vec<Intersection<'shape>>,
-    ) {
+    fn intersect_caps(&self, shape: &Shape, ray: Ray, xs: &mut Vec<Intersection>) {
         if !self.closed || ray.direction.y.abs() < EPSILON {
             return;
         }
 
         let t = (self.minimum - ray.origin.y) / ray.direction.y;
         if Self::check_cap(ray, t, self.minimum) {
-            xs.push(intersection(t, shape));
+            xs.push(Intersection {
+                time: t,
+                object: shape.clone(),
+            });
         }
 
         let t = (self.maximum - ray.origin.y) / ray.direction.y;
         if Self::check_cap(ray, t, self.maximum) {
-            xs.push(intersection(t, shape));
+            xs.push(Intersection {
+                time: t,
+                object: shape.clone(),
+            });
         }
     }
 }
 
 impl Geometry for Cone {
     #[allow(clippy::many_single_char_names)]
-    fn local_intersection<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-    ) -> Vec<Intersection<'shape>> {
+    fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         let mut xs = vec![];
 
         let a = ray.direction.x.powi(2) - ray.direction.y.powi(2) + ray.direction.z.powi(2);
@@ -83,7 +81,10 @@ impl Geometry for Cone {
                 let t = -c / (2.0 * b);
                 let y = ray.origin.y + t * ray.direction.y;
                 if self.minimum < y && y < self.maximum {
-                    xs.push(intersection(t, shape));
+                    xs.push(Intersection {
+                        time: t,
+                        object: shape.clone(),
+                    });
                 }
             }
             self.intersect_caps(shape, ray, &mut xs);
@@ -102,12 +103,18 @@ impl Geometry for Cone {
 
         let y0 = ray.origin.y + t0 * ray.direction.y;
         if self.minimum < y0 && y0 < self.maximum {
-            xs.push(intersection(t0, shape));
+            xs.push(Intersection {
+                time: t0,
+                object: shape.clone(),
+            });
         }
 
         let y1 = ray.origin.y + t1 * ray.direction.y;
         if self.minimum < y1 && y1 < self.maximum {
-            xs.push(intersection(t1, shape));
+            xs.push(Intersection {
+                time: t1,
+                object: shape.clone(),
+            });
         }
 
         self.intersect_caps(shape, ray, &mut xs);
@@ -130,15 +137,27 @@ impl Geometry for Cone {
             vector(point.x, y, point.z)
         }
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use approx::assert_relative_eq;
 
-    use crate::{EPSILON, point, ray, shape::cone::cone, vector};
+    use super::Cone;
+    use crate::{
+        EPSILON, point, ray,
+        shape::{Geometry, cone::cone},
+        vector,
+    };
 
-    // Test: Intersecting a cone with a ray
     #[test]
     fn intersecting_cone_along_z_axis() {
         let shape = cone().build();
@@ -172,7 +191,6 @@ mod tests {
         assert_relative_eq!(xs[1].time, 49.44994, epsilon = EPSILON);
     }
 
-    // Test: Intersecting a cone with a ray parallel to one of its halves
     #[test]
     fn intersecting_cone_parallel_to_half() {
         let shape = cone().build();
@@ -183,7 +201,6 @@ mod tests {
         assert_relative_eq!(xs[0].time, 0.35355, epsilon = EPSILON);
     }
 
-    // Test: Intersecting a cone's end caps
     #[test]
     fn intersecting_cone_end_caps_miss() {
         let shape = cone().minimum(-0.5).maximum(0.5).closed(true).build();
@@ -211,9 +228,6 @@ mod tests {
         assert_eq!(xs.len(), 4);
     }
 
-    // Test: Computing the normal vector on a cone
-    // Note: The book tests local_normal_at directly, but our tests go through
-    // normal_at which normalizes. We test the normalized results here.
     #[test]
     fn normal_on_cone_at_origin() {
         let cone_geom = Cone {
@@ -229,8 +243,6 @@ mod tests {
     fn normal_on_cone_positive_y() {
         let shape = cone().build();
         let n = shape.normal_at(point(1, 1, 1));
-        // local_normal = (1, -sqrt2, 1), magnitude = 2
-        // normalized = (0.5, -sqrt2/2, 0.5)
         let sqrt2 = 2.0_f64.sqrt();
         assert_relative_eq!(n.x, 0.5, epsilon = EPSILON);
         assert_relative_eq!(n.y, -sqrt2 / 2.0, epsilon = EPSILON);
@@ -241,8 +253,6 @@ mod tests {
     fn normal_on_cone_negative_y() {
         let shape = cone().build();
         let n = shape.normal_at(point(-1, -1, 0));
-        // local_normal = (-1, 1, 0), magnitude = sqrt(2)
-        // normalized = (-1/sqrt2, 1/sqrt2, 0)
         let sqrt2 = 2.0_f64.sqrt();
         assert_relative_eq!(n.x, -1.0 / sqrt2, epsilon = EPSILON);
         assert_relative_eq!(n.y, 1.0 / sqrt2, epsilon = EPSILON);

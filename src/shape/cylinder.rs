@@ -1,7 +1,9 @@
+use std::any::Any;
+
 use bon::builder;
 
 use crate::{
-    EPSILON, Intersection, Material, Vector, identity_matrix, intersection, material,
+    EPSILON, Intersection, Material, Vector, identity_matrix, material,
     matrix::Matrix4,
     point::Point,
     ray::Ray,
@@ -9,7 +11,7 @@ use crate::{
     vector,
 };
 
-#[builder(finish_fn = build, derive(Into))]
+#[builder(finish_fn = build)]
 #[must_use]
 pub fn cylinder(
     #[builder(default = identity_matrix())] transform: Matrix4,
@@ -18,14 +20,13 @@ pub fn cylinder(
     #[builder(default = f64::INFINITY)] maximum: f64,
     #[builder(default = false)] closed: bool,
 ) -> Shape {
-    let mut shape: Shape = Cylinder {
+    let shape = Shape::new(Cylinder {
         minimum,
         maximum,
         closed,
-    }
-    .into();
-    shape.transform = transform;
-    shape.material = material;
+    });
+    shape.set_transform(transform);
+    shape.set_material(material);
     shape
 }
 
@@ -42,34 +43,31 @@ impl Cylinder {
         (x.powi(2) + z.powi(2)) <= 1.0
     }
 
-    fn intersect_caps<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-        xs: &mut Vec<Intersection<'shape>>,
-    ) {
+    fn intersect_caps(&self, shape: &Shape, ray: Ray, xs: &mut Vec<Intersection>) {
         if !self.closed || ray.direction.y.abs() < EPSILON {
             return;
         }
 
         let t = (self.minimum - ray.origin.y) / ray.direction.y;
         if Self::check_cap(ray, t) {
-            xs.push(intersection(t, shape));
+            xs.push(Intersection {
+                time: t,
+                object: shape.clone(),
+            });
         }
 
         let t = (self.maximum - ray.origin.y) / ray.direction.y;
         if Self::check_cap(ray, t) {
-            xs.push(intersection(t, shape));
+            xs.push(Intersection {
+                time: t,
+                object: shape.clone(),
+            });
         }
     }
 }
 
 impl Geometry for Cylinder {
-    fn local_intersection<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-    ) -> Vec<Intersection<'shape>> {
+    fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         let mut xs = vec![];
 
         let a = ray.direction.x.powi(2) + ray.direction.z.powi(2);
@@ -96,12 +94,18 @@ impl Geometry for Cylinder {
 
         let y0 = ray.origin.y + t0 * ray.direction.y;
         if self.minimum < y0 && y0 < self.maximum {
-            xs.push(intersection(t0, shape));
+            xs.push(Intersection {
+                time: t0,
+                object: shape.clone(),
+            });
         }
 
         let y1 = ray.origin.y + t1 * ray.direction.y;
         if self.minimum < y1 && y1 < self.maximum {
-            xs.push(intersection(t1, shape));
+            xs.push(Intersection {
+                time: t1,
+                object: shape.clone(),
+            });
         }
 
         self.intersect_caps(shape, ray, &mut xs);
@@ -120,6 +124,14 @@ impl Geometry for Cylinder {
             vector(point.x, 0, point.z)
         }
     }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
 }
 
 #[cfg(test)]
@@ -129,7 +141,6 @@ mod tests {
     use super::Cylinder;
     use crate::{EPSILON, point, ray, shape::cylinder::cylinder, vector};
 
-    // Test #1: A ray misses a cylinder
     #[test]
     fn ray_misses_cylinder_on_surface_parallel_to_y() {
         let cyl = cylinder().build();
@@ -157,7 +168,6 @@ mod tests {
         assert!(xs.is_empty());
     }
 
-    // Test #2: A ray strikes a cylinder
     #[test]
     fn ray_strikes_cylinder_tangent() {
         let cyl = cylinder().build();
@@ -191,7 +201,6 @@ mod tests {
         assert_relative_eq!(xs[1].time, 7.08872, epsilon = EPSILON);
     }
 
-    // Test #3: Normal vector on a cylinder
     #[test]
     fn normal_on_cylinder_positive_x() {
         let cyl = cylinder().build();
@@ -220,7 +229,6 @@ mod tests {
         assert_eq!(n, vector(-1, 0, 0));
     }
 
-    // Test #4: The default minimum and maximum for a cylinder
     #[test]
     fn default_minimum_and_maximum() {
         let cyl = Cylinder {
@@ -232,7 +240,6 @@ mod tests {
         assert!(cyl.maximum.is_infinite() && cyl.maximum.is_sign_positive());
     }
 
-    // Test #5: Intersecting a constrained cylinder
     #[test]
     fn intersecting_constrained_cylinder_diagonal_escape() {
         let cyl = cylinder().minimum(1.0).maximum(2.0).build();
@@ -287,7 +294,6 @@ mod tests {
         assert_eq!(xs.len(), 2);
     }
 
-    // Test #6: The default closed value for a cylinder
     #[test]
     fn default_closed_value() {
         let cyl = Cylinder {
@@ -298,7 +304,6 @@ mod tests {
         assert!(!cyl.closed);
     }
 
-    // Test #7: Intersecting the caps of a closed cylinder
     #[test]
     fn intersecting_closed_cylinder_caps_from_above() {
         let cyl = cylinder().minimum(1.0).maximum(2.0).closed(true).build();
@@ -344,7 +349,6 @@ mod tests {
         assert_eq!(xs.len(), 2);
     }
 
-    // Test #8: The normal vector on a cylinder's end caps
     #[test]
     fn normal_on_cylinder_end_cap_lower_center() {
         let cyl = cylinder().minimum(1.0).maximum(2.0).closed(true).build();

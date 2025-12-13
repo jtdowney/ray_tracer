@@ -34,18 +34,13 @@ fn main() -> Result<()> {
             let r = ray(ray_origin, direction);
             let xs = shape.intersect(r);
 
-            if let Some(intersection) = hit(&xs) {
+            if let Some(intersection) = hit(xs) {
                 let hit_point = r.position(intersection.time);
                 let normal = intersection.object.normal_at(hit_point);
                 let eye = -r.direction;
-                let pixel_color = intersection.object.material.lighting(
-                    intersection.object,
-                    &light,
-                    hit_point,
-                    eye,
-                    normal,
-                    false,
-                );
+                let material = intersection.object.material();
+                let pixel_color =
+                    material.lighting(&intersection.object, &light, hit_point, eye, normal, false);
                 c.write_pixel(x, y, pixel_color)?;
             }
         }

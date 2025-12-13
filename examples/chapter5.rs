@@ -29,7 +29,7 @@ fn main() -> Result<()> {
             let r = ray(ray_origin, direction);
             let xs = shape.intersect(r);
 
-            if hit(&xs).is_some() {
+            if hit(xs).is_some() {
                 c.write_pixel(x, y, RED)?;
             }
         }

@@ -1,7 +1,9 @@
+use std::any::Any;
+
 use bon::builder;
 
 use crate::{
-    EPSILON, Intersection, Material, Vector, identity_matrix, intersection, material,
+    EPSILON, Intersection, Material, Vector, identity_matrix, material,
     matrix::Matrix4,
     point::Point,
     ray::Ray,
@@ -9,38 +11,43 @@ use crate::{
     vector,
 };
 
-#[builder(finish_fn = build, derive(Into))]
+#[builder(finish_fn = build)]
 #[must_use]
 pub fn plane(
     #[builder(default = identity_matrix())] transform: Matrix4,
     #[builder(default = material(), into)] material: Material,
 ) -> Shape {
-    let mut shape: Shape = Plane.into();
-    shape.transform = transform;
-    shape.material = material;
+    let shape = Shape::new(Plane);
+    shape.set_transform(transform);
+    shape.set_material(material);
     shape
 }
 
 pub struct Plane;
 
 impl Geometry for Plane {
-    fn local_intersection<'shape>(
-        &self,
-        shape: &'shape Shape,
-        ray: Ray,
-    ) -> Vec<Intersection<'shape>> {
-        let mut xs = vec![];
+    fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         if ray.direction.y.abs() < EPSILON {
-            return xs;
+            return vec![];
         }
 
         let time = -ray.origin.y / ray.direction.y;
-        xs.push(intersection(time, shape));
-        xs
+        vec![Intersection {
+            time,
+            object: shape.clone(),
+        }]
     }
 
     fn local_normal_at(&self, _point: Point) -> Vector {
         vector(0, 1, 0)
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
     }
 }
 
@@ -84,7 +91,7 @@ mod tests {
         let xs = p.intersect(r);
         assert_eq!(xs.len(), 1);
         assert_relative_eq!(xs[0].time, 1.0, epsilon = EPSILON);
-        assert!(std::ptr::eq(xs[0].object, &raw const p));
+        assert_eq!(xs[0].object, p);
     }
 
     #[test]
@@ -94,6 +101,6 @@ mod tests {
         let xs = p.intersect(r);
         assert_eq!(xs.len(), 1);
         assert_relative_eq!(xs[0].time, 1.0, epsilon = EPSILON);
-        assert!(std::ptr::eq(xs[0].object, &raw const p));
+        assert_eq!(xs[0].object, p);
     }
 }

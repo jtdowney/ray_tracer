@@ -10,12 +10,14 @@ use ray_tracer::{
 };
 
 fn main() -> Result<()> {
-    let floor = plane().material(
-        Material::builder()
-            .pattern(checkers_pattern(color(0.35, 0.35, 0.35), color(0.65, 0.65, 0.65)).build())
-            .reflective(0.4)
-            .specular(0.0),
-    );
+    let floor = plane()
+        .material(
+            Material::builder()
+                .pattern(checkers_pattern(color(0.35, 0.35, 0.35), color(0.65, 0.65, 0.65)).build())
+                .reflective(0.4)
+                .specular(0.0),
+        )
+        .build();
 
     let backdrop = plane()
         .transform(transform::translation(0, 0, 10) * transform::rotation_x(FRAC_PI_2))
@@ -23,7 +25,8 @@ fn main() -> Result<()> {
             Material::builder()
                 .pattern(checkers_pattern(color(0.15, 0.15, 0.15), color(0.85, 0.85, 0.85)).build())
                 .specular(0.0),
-        );
+        )
+        .build();
 
     let glass_sphere = sphere()
         .transform(transform::translation(0, 1, 0))
@@ -36,7 +39,8 @@ fn main() -> Result<()> {
                 .reflective(0.9)
                 .transparency(0.9)
                 .refractive_index(1.5),
-        );
+        )
+        .build();
 
     let inner_sphere = sphere()
         .transform(transform::translation(0, 1, 0) * transform::scaling(0.5, 0.5, 0.5))
@@ -47,7 +51,8 @@ fn main() -> Result<()> {
                 .diffuse(0.9)
                 .specular(0.9)
                 .shininess(200),
-        );
+        )
+        .build();
 
     let right_sphere = sphere()
         .transform(transform::translation(2, 0.5, -1) * transform::scaling(0.5, 0.5, 0.5))
@@ -58,7 +63,8 @@ fn main() -> Result<()> {
                 .specular(0.9)
                 .shininess(200)
                 .reflective(0.1),
-        );
+        )
+        .build();
 
     let left_sphere = sphere()
         .transform(transform::translation(-2, 0.75, -0.5) * transform::scaling(0.75, 0.75, 0.75))
@@ -69,17 +75,18 @@ fn main() -> Result<()> {
                 .specular(0.9)
                 .shininess(200)
                 .reflective(0.1),
-        );
+        )
+        .build();
 
     let world = World::builder()
         .light(point_light(point(-10, 10, -10), color(1, 1, 1)))
-        .objects(bon::vec![
+        .objects(vec![
             floor,
             backdrop,
             glass_sphere,
             inner_sphere,
             right_sphere,
-            left_sphere
+            left_sphere,
         ])
         .build();
 

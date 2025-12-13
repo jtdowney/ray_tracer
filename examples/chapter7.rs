@@ -8,7 +8,8 @@ use ray_tracer::{
 fn main() -> Result<()> {
     let floor = sphere()
         .transform(transform::scaling(10, 0.01, 10))
-        .material(Material::builder().color(color(1, 0.9, 0.9)).specular(0.0));
+        .material(Material::builder().color(color(1, 0.9, 0.9)).specular(0.0))
+        .build();
 
     let left_wall = sphere()
         .transform(
@@ -17,7 +18,8 @@ fn main() -> Result<()> {
                 * transform::rotation_x(FRAC_PI_2)
                 * transform::scaling(10, 0.01, 10),
         )
-        .material(Material::builder().color(color(1, 0.9, 0.9)).specular(0.0));
+        .material(Material::builder().color(color(1, 0.9, 0.9)).specular(0.0))
+        .build();
 
     let right_wall = sphere()
         .transform(
@@ -26,7 +28,8 @@ fn main() -> Result<()> {
                 * transform::rotation_x(FRAC_PI_2)
                 * transform::scaling(10, 0.01, 10),
         )
-        .material(Material::builder().color(color(1, 0.9, 0.9)).specular(0.0));
+        .material(Material::builder().color(color(1, 0.9, 0.9)).specular(0.0))
+        .build();
 
     let middle = sphere()
         .transform(transform::translation(-0.5, 1, 0.5))
@@ -35,7 +38,8 @@ fn main() -> Result<()> {
                 .color(color(0.1, 1, 0.5))
                 .diffuse(0.7)
                 .specular(0.3),
-        );
+        )
+        .build();
 
     let right = sphere()
         .transform(transform::translation(1.5, 0.5, -0.5) * transform::scaling(0.5, 0.5, 0.5))
@@ -44,7 +48,8 @@ fn main() -> Result<()> {
                 .color(color(0.5, 1, 0.1))
                 .diffuse(0.7)
                 .specular(0.3),
-        );
+        )
+        .build();
 
     let left = sphere()
         .transform(transform::translation(-1.5, 0.33, -0.75) * transform::scaling(0.33, 0.33, 0.33))
@@ -53,11 +58,12 @@ fn main() -> Result<()> {
                 .color(color(1, 0.8, 0.1))
                 .diffuse(0.7)
                 .specular(0.3),
-        );
+        )
+        .build();
 
     let world = World::builder()
         .light(point_light(point(-10, 10, -10), color(1, 1, 1)))
-        .objects(bon::vec![floor, left_wall, right_wall, middle, right, left])
+        .objects(vec![floor, left_wall, right_wall, middle, right, left])
         .build();
 
     let camera = camera(1000, 500)
