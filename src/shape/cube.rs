@@ -49,9 +49,9 @@ impl Cube {
 
 impl Geometry for Cube {
     fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
-        let (xtmin, xtmax) = Self::check_axis(ray.origin.x, ray.direction.x);
-        let (ytmin, ytmax) = Self::check_axis(ray.origin.y, ray.direction.y);
-        let (ztmin, ztmax) = Self::check_axis(ray.origin.z, ray.direction.z);
+        let (xtmin, xtmax) = Self::check_axis(ray.origin.x(), ray.direction.x());
+        let (ytmin, ytmax) = Self::check_axis(ray.origin.y(), ray.direction.y());
+        let (ztmin, ztmax) = Self::check_axis(ray.origin.z(), ray.direction.z());
 
         let tmin = xtmin.max(ytmin).max(ztmin);
         let tmax = xtmax.min(ytmax).min(ztmax);
@@ -73,16 +73,16 @@ impl Geometry for Cube {
     }
 
     fn local_normal_at(&self, point: Point) -> Vector {
-        let abs_x = point.x.abs();
-        let abs_y = point.y.abs();
-        let abs_z = point.z.abs();
+        let abs_x = point.x().abs();
+        let abs_y = point.y().abs();
+        let abs_z = point.z().abs();
 
         if abs_x >= abs_y && abs_x >= abs_z {
-            vector(point.x, 0.0, 0.0)
+            vector(point.x(), 0.0, 0.0)
         } else if abs_y >= abs_z {
-            vector(0.0, point.y, 0.0)
+            vector(0.0, point.y(), 0.0)
         } else {
-            vector(0.0, 0.0, point.z)
+            vector(0.0, 0.0, point.z())
         }
     }
 

@@ -24,8 +24,8 @@ fn main() -> Result<()> {
         let rotation = rotation_y(hour as f32 * PI / 6.0);
         let position = rotation * twelve;
 
-        let x = (position.x * radius + center).round() as usize;
-        let y = (position.z * radius + center).round() as usize;
+        let x = (position.x() * radius + center).round() as usize;
+        let y = (position.z() * radius + center).round() as usize;
 
         if x < c.width && y < c.height {
             c.write_pixel(x, y, RED)?;

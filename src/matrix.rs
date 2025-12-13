@@ -1,6 +1,7 @@
 use std::ops::{Index, IndexMut, Mul};
 
 use num_traits::AsPrimitive;
+use wide::f32x4;
 
 use crate::{Point, Vector, point, vector};
 
@@ -193,9 +194,22 @@ impl Mul<Point> for Matrix4 {
     type Output = Point;
 
     fn mul(self, rhs: Point) -> Self::Output {
-        let x = self[(0, 0)] * rhs.x + self[(0, 1)] * rhs.y + self[(0, 2)] * rhs.z + self[(0, 3)];
-        let y = self[(1, 0)] * rhs.x + self[(1, 1)] * rhs.y + self[(1, 2)] * rhs.z + self[(1, 3)];
-        let z = self[(2, 0)] * rhs.x + self[(2, 1)] * rhs.y + self[(2, 2)] * rhs.z + self[(2, 3)];
+        let row0 = f32x4::new(self.values[0]);
+        let row1 = f32x4::new(self.values[1]);
+        let row2 = f32x4::new(self.values[2]);
+
+        let p0 = row0 * rhs.data;
+        let p1 = row1 * rhs.data;
+        let p2 = row2 * rhs.data;
+
+        let a0 = p0.as_array();
+        let a1 = p1.as_array();
+        let a2 = p2.as_array();
+
+        let x = a0[0] + a0[1] + a0[2] + a0[3];
+        let y = a1[0] + a1[1] + a1[2] + a1[3];
+        let z = a2[0] + a2[1] + a2[2] + a2[3];
+
         point(x, y, z)
     }
 }
@@ -204,9 +218,22 @@ impl Mul<Vector> for Matrix4 {
     type Output = Vector;
 
     fn mul(self, rhs: Vector) -> Self::Output {
-        let x = self[(0, 0)] * rhs.x + self[(0, 1)] * rhs.y + self[(0, 2)] * rhs.z;
-        let y = self[(1, 0)] * rhs.x + self[(1, 1)] * rhs.y + self[(1, 2)] * rhs.z;
-        let z = self[(2, 0)] * rhs.x + self[(2, 1)] * rhs.y + self[(2, 2)] * rhs.z;
+        let row0 = f32x4::new(self.values[0]);
+        let row1 = f32x4::new(self.values[1]);
+        let row2 = f32x4::new(self.values[2]);
+
+        let p0 = row0 * rhs.data;
+        let p1 = row1 * rhs.data;
+        let p2 = row2 * rhs.data;
+
+        let a0 = p0.as_array();
+        let a1 = p1.as_array();
+        let a2 = p2.as_array();
+
+        let x = a0[0] + a0[1] + a0[2];
+        let y = a1[0] + a1[1] + a1[2];
+        let z = a2[0] + a2[1] + a2[2];
+
         vector(x, y, z)
     }
 }

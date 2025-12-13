@@ -34,11 +34,11 @@ fn main() -> Result<()> {
     let red = color(1, 0, 0);
 
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-    while projectile.position.y > 0.0 {
-        let x = projectile.position.x.round() as usize;
+    while projectile.position.y() > 0.0 {
+        let x = projectile.position.x().round() as usize;
         let y = c
             .height
-            .saturating_sub(projectile.position.y.round() as usize);
+            .saturating_sub(projectile.position.y().round() as usize);
 
         if x < c.width && y < c.height {
             c.write_pixel(x, y, red)?;

@@ -228,7 +228,7 @@ mod tests {
         }
 
         fn local_normal_at(&self, point: Point) -> Vector {
-            vector(point.x, point.y, point.z)
+            vector(point.x(), point.y(), point.z())
         }
 
         fn as_any(&self) -> &dyn Any {
@@ -281,12 +281,12 @@ mod tests {
         let _ = s.intersect(r);
         let saved = saved_ray.borrow();
         let saved = saved.as_ref().expect("saved ray");
-        assert_relative_eq!(saved.origin.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.origin.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.origin.z, -2.5, epsilon = EPSILON);
-        assert_relative_eq!(saved.direction.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.direction.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.direction.z, 0.5, epsilon = EPSILON);
+        assert_relative_eq!(saved.origin.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.origin.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.origin.z(), -2.5, epsilon = EPSILON);
+        assert_relative_eq!(saved.direction.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.direction.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.direction.z(), 0.5, epsilon = EPSILON);
     }
 
     #[test]
@@ -297,12 +297,12 @@ mod tests {
         let _ = s.intersect(r);
         let saved = saved_ray.borrow();
         let saved = saved.as_ref().expect("saved ray");
-        assert_relative_eq!(saved.origin.x, -5.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.origin.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.origin.z, -5.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.direction.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.direction.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(saved.direction.z, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.origin.x(), -5.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.origin.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.origin.z(), -5.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.direction.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.direction.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(saved.direction.z(), 1.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -310,9 +310,9 @@ mod tests {
         let (s, _) = test_shape();
         s.set_transform(transform::translation(0, 1, 0));
         let n = s.normal_at(point(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
-        assert_relative_eq!(n.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(n.y, FRAC_1_SQRT_2, epsilon = EPSILON);
-        assert_relative_eq!(n.z, -FRAC_1_SQRT_2, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), FRAC_1_SQRT_2, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), -FRAC_1_SQRT_2, epsilon = EPSILON);
     }
 
     #[test]
@@ -323,9 +323,9 @@ mod tests {
         s.set_transform(m);
         let sqrt2_over_2 = FRAC_1_SQRT_2;
         let n = s.normal_at(point(0.0, sqrt2_over_2, -sqrt2_over_2));
-        assert_relative_eq!(n.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(n.y, 0.97014, epsilon = EPSILON);
-        assert_relative_eq!(n.z, -0.24254, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), 0.97014, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), -0.24254, epsilon = EPSILON);
     }
 
     #[test]

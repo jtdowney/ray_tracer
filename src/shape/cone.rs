@@ -38,17 +38,18 @@ pub struct Cone {
 
 impl Cone {
     fn check_cap(ray: Ray, t: f32, y: f32) -> bool {
-        let x = ray.origin.x + t * ray.direction.x;
-        let z = ray.origin.z + t * ray.direction.z;
-        (x.powi(2) + z.powi(2)) <= y.abs().powi(2)
+        let x = ray.origin.x() + t * ray.direction.x();
+        let z = ray.origin.z() + t * ray.direction.z();
+        let y_abs = y.abs();
+        (x * x + z * z) <= y_abs * y_abs
     }
 
     fn intersect_caps(&self, shape: &Shape, ray: Ray, xs: &mut Vec<Intersection>) {
-        if !self.closed || ray.direction.y.abs() < EPSILON {
+        if !self.closed || ray.direction.y().abs() < EPSILON {
             return;
         }
 
-        let t = (self.minimum - ray.origin.y) / ray.direction.y;
+        let t = (self.minimum - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(ray, t, self.minimum) {
             xs.push(Intersection {
                 time: t,
@@ -56,7 +57,7 @@ impl Cone {
             });
         }
 
-        let t = (self.maximum - ray.origin.y) / ray.direction.y;
+        let t = (self.maximum - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(ray, t, self.maximum) {
             xs.push(Intersection {
                 time: t,
@@ -71,15 +72,17 @@ impl Geometry for Cone {
     fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         let mut xs = vec![];
 
-        let a = ray.direction.x.powi(2) - ray.direction.y.powi(2) + ray.direction.z.powi(2);
-        let b = 2.0 * ray.origin.x * ray.direction.x - 2.0 * ray.origin.y * ray.direction.y
-            + 2.0 * ray.origin.z * ray.direction.z;
-        let c = ray.origin.x.powi(2) - ray.origin.y.powi(2) + ray.origin.z.powi(2);
+        let (dx, dy, dz) = (ray.direction.x(), ray.direction.y(), ray.direction.z());
+        let (ox, oy, oz) = (ray.origin.x(), ray.origin.y(), ray.origin.z());
+
+        let a = dx * dx - dy * dy + dz * dz;
+        let b = 2.0 * ox * dx - 2.0 * oy * dy + 2.0 * oz * dz;
+        let c = ox * ox - oy * oy + oz * oz;
 
         if a.abs() < EPSILON {
             if b.abs() >= EPSILON {
                 let t = -c / (2.0 * b);
-                let y = ray.origin.y + t * ray.direction.y;
+                let y = oy + t * dy;
                 if self.minimum < y && y < self.maximum {
                     xs.push(Intersection {
                         time: t,
@@ -91,7 +94,7 @@ impl Geometry for Cone {
             return xs;
         }
 
-        let discriminant = match b.powi(2) - 4.0 * a * c {
+        let discriminant = match b * b - 4.0 * a * c {
             d if d < -EPSILON => return xs,
             d => d.max(0.0),
         };
@@ -101,7 +104,7 @@ impl Geometry for Cone {
 
         let (t0, t1) = if t0 > t1 { (t1, t0) } else { (t0, t1) };
 
-        let y0 = ray.origin.y + t0 * ray.direction.y;
+        let y0 = ray.origin.y() + t0 * ray.direction.y();
         if self.minimum < y0 && y0 < self.maximum {
             xs.push(Intersection {
                 time: t0,
@@ -109,7 +112,7 @@ impl Geometry for Cone {
             });
         }
 
-        let y1 = ray.origin.y + t1 * ray.direction.y;
+        let y1 = ray.origin.y() + t1 * ray.direction.y();
         if self.minimum < y1 && y1 < self.maximum {
             xs.push(Intersection {
                 time: t1,
@@ -123,18 +126,20 @@ impl Geometry for Cone {
     }
 
     fn local_normal_at(&self, point: Point) -> Vector {
-        let dist = point.x.powi(2) + point.z.powi(2);
+        let dist = point.x() * point.x() + point.z() * point.z();
+        let max_abs = self.maximum.abs();
+        let min_abs = self.minimum.abs();
 
-        if dist < self.maximum.abs().powi(2) && point.y >= self.maximum - EPSILON {
+        if dist < max_abs * max_abs && point.y() >= self.maximum - EPSILON {
             vector(0, 1, 0)
-        } else if dist < self.minimum.abs().powi(2) && point.y <= self.minimum + EPSILON {
+        } else if dist < min_abs * min_abs && point.y() <= self.minimum + EPSILON {
             vector(0, -1, 0)
         } else {
-            let mut y = (point.x.powi(2) + point.z.powi(2)).sqrt();
-            if point.y > 0.0 {
+            let mut y = dist.sqrt();
+            if point.y() > 0.0 {
                 y = -y;
             }
-            vector(point.x, y, point.z)
+            vector(point.x(), y, point.z())
         }
     }
 
@@ -244,9 +249,9 @@ mod tests {
         let shape = cone().build();
         let n = shape.normal_at(point(1, 1, 1));
         let sqrt2 = 2.0_f32.sqrt();
-        assert_relative_eq!(n.x, 0.5, epsilon = EPSILON);
-        assert_relative_eq!(n.y, -sqrt2 / 2.0, epsilon = EPSILON);
-        assert_relative_eq!(n.z, 0.5, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.5, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), -sqrt2 / 2.0, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), 0.5, epsilon = EPSILON);
     }
 
     #[test]
@@ -254,8 +259,8 @@ mod tests {
         let shape = cone().build();
         let n = shape.normal_at(point(-1, -1, 0));
         let sqrt2 = 2.0_f32.sqrt();
-        assert_relative_eq!(n.x, -1.0 / sqrt2, epsilon = EPSILON);
-        assert_relative_eq!(n.y, 1.0 / sqrt2, epsilon = EPSILON);
-        assert_relative_eq!(n.z, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), -1.0 / sqrt2, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), 1.0 / sqrt2, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), 0.0, epsilon = EPSILON);
     }
 }

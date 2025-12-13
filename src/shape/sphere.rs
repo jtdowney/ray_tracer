@@ -199,9 +199,9 @@ mod tests {
         let s = sphere().build();
         let sqrt3_over_3 = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_at(point(sqrt3_over_3, sqrt3_over_3, sqrt3_over_3));
-        assert_relative_eq!(n.x, sqrt3_over_3, epsilon = EPSILON);
-        assert_relative_eq!(n.y, sqrt3_over_3, epsilon = EPSILON);
-        assert_relative_eq!(n.z, sqrt3_over_3, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), sqrt3_over_3, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), sqrt3_over_3, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), sqrt3_over_3, epsilon = EPSILON);
     }
 
     #[test]
@@ -209,18 +209,18 @@ mod tests {
         let s = sphere().build();
         let sqrt3_over_3 = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_at(point(sqrt3_over_3, sqrt3_over_3, sqrt3_over_3));
-        assert_relative_eq!(n.x, n.normalize().x, epsilon = EPSILON);
-        assert_relative_eq!(n.y, n.normalize().y, epsilon = EPSILON);
-        assert_relative_eq!(n.z, n.normalize().z, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), n.normalize().x(), epsilon = EPSILON);
+        assert_relative_eq!(n.y(), n.normalize().y(), epsilon = EPSILON);
+        assert_relative_eq!(n.z(), n.normalize().z(), epsilon = EPSILON);
     }
 
     #[test]
     fn computing_normal_on_translated_sphere() {
         let s = sphere().transform(transform::translation(0, 1, 0)).build();
         let n = s.normal_at(point(0.0, 1.0 + FRAC_1_SQRT_2, -FRAC_1_SQRT_2));
-        assert_relative_eq!(n.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(n.y, FRAC_1_SQRT_2, epsilon = EPSILON);
-        assert_relative_eq!(n.z, -FRAC_1_SQRT_2, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), FRAC_1_SQRT_2, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), -FRAC_1_SQRT_2, epsilon = EPSILON);
     }
 
     #[test]
@@ -230,9 +230,9 @@ mod tests {
         let s = sphere().transform(t).build();
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let n = s.normal_at(point(0.0, sqrt2_over_2, -sqrt2_over_2));
-        assert_relative_eq!(n.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(n.y, 0.97014, epsilon = EPSILON);
-        assert_relative_eq!(n.z, -0.24254, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), 0.97014, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), -0.24254, epsilon = EPSILON);
     }
 
     #[test]

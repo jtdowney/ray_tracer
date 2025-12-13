@@ -1,23 +1,18 @@
 use std::ops::{Add, Mul, Sub};
 
 use num_traits::AsPrimitive;
+use wide::f32x4;
 
 pub const BLACK: Color = Color {
-    red: 0.0,
-    green: 0.0,
-    blue: 0.0,
+    data: f32x4::new([0.0, 0.0, 0.0, 0.0]),
 };
 
 pub const WHITE: Color = Color {
-    red: 1.0,
-    green: 1.0,
-    blue: 1.0,
+    data: f32x4::new([1.0, 1.0, 1.0, 0.0]),
 };
 
 pub const RED: Color = Color {
-    red: 1.0,
-    green: 0.0,
-    blue: 0.0,
+    data: f32x4::new([1.0, 0.0, 0.0, 0.0]),
 };
 
 pub fn color(
@@ -26,17 +21,42 @@ pub fn color(
     blue: impl AsPrimitive<f32>,
 ) -> Color {
     Color {
-        red: red.as_(),
-        green: green.as_(),
-        blue: blue.as_(),
+        data: f32x4::new([red.as_(), green.as_(), blue.as_(), 0.0]),
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Color {
-    pub red: f32,
-    pub green: f32,
-    pub blue: f32,
+    pub(crate) data: f32x4,
+}
+
+impl Default for Color {
+    fn default() -> Self {
+        BLACK
+    }
+}
+
+impl PartialEq for Color {
+    fn eq(&self, other: &Self) -> bool {
+        self.red() == other.red() && self.green() == other.green() && self.blue() == other.blue()
+    }
+}
+
+impl Color {
+    #[must_use]
+    pub fn red(&self) -> f32 {
+        self.data.as_array()[0]
+    }
+
+    #[must_use]
+    pub fn green(&self) -> f32 {
+        self.data.as_array()[1]
+    }
+
+    #[must_use]
+    pub fn blue(&self) -> f32 {
+        self.data.as_array()[2]
+    }
 }
 
 impl Add for Color {
@@ -44,9 +64,7 @@ impl Add for Color {
 
     fn add(self, rhs: Self) -> Self::Output {
         Color {
-            red: self.red + rhs.red,
-            green: self.green + rhs.green,
-            blue: self.blue + rhs.blue,
+            data: self.data + rhs.data,
         }
     }
 }
@@ -56,9 +74,7 @@ impl Sub for Color {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Color {
-            red: self.red - rhs.red,
-            green: self.green - rhs.green,
-            blue: self.blue - rhs.blue,
+            data: self.data - rhs.data,
         }
     }
 }
@@ -68,9 +84,7 @@ impl Mul<f32> for Color {
 
     fn mul(self, rhs: f32) -> Self::Output {
         Color {
-            red: self.red * rhs,
-            green: self.green * rhs,
-            blue: self.blue * rhs,
+            data: self.data * f32x4::splat(rhs),
         }
     }
 }
@@ -80,9 +94,7 @@ impl Mul for Color {
 
     fn mul(self, rhs: Self) -> Self::Output {
         Color {
-            red: self.red * rhs.red,
-            green: self.green * rhs.green,
-            blue: self.blue * rhs.blue,
+            data: self.data * rhs.data,
         }
     }
 }
@@ -96,9 +108,9 @@ mod tests {
     #[test]
     fn colors_are_red_green_blue_tuples() {
         let c = color(-0.5, 0.4, 1.7);
-        assert_relative_eq!(c.red, -0.5);
-        assert_relative_eq!(c.green, 0.4);
-        assert_relative_eq!(c.blue, 1.7);
+        assert_relative_eq!(c.red(), -0.5);
+        assert_relative_eq!(c.green(), 0.4);
+        assert_relative_eq!(c.blue(), 1.7);
     }
 
     #[test]
@@ -106,9 +118,9 @@ mod tests {
         let c1 = color(0.9, 0.6, 0.75);
         let c2 = color(0.7, 0.1, 0.25);
         let result = c1 + c2;
-        assert_relative_eq!(result.red, 1.6);
-        assert_relative_eq!(result.green, 0.7);
-        assert_relative_eq!(result.blue, 1.0);
+        assert_relative_eq!(result.red(), 1.6);
+        assert_relative_eq!(result.green(), 0.7);
+        assert_relative_eq!(result.blue(), 1.0);
     }
 
     #[test]
@@ -116,18 +128,18 @@ mod tests {
         let c1 = color(0.9, 0.6, 0.75);
         let c2 = color(0.7, 0.1, 0.25);
         let result = c1 - c2;
-        assert_relative_eq!(result.red, 0.2);
-        assert_relative_eq!(result.green, 0.5);
-        assert_relative_eq!(result.blue, 0.5);
+        assert_relative_eq!(result.red(), 0.2);
+        assert_relative_eq!(result.green(), 0.5);
+        assert_relative_eq!(result.blue(), 0.5);
     }
 
     #[test]
     fn multiplying_color_by_scalar() {
         let c = color(0.2, 0.3, 0.4);
         let result = c * 2.0;
-        assert_relative_eq!(result.red, 0.4);
-        assert_relative_eq!(result.green, 0.6);
-        assert_relative_eq!(result.blue, 0.8);
+        assert_relative_eq!(result.red(), 0.4);
+        assert_relative_eq!(result.green(), 0.6);
+        assert_relative_eq!(result.blue(), 0.8);
     }
 
     #[test]
@@ -135,8 +147,8 @@ mod tests {
         let c1 = color(1, 0.2, 0.4);
         let c2 = color(0.9, 1, 0.1);
         let result = c1 * c2;
-        assert_relative_eq!(result.red, 0.9);
-        assert_relative_eq!(result.green, 0.2);
-        assert_relative_eq!(result.blue, 0.04);
+        assert_relative_eq!(result.red(), 0.9);
+        assert_relative_eq!(result.green(), 0.2);
+        assert_relative_eq!(result.blue(), 0.04);
     }
 }

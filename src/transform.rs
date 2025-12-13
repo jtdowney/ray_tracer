@@ -10,13 +10,13 @@ pub fn view_transform(from: Point, to: Point, up: Vector) -> Matrix4 {
     let true_up = left.cross(&forward);
 
     let orientation = matrix([
-        [left.x, left.y, left.z, 0.0],
-        [true_up.x, true_up.y, true_up.z, 0.0],
-        [-forward.x, -forward.y, -forward.z, 0.0],
+        [left.x(), left.y(), left.z(), 0.0],
+        [true_up.x(), true_up.y(), true_up.z(), 0.0],
+        [-forward.x(), -forward.y(), -forward.z(), 0.0],
         [0.0, 0.0, 0.0, 1.0],
     ]);
 
-    orientation * translation(-from.x, -from.y, -from.z)
+    orientation * translation(-from.x(), -from.y(), -from.z())
 }
 
 pub fn translation(
@@ -159,14 +159,14 @@ mod tests {
 
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let result = half_quarter * p;
-        assert_relative_eq!(result.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.y, sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(result.z, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), sqrt2_over_2, epsilon = EPSILON);
 
         let result = full_quarter * p;
-        assert_relative_eq!(result.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.z, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), 1.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -177,9 +177,9 @@ mod tests {
 
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let result = inv * p;
-        assert_relative_eq!(result.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.y, sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(result.z, -sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), -sqrt2_over_2, epsilon = EPSILON);
     }
 
     #[test]
@@ -190,14 +190,14 @@ mod tests {
 
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let result = half_quarter * p;
-        assert_relative_eq!(result.x, sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.z, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), sqrt2_over_2, epsilon = EPSILON);
 
         let result = full_quarter * p;
-        assert_relative_eq!(result.x, 1.0, epsilon = EPSILON);
-        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.z, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), 1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), 0.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -208,14 +208,14 @@ mod tests {
 
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let result = half_quarter * p;
-        assert_relative_eq!(result.x, -sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(result.y, sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(result.z, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), -sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), 0.0, epsilon = EPSILON);
 
         let result = full_quarter * p;
-        assert_relative_eq!(result.x, -1.0, epsilon = EPSILON);
-        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.z, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), -1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), 0.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -268,19 +268,19 @@ mod tests {
         let c = translation(10, 5, 7);
 
         let p2 = a * p;
-        assert_relative_eq!(p2.x, 1.0, epsilon = EPSILON);
-        assert_relative_eq!(p2.y, -1.0, epsilon = EPSILON);
-        assert_relative_eq!(p2.z, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(p2.x(), 1.0, epsilon = EPSILON);
+        assert_relative_eq!(p2.y(), -1.0, epsilon = EPSILON);
+        assert_relative_eq!(p2.z(), 0.0, epsilon = EPSILON);
 
         let p3 = b * p2;
-        assert_relative_eq!(p3.x, 5.0, epsilon = EPSILON);
-        assert_relative_eq!(p3.y, -5.0, epsilon = EPSILON);
-        assert_relative_eq!(p3.z, 0.0, epsilon = EPSILON);
+        assert_relative_eq!(p3.x(), 5.0, epsilon = EPSILON);
+        assert_relative_eq!(p3.y(), -5.0, epsilon = EPSILON);
+        assert_relative_eq!(p3.z(), 0.0, epsilon = EPSILON);
 
         let p4 = c * p3;
-        assert_relative_eq!(p4.x, 15.0, epsilon = EPSILON);
-        assert_relative_eq!(p4.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(p4.z, 7.0, epsilon = EPSILON);
+        assert_relative_eq!(p4.x(), 15.0, epsilon = EPSILON);
+        assert_relative_eq!(p4.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(p4.z(), 7.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -292,9 +292,9 @@ mod tests {
 
         let transform = translate * scale * rotation;
         let result = transform * p;
-        assert_relative_eq!(result.x, 15.0, epsilon = EPSILON);
-        assert_relative_eq!(result.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(result.z, 7.0, epsilon = EPSILON);
+        assert_relative_eq!(result.x(), 15.0, epsilon = EPSILON);
+        assert_relative_eq!(result.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(result.z(), 7.0, epsilon = EPSILON);
     }
 
     #[test]

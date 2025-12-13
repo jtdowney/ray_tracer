@@ -127,24 +127,24 @@ mod tests {
     fn constructing_ray_through_center_of_canvas() {
         let c = camera(201, 101).field_of_view(FRAC_PI_2).build();
         let r = c.ray_for_pixel(100, 50);
-        assert_relative_eq!(r.origin.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.origin.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.origin.z, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.z, -1.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.z(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.z(), -1.0, epsilon = EPSILON);
     }
 
     #[test]
     fn constructing_ray_through_corner_of_canvas() {
         let c = camera(201, 101).field_of_view(FRAC_PI_2).build();
         let r = c.ray_for_pixel(0, 0);
-        assert_relative_eq!(r.origin.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.origin.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.origin.z, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.x, 0.66519, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.y, 0.33259, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.z, -0.66851, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.z(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.x(), 0.66519, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.y(), 0.33259, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.z(), -0.66851, epsilon = EPSILON);
     }
 
     #[test]
@@ -155,12 +155,12 @@ mod tests {
             .build();
         let r = c.ray_for_pixel(100, 50);
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
-        assert_relative_eq!(r.origin.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.origin.y, 2.0, epsilon = EPSILON);
-        assert_relative_eq!(r.origin.z, -5.0, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.x, sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(r.direction.z, -sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.y(), 2.0, epsilon = EPSILON);
+        assert_relative_eq!(r.origin.z(), -5.0, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.x(), sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(r.direction.z(), -sqrt2_over_2, epsilon = EPSILON);
     }
 
     #[test]
@@ -176,8 +176,8 @@ mod tests {
             .build();
         let image = c.render(&w).unwrap();
         let pixel = image.pixel_at(5, 5).unwrap();
-        assert_relative_eq!(pixel.red, 0.38066, epsilon = EPSILON);
-        assert_relative_eq!(pixel.green, 0.47583, epsilon = EPSILON);
-        assert_relative_eq!(pixel.blue, 0.2855, epsilon = EPSILON);
+        assert_relative_eq!(pixel.red(), 0.38066, epsilon = EPSILON);
+        assert_relative_eq!(pixel.green(), 0.47583, epsilon = EPSILON);
+        assert_relative_eq!(pixel.blue(), 0.2855, epsilon = EPSILON);
     }
 }

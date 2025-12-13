@@ -52,7 +52,7 @@ impl Canvas {
             let codes = self.pixels[offset..]
                 .iter()
                 .take(self.width)
-                .flat_map(|&p| [p.red, p.green, p.blue])
+                .flat_map(|p| [p.red(), p.green(), p.blue()])
                 .map(|n| {
                     let scaled = clamp(n * 255.0, 0.0, 255.0).round();
                     scaled.to_string()

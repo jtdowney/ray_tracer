@@ -35,9 +35,9 @@ pub fn stripe_pattern(
 ) -> Pattern {
     Pattern {
         transform,
-        point_to_color: Rc::new(move |Point { x, .. }| {
+        point_to_color: Rc::new(move |p| {
             #[allow(clippy::cast_possible_truncation)]
-            let value = x.floor() as i32;
+            let value = p.x().floor() as i32;
             if value % 2 == 0 { a } else { b }
         }),
     }
@@ -52,9 +52,9 @@ pub fn gradient_pattern(
 ) -> Pattern {
     Pattern {
         transform,
-        point_to_color: Rc::new(move |Point { x, .. }| {
+        point_to_color: Rc::new(move |p| {
             let distance = b - a;
-            let fraction = x - x.floor();
+            let fraction = p.x() - p.x().floor();
             a + distance * fraction
         }),
     }
@@ -69,9 +69,9 @@ pub fn ring_pattern(
 ) -> Pattern {
     Pattern {
         transform,
-        point_to_color: Rc::new(move |Point { x, z, .. }| {
+        point_to_color: Rc::new(move |p| {
             #[allow(clippy::cast_possible_truncation)]
-            let value = (x.powi(2) + z.powi(2)).sqrt().floor() as i32;
+            let value = (p.x().powi(2) + p.z().powi(2)).sqrt().floor() as i32;
             if value % 2 == 0 { a } else { b }
         }),
     }
@@ -86,9 +86,9 @@ pub fn checkers_pattern(
 ) -> Pattern {
     Pattern {
         transform,
-        point_to_color: Rc::new(move |Point { x, y, z }| {
+        point_to_color: Rc::new(move |p| {
             #[allow(clippy::cast_possible_truncation)]
-            let value = (x.floor() + y.floor() + z.floor()) as i32;
+            let value = (p.x().floor() + p.y().floor() + p.z().floor()) as i32;
             if value % 2 == 0 { a } else { b }
         }),
     }
@@ -100,7 +100,7 @@ pub fn checkers_pattern(
 pub fn test_pattern() -> Pattern {
     Pattern {
         transform: identity_matrix(),
-        point_to_color: Rc::new(|Point { x, y, z }| crate::color(x, y, z)),
+        point_to_color: Rc::new(|p| crate::color(p.x(), p.y(), p.z())),
     }
 }
 
@@ -195,7 +195,7 @@ mod tests {
         let shape = sphere().build();
         let pattern = Pattern {
             transform: transform::scaling(2, 2, 2),
-            point_to_color: Rc::new(|Point { x, y, z }| color(x, y, z)),
+            point_to_color: Rc::new(|p| color(p.x(), p.y(), p.z())),
         };
         let c = pattern.pattern_at_shape(&shape, point(2, 3, 4));
         assert_eq!(c, color(1, 1.5, 2));
@@ -206,7 +206,7 @@ mod tests {
         let shape = sphere().transform(transform::scaling(2, 2, 2)).build();
         let pattern = Pattern {
             transform: transform::translation(0.5, 1, 1.5),
-            point_to_color: Rc::new(|Point { x, y, z }| color(x, y, z)),
+            point_to_color: Rc::new(|p| color(p.x(), p.y(), p.z())),
         };
         let c = pattern.pattern_at_shape(&shape, point(2.5, 3, 3.5));
         assert_eq!(c, color(0.75, 0.5, 0.25));

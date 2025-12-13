@@ -1,13 +1,12 @@
 use std::ops::{Add, Sub};
 
 use num_traits::AsPrimitive;
+use wide::f32x4;
 
 use crate::Vector;
 
 pub const ORIGIN: Point = Point {
-    x: 0.0,
-    y: 0.0,
-    z: 0.0,
+    data: f32x4::new([0.0, 0.0, 0.0, 1.0]),
 };
 
 pub fn point(
@@ -16,17 +15,42 @@ pub fn point(
     z: impl AsPrimitive<f32>,
 ) -> Point {
     Point {
-        x: x.as_(),
-        y: y.as_(),
-        z: z.as_(),
+        data: f32x4::new([x.as_(), y.as_(), z.as_(), 1.0]),
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Point {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+    pub(crate) data: f32x4,
+}
+
+impl Default for Point {
+    fn default() -> Self {
+        ORIGIN
+    }
+}
+
+impl PartialEq for Point {
+    fn eq(&self, other: &Self) -> bool {
+        self.x() == other.x() && self.y() == other.y() && self.z() == other.z()
+    }
+}
+
+impl Point {
+    #[must_use]
+    pub fn x(&self) -> f32 {
+        self.data.as_array()[0]
+    }
+
+    #[must_use]
+    pub fn y(&self) -> f32 {
+        self.data.as_array()[1]
+    }
+
+    #[must_use]
+    pub fn z(&self) -> f32 {
+        self.data.as_array()[2]
+    }
 }
 
 impl Sub for Point {
@@ -34,9 +58,7 @@ impl Sub for Point {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vector {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
+            data: self.data - rhs.data,
         }
     }
 }
@@ -46,9 +68,7 @@ impl Sub<Vector> for Point {
 
     fn sub(self, rhs: Vector) -> Self::Output {
         Point {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
+            data: self.data - rhs.data,
         }
     }
 }
@@ -58,9 +78,7 @@ impl Add<Vector> for Point {
 
     fn add(self, rhs: Vector) -> Self::Output {
         Point {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
+            data: self.data + rhs.data,
         }
     }
 }
@@ -75,9 +93,9 @@ mod tests {
     #[test]
     fn point_creates_point_with_coordinates() {
         let p = point(4.3, -4.2, 3.1);
-        assert_relative_eq!(p.x, 4.3);
-        assert_relative_eq!(p.y, -4.2);
-        assert_relative_eq!(p.z, 3.1);
+        assert_relative_eq!(p.x(), 4.3);
+        assert_relative_eq!(p.y(), -4.2);
+        assert_relative_eq!(p.z(), 3.1);
     }
 
     #[test]

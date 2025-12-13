@@ -208,9 +208,9 @@ mod tests {
         let i = intersection(4, shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.shade_hit(&comps, 5);
-        assert_relative_eq!(c.red, 0.38066, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.47583, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.2855, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.38066, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.47583, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.2855, epsilon = EPSILON);
     }
 
     #[test]
@@ -222,9 +222,9 @@ mod tests {
         let i = intersection(0.5, shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.shade_hit(&comps, 5);
-        assert_relative_eq!(c.red, 0.90498, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.90498, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.90498, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.90498, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.90498, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.90498, epsilon = EPSILON);
     }
 
     #[test]
@@ -240,9 +240,9 @@ mod tests {
         let w = default_world();
         let r = ray(point(0, 0, -5), vector(0, 0, 1));
         let c = w.color_at(r, 5);
-        assert_relative_eq!(c.red, 0.38066, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.47583, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.2855, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.38066, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.47583, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.2855, epsilon = EPSILON);
     }
 
     #[test]
@@ -295,9 +295,9 @@ mod tests {
         let i = intersection(4, w.objects[1].clone());
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.shade_hit(&comps, 5);
-        assert_relative_eq!(c.red, 0.1, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.1, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.1, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.1, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.1, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.1, epsilon = EPSILON);
     }
 
     // Chapter 11: Reflection and Refraction tests
@@ -327,9 +327,9 @@ mod tests {
         let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.reflected_color(&comps, 5);
-        assert_relative_eq!(c.red, 0.19032, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.2379, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.14274, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.19032, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.2379, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.14274, epsilon = EPSILON);
     }
 
     #[test]
@@ -345,9 +345,9 @@ mod tests {
         let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.shade_hit(&comps, 5);
-        assert_relative_eq!(c.red, 0.87677, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.92436, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.82918, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.87677, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.92436, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.82918, epsilon = EPSILON);
     }
 
     #[test]
@@ -444,9 +444,9 @@ mod tests {
         ];
         let comps = xs[2].prepare_computations(r, &xs);
         let c = w.refracted_color(&comps, 5);
-        assert_relative_eq!(c.red, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.99888, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.04725, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.99888, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.04725, epsilon = EPSILON);
     }
 
     #[test]
@@ -467,9 +467,9 @@ mod tests {
         let xs = [intersection(2.0_f32.sqrt(), floor)];
         let comps = xs[0].prepare_computations(r, &xs);
         let c = w.shade_hit(&comps, 5);
-        assert_relative_eq!(c.red, 0.93642, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.68642, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.68642, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.93642, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.68642, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.68642, epsilon = EPSILON);
     }
 
     #[test]
@@ -495,8 +495,8 @@ mod tests {
         let xs = [intersection(2.0_f32.sqrt(), floor)];
         let comps = xs[0].prepare_computations(r, &xs);
         let c = w.shade_hit(&comps, 5);
-        assert_relative_eq!(c.red, 0.93391, epsilon = EPSILON);
-        assert_relative_eq!(c.green, 0.69643, epsilon = EPSILON);
-        assert_relative_eq!(c.blue, 0.69243, epsilon = EPSILON);
+        assert_relative_eq!(c.red(), 0.93391, epsilon = EPSILON);
+        assert_relative_eq!(c.green(), 0.69643, epsilon = EPSILON);
+        assert_relative_eq!(c.blue(), 0.69243, epsilon = EPSILON);
     }
 }

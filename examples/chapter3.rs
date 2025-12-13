@@ -41,12 +41,12 @@ fn main() {
     // 4. Multiplying a modified identity matrix by a tuple
     println!("4. Modifying identity matrix and multiplying by a tuple:");
     let p = point(1, 2, 3);
-    println!("   Original point: ({}, {}, {})", p.x, p.y, p.z);
+    println!("   Original point: ({}, {}, {})", p.x(), p.y(), p.z());
     println!(
         "   Identity * point: ({}, {}, {})",
-        (identity * p).x,
-        (identity * p).y,
-        (identity * p).z
+        (identity * p).x(),
+        (identity * p).y(),
+        (identity * p).z()
     );
 
     let mut modified = identity;
@@ -56,7 +56,7 @@ fn main() {
     let result = modified * p;
     println!(
         "   Modified * point: ({}, {}, {})",
-        result.x, result.y, result.z
+        result.x(), result.y(), result.z()
     );
     println!("   Result: The y component is doubled (scaled by 2).");
 }

@@ -38,17 +38,17 @@ pub struct Cylinder {
 
 impl Cylinder {
     fn check_cap(ray: Ray, t: f32) -> bool {
-        let x = ray.origin.x + t * ray.direction.x;
-        let z = ray.origin.z + t * ray.direction.z;
-        (x.powi(2) + z.powi(2)) <= 1.0 + EPSILON
+        let x = ray.origin.x() + t * ray.direction.x();
+        let z = ray.origin.z() + t * ray.direction.z();
+        (x * x + z * z) <= 1.0 + EPSILON
     }
 
     fn intersect_caps(&self, shape: &Shape, ray: Ray, xs: &mut Vec<Intersection>) {
-        if !self.closed || ray.direction.y.abs() < EPSILON {
+        if !self.closed || ray.direction.y().abs() < EPSILON {
             return;
         }
 
-        let t = (self.minimum - ray.origin.y) / ray.direction.y;
+        let t = (self.minimum - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(ray, t) {
             xs.push(Intersection {
                 time: t,
@@ -56,7 +56,7 @@ impl Cylinder {
             });
         }
 
-        let t = (self.maximum - ray.origin.y) / ray.direction.y;
+        let t = (self.maximum - ray.origin.y()) / ray.direction.y();
         if Self::check_cap(ray, t) {
             xs.push(Intersection {
                 time: t,
@@ -70,17 +70,21 @@ impl Geometry for Cylinder {
     fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
         let mut xs = vec![];
 
-        let a = ray.direction.x.powi(2) + ray.direction.z.powi(2);
+        let dx = ray.direction.x();
+        let dz = ray.direction.z();
+        let a = dx * dx + dz * dz;
 
         if a.abs() < EPSILON {
             self.intersect_caps(shape, ray, &mut xs);
             return xs;
         }
 
-        let b = 2.0 * ray.origin.x * ray.direction.x + 2.0 * ray.origin.z * ray.direction.z;
-        let c = ray.origin.x.powi(2) + ray.origin.z.powi(2) - 1.0;
+        let ox = ray.origin.x();
+        let oz = ray.origin.z();
+        let b = 2.0 * ox * dx + 2.0 * oz * dz;
+        let c = ox * ox + oz * oz - 1.0;
 
-        let discriminant = match b.powi(2) - 4.0 * a * c {
+        let discriminant = match b * b - 4.0 * a * c {
             d if d < -EPSILON => return xs,
             d => d.max(0.0),
         };
@@ -92,7 +96,7 @@ impl Geometry for Cylinder {
             std::mem::swap(&mut t0, &mut t1);
         }
 
-        let y0 = ray.origin.y + t0 * ray.direction.y;
+        let y0 = ray.origin.y() + t0 * ray.direction.y();
         if self.minimum < y0 && y0 < self.maximum {
             xs.push(Intersection {
                 time: t0,
@@ -100,7 +104,7 @@ impl Geometry for Cylinder {
             });
         }
 
-        let y1 = ray.origin.y + t1 * ray.direction.y;
+        let y1 = ray.origin.y() + t1 * ray.direction.y();
         if self.minimum < y1 && y1 < self.maximum {
             xs.push(Intersection {
                 time: t1,
@@ -114,14 +118,14 @@ impl Geometry for Cylinder {
     }
 
     fn local_normal_at(&self, point: Point) -> Vector {
-        let dist = point.x.powi(2) + point.z.powi(2);
+        let dist = point.x().powi(2) + point.z().powi(2);
 
-        if dist < 1.0 && point.y >= self.maximum - EPSILON {
+        if dist < 1.0 && point.y() >= self.maximum - EPSILON {
             vector(0, 1, 0)
-        } else if dist < 1.0 && point.y <= self.minimum + EPSILON {
+        } else if dist < 1.0 && point.y() <= self.minimum + EPSILON {
             vector(0, -1, 0)
         } else {
-            vector(point.x, 0, point.z)
+            vector(point.x(), 0, point.z())
         }
     }
 

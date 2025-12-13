@@ -155,9 +155,9 @@ mod tests {
         g2.add_child(s.clone());
 
         let p = s.world_to_object(point(-2, 0, -10));
-        assert_relative_eq!(p.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(p.y, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(p.z, -1.0, epsilon = EPSILON);
+        assert_relative_eq!(p.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(p.y(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(p.z(), -1.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -171,9 +171,9 @@ mod tests {
 
         let sqrt3_over_3 = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_to_world(vector(sqrt3_over_3, sqrt3_over_3, sqrt3_over_3));
-        assert_relative_eq!(n.x, 0.2857, epsilon = EPSILON);
-        assert_relative_eq!(n.y, 0.4286, epsilon = EPSILON);
-        assert_relative_eq!(n.z, -0.8571, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.2857, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), 0.4286, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), -0.8571, epsilon = EPSILON);
     }
 
     #[test]
@@ -186,9 +186,9 @@ mod tests {
         g2.add_child(s.clone());
 
         let n = s.normal_at(point(1.7321, 1.1547, -5.5774));
-        assert_relative_eq!(n.x, 0.2857, epsilon = EPSILON);
-        assert_relative_eq!(n.y, 0.4286, epsilon = EPSILON);
-        assert_relative_eq!(n.z, -0.8571, epsilon = EPSILON);
+        assert_relative_eq!(n.x(), 0.2857, epsilon = EPSILON);
+        assert_relative_eq!(n.y(), 0.4286, epsilon = EPSILON);
+        assert_relative_eq!(n.z(), -0.8571, epsilon = EPSILON);
     }
 
     #[test]

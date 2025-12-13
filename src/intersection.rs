@@ -235,8 +235,8 @@ mod tests {
         let shape = sphere().transform(transform::translation(0, 0, 1)).build();
         let i = intersection(5, shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
-        assert!(comps.over_point.z < -EPSILON / 2.0);
-        assert!(comps.point.z > comps.over_point.z);
+        assert!(comps.over_point.z() < -EPSILON / 2.0);
+        assert!(comps.point.z() > comps.over_point.z());
     }
 
     #[test]
@@ -246,9 +246,9 @@ mod tests {
         let r = ray(point(0, 1, -1), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
         let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
-        assert_relative_eq!(comps.reflectv.x, 0.0, epsilon = EPSILON);
-        assert_relative_eq!(comps.reflectv.y, sqrt2_over_2, epsilon = EPSILON);
-        assert_relative_eq!(comps.reflectv.z, sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(comps.reflectv.x(), 0.0, epsilon = EPSILON);
+        assert_relative_eq!(comps.reflectv.y(), sqrt2_over_2, epsilon = EPSILON);
+        assert_relative_eq!(comps.reflectv.z(), sqrt2_over_2, epsilon = EPSILON);
     }
 
     #[test]
@@ -301,8 +301,8 @@ mod tests {
         let i = intersection(5, shape);
         let xs = [i.clone()];
         let comps = i.prepare_computations(r, &xs);
-        assert!(comps.under_point.z > EPSILON / 2.0);
-        assert!(comps.point.z < comps.under_point.z);
+        assert!(comps.under_point.z() > EPSILON / 2.0);
+        assert!(comps.point.z() < comps.under_point.z());
     }
 
     #[test]

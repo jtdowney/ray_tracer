@@ -27,11 +27,11 @@ pub struct Plane;
 
 impl Geometry for Plane {
     fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection> {
-        if ray.direction.y.abs() < EPSILON {
+        if ray.direction.y().abs() < EPSILON {
             return vec![];
         }
 
-        let time = -ray.origin.y / ray.direction.y;
+        let time = -ray.origin.y() / ray.direction.y();
         vec![Intersection {
             time,
             object: shape.clone(),

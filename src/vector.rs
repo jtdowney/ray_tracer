@@ -1,6 +1,7 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use num_traits::AsPrimitive;
+use wide::f32x4;
 
 pub fn vector(
     x: impl AsPrimitive<f32>,
@@ -8,23 +9,48 @@ pub fn vector(
     z: impl AsPrimitive<f32>,
 ) -> Vector {
     Vector {
-        x: x.as_(),
-        y: y.as_(),
-        z: z.as_(),
+        data: f32x4::new([x.as_(), y.as_(), z.as_(), 0.0]),
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 pub struct Vector {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
+    pub(crate) data: f32x4,
+}
+
+impl Default for Vector {
+    fn default() -> Self {
+        Self {
+            data: f32x4::splat(0.0),
+        }
+    }
+}
+
+impl PartialEq for Vector {
+    fn eq(&self, other: &Self) -> bool {
+        self.x() == other.x() && self.y() == other.y() && self.z() == other.z()
+    }
 }
 
 impl Vector {
     #[must_use]
+    pub fn x(&self) -> f32 {
+        self.data.as_array()[0]
+    }
+
+    #[must_use]
+    pub fn y(&self) -> f32 {
+        self.data.as_array()[1]
+    }
+
+    #[must_use]
+    pub fn z(&self) -> f32 {
+        self.data.as_array()[2]
+    }
+
+    #[must_use]
     pub fn magnitude(&self) -> f32 {
-        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
+        self.dot(self).sqrt()
     }
 
     #[must_use]
@@ -34,25 +60,30 @@ impl Vector {
 
     #[must_use]
     pub fn normalize(&self) -> Vector {
-        let magnitude = self.magnitude();
+        let mag = self.magnitude();
         Vector {
-            x: self.x / magnitude,
-            y: self.y / magnitude,
-            z: self.z / magnitude,
+            data: self.data / f32x4::splat(mag),
         }
     }
 
     #[must_use]
     pub fn dot(&self, other: &Vector) -> f32 {
-        self.x * other.x + self.y * other.y + self.z * other.z
+        let product = self.data * other.data;
+        let arr = product.as_array();
+        arr[0] + arr[1] + arr[2]
     }
 
     #[must_use]
     pub fn cross(&self, other: &Vector) -> Vector {
+        let (ax, ay, az) = (self.x(), self.y(), self.z());
+        let (bx, by, bz) = (other.x(), other.y(), other.z());
         Vector {
-            x: self.y * other.z - self.z * other.y,
-            y: self.z * other.x - self.x * other.z,
-            z: self.x * other.y - self.y * other.x,
+            data: f32x4::new([
+                ay * bz - az * by,
+                az * bx - ax * bz,
+                ax * by - ay * bx,
+                0.0,
+            ]),
         }
     }
 }
@@ -62,9 +93,7 @@ impl Add for Vector {
 
     fn add(self, rhs: Self) -> Self::Output {
         Vector {
-            x: self.x + rhs.x,
-            y: self.y + rhs.y,
-            z: self.z + rhs.z,
+            data: self.data + rhs.data,
         }
     }
 }
@@ -74,9 +103,7 @@ impl Sub for Vector {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vector {
-            x: self.x - rhs.x,
-            y: self.y - rhs.y,
-            z: self.z - rhs.z,
+            data: self.data - rhs.data,
         }
     }
 }
@@ -85,11 +112,7 @@ impl Neg for Vector {
     type Output = Vector;
 
     fn neg(self) -> Self::Output {
-        Vector {
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
+        Vector { data: -self.data }
     }
 }
 
@@ -98,9 +121,7 @@ impl Mul<f32> for Vector {
 
     fn mul(self, rhs: f32) -> Self::Output {
         Vector {
-            x: self.x * rhs,
-            y: self.y * rhs,
-            z: self.z * rhs,
+            data: self.data * f32x4::splat(rhs),
         }
     }
 }
@@ -110,9 +131,7 @@ impl Div<f32> for Vector {
 
     fn div(self, rhs: f32) -> Self::Output {
         Vector {
-            x: self.x / rhs,
-            y: self.y / rhs,
-            z: self.z / rhs,
+            data: self.data / f32x4::splat(rhs),
         }
     }
 }
@@ -126,9 +145,9 @@ mod tests {
     #[test]
     fn vector_creates_vector_with_coordinates() {
         let v = vector(4.3, -4.2, 3.1);
-        assert_relative_eq!(v.x, 4.3);
-        assert_relative_eq!(v.y, -4.2);
-        assert_relative_eq!(v.z, 3.1);
+        assert_relative_eq!(v.x(), 4.3);
+        assert_relative_eq!(v.y(), -4.2);
+        assert_relative_eq!(v.z(), 3.1);
     }
 
     #[test]
@@ -217,9 +236,9 @@ mod tests {
         let v = vector(1, 2, 3);
         let norm = v.normalize();
         let sqrt14 = 14.0_f32.sqrt();
-        assert_relative_eq!(norm.x, 1.0 / sqrt14);
-        assert_relative_eq!(norm.y, 2.0 / sqrt14);
-        assert_relative_eq!(norm.z, 3.0 / sqrt14);
+        assert_relative_eq!(norm.x(), 1.0 / sqrt14);
+        assert_relative_eq!(norm.y(), 2.0 / sqrt14);
+        assert_relative_eq!(norm.z(), 3.0 / sqrt14);
     }
 
     #[test]
@@ -258,8 +277,8 @@ mod tests {
         let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let n = vector(sqrt2_over_2, sqrt2_over_2, 0);
         let r = v.reflect(&n);
-        assert_relative_eq!(r.x, 1.0, epsilon = crate::EPSILON);
-        assert_relative_eq!(r.y, 0.0, epsilon = crate::EPSILON);
-        assert_relative_eq!(r.z, 0.0, epsilon = crate::EPSILON);
+        assert_relative_eq!(r.x(), 1.0, epsilon = crate::EPSILON);
+        assert_relative_eq!(r.y(), 0.0, epsilon = crate::EPSILON);
+        assert_relative_eq!(r.z(), 0.0, epsilon = crate::EPSILON);
     }
 }

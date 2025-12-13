@@ -144,9 +144,9 @@ mod tests {
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
         let result = m.lighting(&object, &light, position, eyev, normalv, false);
-        assert_relative_eq!(result.red, 1.9, epsilon = EPSILON);
-        assert_relative_eq!(result.green, 1.9, epsilon = EPSILON);
-        assert_relative_eq!(result.blue, 1.9, epsilon = EPSILON);
+        assert_relative_eq!(result.red(), 1.9, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 1.9, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 1.9, epsilon = EPSILON);
     }
 
     #[test]
@@ -159,9 +159,9 @@ mod tests {
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
         let result = m.lighting(&object, &light, position, eyev, normalv, false);
-        assert_relative_eq!(result.red, 1.0, epsilon = EPSILON);
-        assert_relative_eq!(result.green, 1.0, epsilon = EPSILON);
-        assert_relative_eq!(result.blue, 1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.red(), 1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 1.0, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 1.0, epsilon = EPSILON);
     }
 
     #[test]
@@ -173,9 +173,9 @@ mod tests {
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
         let result = m.lighting(&object, &light, position, eyev, normalv, false);
-        assert_relative_eq!(result.red, 0.7364, epsilon = EPSILON);
-        assert_relative_eq!(result.green, 0.7364, epsilon = EPSILON);
-        assert_relative_eq!(result.blue, 0.7364, epsilon = EPSILON);
+        assert_relative_eq!(result.red(), 0.7364, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 0.7364, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 0.7364, epsilon = EPSILON);
     }
 
     #[test]
@@ -188,9 +188,9 @@ mod tests {
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
         let result = m.lighting(&object, &light, position, eyev, normalv, false);
-        assert_relative_eq!(result.red, 1.6364, epsilon = EPSILON);
-        assert_relative_eq!(result.green, 1.6364, epsilon = EPSILON);
-        assert_relative_eq!(result.blue, 1.6364, epsilon = EPSILON);
+        assert_relative_eq!(result.red(), 1.6364, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 1.6364, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 1.6364, epsilon = EPSILON);
     }
 
     #[test]
@@ -202,9 +202,9 @@ mod tests {
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, 10), color(1, 1, 1));
         let result = m.lighting(&object, &light, position, eyev, normalv, false);
-        assert_relative_eq!(result.red, 0.1, epsilon = EPSILON);
-        assert_relative_eq!(result.green, 0.1, epsilon = EPSILON);
-        assert_relative_eq!(result.blue, 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.red(), 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 0.1, epsilon = EPSILON);
     }
 
     #[test]
@@ -217,9 +217,9 @@ mod tests {
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
         let in_shadow = true;
         let result = m.lighting(&object, &light, position, eyev, normalv, in_shadow);
-        assert_relative_eq!(result.red, 0.1, epsilon = EPSILON);
-        assert_relative_eq!(result.green, 0.1, epsilon = EPSILON);
-        assert_relative_eq!(result.blue, 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.red(), 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 0.1, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 0.1, epsilon = EPSILON);
     }
 
     #[test]
