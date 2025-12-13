@@ -24,7 +24,7 @@ fn build_test_world() -> World {
         .build()
 }
 
-fn build_camera(width: u16, height: u16) -> ray_tracer::Camera {
+fn build_camera(width: u16, height: u16, parallel: bool) -> ray_tracer::Camera {
     camera(width, height)
         .field_of_view(FRAC_PI_3)
         .transform(transform::view_transform(
@@ -32,28 +32,29 @@ fn build_camera(width: u16, height: u16) -> ray_tracer::Camera {
             point(0.0, 1.0, 0.0),
             vector(0.0, 1.0, 0.0),
         ))
+        .parallel(parallel)
         .build()
 }
 
-fn render_benchmarks(c: &mut Criterion) {
-    let mut group = c.benchmark_group("render");
+fn sequential_benchmarks(c: &mut Criterion) {
+    let mut group = c.benchmark_group("render_sequential");
 
     let world = build_test_world();
 
     group.sample_size(10);
-    let cam_small = build_camera(100, 50);
+    let cam_small = build_camera(100, 50, false);
     group.bench_function("small_100x50", |b| {
         b.iter(|| cam_small.render(hint::black_box(&world)));
     });
 
     group.sample_size(10);
-    let cam_medium = build_camera(400, 200);
+    let cam_medium = build_camera(400, 200, false);
     group.bench_function("medium_400x200", |b| {
         b.iter(|| cam_medium.render(hint::black_box(&world)));
     });
 
     group.sample_size(10);
-    let cam_large = build_camera(1000, 500);
+    let cam_large = build_camera(1000, 500, false);
     group.bench_function("large_1000x500", |b| {
         b.iter(|| cam_large.render(hint::black_box(&world)));
     });
@@ -61,5 +62,31 @@ fn render_benchmarks(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, render_benchmarks);
+fn parallel_benchmarks(c: &mut Criterion) {
+    let mut group = c.benchmark_group("render_parallel");
+
+    let world = build_test_world();
+
+    group.sample_size(10);
+    let cam_small = build_camera(100, 50, true);
+    group.bench_function("small_100x50", |b| {
+        b.iter(|| cam_small.render(hint::black_box(&world)));
+    });
+
+    group.sample_size(10);
+    let cam_medium = build_camera(400, 200, true);
+    group.bench_function("medium_400x200", |b| {
+        b.iter(|| cam_medium.render(hint::black_box(&world)));
+    });
+
+    group.sample_size(10);
+    let cam_large = build_camera(1000, 500, true);
+    group.bench_function("large_1000x500", |b| {
+        b.iter(|| cam_large.render(hint::black_box(&world)));
+    });
+
+    group.finish();
+}
+
+criterion_group!(benches, sequential_benchmarks, parallel_benchmarks);
 criterion_main!(benches);

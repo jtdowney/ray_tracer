@@ -194,9 +194,10 @@ fn main() -> Result<()> {
             point(0, 1, 0),
             vector(0, 1, 0),
         ))
+        .parallel(true)
         .build();
 
-    let canvas = camera.render(&world)?;
+    let canvas = camera.render(&world);
     let ppm = canvas.to_ppm()?;
     print!("{ppm}");
 

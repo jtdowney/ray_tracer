@@ -1,8 +1,7 @@
 use std::{
     any::Any,
-    cell::{Ref, RefCell, RefMut},
     fmt,
-    rc::{Rc, Weak},
+    sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard, Weak},
 };
 
 use crate::{Intersection, Material, Matrix4, Point, Ray, Vector, identity_matrix, material};
@@ -25,10 +24,10 @@ pub use smooth_triangle::{SmoothTriangle, smooth_triangle};
 pub use sphere::{glass_sphere, sphere};
 pub use triangle::{Triangle, triangle};
 
-pub type ShapeRef = Rc<RefCell<ShapeInner>>;
-pub type WeakShapeRef = Weak<RefCell<ShapeInner>>;
+pub type ShapeRef = Arc<RwLock<ShapeInner>>;
+pub type WeakShapeRef = Weak<RwLock<ShapeInner>>;
 
-pub trait Geometry {
+pub trait Geometry: Send + Sync {
     fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection>;
     fn local_normal_at(&self, point: Point, hit: Option<&Intersection>) -> Vector;
     fn as_any(&self) -> &dyn Any;
@@ -61,7 +60,7 @@ impl fmt::Debug for Shape {
 impl Shape {
     pub fn new<G: Geometry + 'static>(geometry: G) -> Self {
         Shape {
-            inner_ref: Rc::new(RefCell::new(ShapeInner {
+            inner_ref: Arc::new(RwLock::new(ShapeInner {
                 transform: identity_matrix(),
                 inverse_transform: identity_matrix(),
                 material: material(),
@@ -71,47 +70,64 @@ impl Shape {
         }
     }
 
-    pub(crate) fn inner(&self) -> Ref<'_, ShapeInner> {
-        self.inner_ref.borrow()
+    pub(crate) fn inner(&self) -> RwLockReadGuard<'_, ShapeInner> {
+        self.inner_ref.read().expect("shape lock poisoned")
     }
 
-    pub(crate) fn inner_mut(&self) -> RefMut<'_, ShapeInner> {
-        self.inner_ref.borrow_mut()
+    pub(crate) fn inner_mut(&self) -> RwLockWriteGuard<'_, ShapeInner> {
+        self.inner_ref.write().expect("shape lock poisoned")
     }
 
     /// Returns this shape's transformation matrix.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn transform(&self) -> Matrix4 {
-        self.inner_ref.borrow().transform
+        self.inner_ref
+            .read()
+            .expect("shape lock poisoned")
+            .transform
     }
 
     /// Returns a clone of this shape's material.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn material(&self) -> Material {
-        self.inner_ref.borrow().material.clone()
+        self.inner_ref
+            .read()
+            .expect("shape lock poisoned")
+            .material
+            .clone()
     }
 
     #[must_use]
     pub fn downgrade(&self) -> WeakShapeRef {
-        Rc::downgrade(&self.inner_ref)
+        Arc::downgrade(&self.inner_ref)
     }
 
     /// Sets the transformation matrix for this shape.
     ///
     /// # Panics
-    /// Panics if the matrix is not invertible.
+    /// Panics if the matrix is not invertible or the internal lock is poisoned.
     pub fn set_transform(&self, transform: Matrix4) {
-        let mut inner = self.inner_ref.borrow_mut();
+        let mut inner = self.inner_ref.write().expect("shape lock poisoned");
         inner.transform = transform;
         inner.inverse_transform = transform.inverse().expect("invertible");
     }
 
     /// Sets the material for this shape.
     /// If this shape is a Group, the material is recursively applied to all children.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     pub fn set_material(&self, material: Material) {
         if let Some(group) = self
             .inner_ref
-            .borrow()
+            .read()
+            .expect("shape lock poisoned")
             .geometry
             .as_any()
             .downcast_ref::<Group>()
@@ -121,19 +137,29 @@ impl Shape {
             }
         }
 
-        self.inner_ref.borrow_mut().material = material;
+        self.inner_ref
+            .write()
+            .expect("shape lock poisoned")
+            .material = material;
     }
 
     /// Sets the parent reference for this shape.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     pub fn set_parent(&self, parent: WeakShapeRef) {
-        self.inner_ref.borrow_mut().parent = Some(parent);
+        self.inner_ref.write().expect("shape lock poisoned").parent = Some(parent);
     }
 
     /// Returns the parent shape if it exists and is still alive.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn parent(&self) -> Option<Shape> {
         self.inner_ref
-            .borrow()
+            .read()
+            .expect("shape lock poisoned")
             .parent
             .as_ref()
             .and_then(|weak| weak.upgrade().map(|inner_ref| Shape { inner_ref }))
@@ -141,6 +167,9 @@ impl Shape {
 
     /// Converts a point from world space to object space, recursively
     /// taking into consideration any parent objects between the two spaces.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn world_to_object(&self, point: Point) -> Point {
         let point = if let Some(parent) = self.parent() {
@@ -149,15 +178,18 @@ impl Shape {
             point
         };
 
-        let inner = self.inner_ref.borrow();
+        let inner = self.inner_ref.read().expect("shape lock poisoned");
         inner.inverse_transform * point
     }
 
     /// Converts a normal vector from object space to world space, recursively
     /// taking into consideration any parent objects between the two spaces.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn normal_to_world(&self, normal: Vector) -> Vector {
-        let inner = self.inner_ref.borrow();
+        let inner = self.inner_ref.read().expect("shape lock poisoned");
         let normal = inner.inverse_transform.transpose() * normal;
         let normal = normal.normalize();
         drop(inner);
@@ -170,9 +202,12 @@ impl Shape {
     }
 
     /// Computes the intersections between a ray and this shape.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn intersect(&self, ray: Ray) -> Vec<Intersection> {
-        let inner = self.inner_ref.borrow();
+        let inner = self.inner_ref.read().expect("shape lock poisoned");
         let local_ray = ray.transform(inner.inverse_transform);
         inner.geometry.local_intersection(self, local_ray)
     }
@@ -184,10 +219,13 @@ impl Shape {
     }
 
     /// Computes the normal vector at a point, with optional intersection data for smooth triangles.
+    ///
+    /// # Panics
+    /// Panics if the internal lock is poisoned.
     #[must_use]
     pub fn normal_at_with_hit(&self, world_point: Point, hit: Option<&Intersection>) -> Vector {
         let local_point = self.world_to_object(world_point);
-        let inner = self.inner_ref.borrow();
+        let inner = self.inner_ref.read().expect("shape lock poisoned");
         let local_normal = inner.geometry.local_normal_at(local_point, hit);
         drop(inner);
         self.normal_to_world(local_normal)
@@ -212,7 +250,7 @@ impl Shape {
 
 impl PartialEq for Shape {
     fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.inner_ref, &other.inner_ref)
+        Arc::ptr_eq(&self.inner_ref, &other.inner_ref)
     }
 }
 
@@ -224,7 +262,11 @@ impl<G: Geometry + 'static> From<G> for Shape {
 
 #[cfg(test)]
 mod tests {
-    use std::{any::Any, cell::RefCell, f32::consts::FRAC_1_SQRT_2, rc::Rc};
+    use std::{
+        any::Any,
+        f32::consts::FRAC_1_SQRT_2,
+        sync::{Arc, RwLock},
+    };
 
     use approx::assert_relative_eq;
 
@@ -235,18 +277,18 @@ mod tests {
     };
 
     struct TestShape {
-        saved_ray: Rc<RefCell<Option<Ray>>>,
+        saved_ray: Arc<RwLock<Option<Ray>>>,
     }
 
     impl TestShape {
-        fn new(saved_ray: Rc<RefCell<Option<Ray>>>) -> Self {
+        fn new(saved_ray: Arc<RwLock<Option<Ray>>>) -> Self {
             Self { saved_ray }
         }
     }
 
     impl Geometry for TestShape {
         fn local_intersection(&self, _shape: &Shape, ray: Ray) -> Vec<Intersection> {
-            *self.saved_ray.borrow_mut() = Some(ray);
+            *self.saved_ray.write().expect("test lock poisoned") = Some(ray);
             vec![]
         }
 
@@ -263,9 +305,9 @@ mod tests {
         }
     }
 
-    fn test_shape() -> (Shape, Rc<RefCell<Option<Ray>>>) {
-        let saved_ray = Rc::new(RefCell::new(None));
-        let shape: Shape = TestShape::new(Rc::clone(&saved_ray)).into();
+    fn test_shape() -> (Shape, Arc<RwLock<Option<Ray>>>) {
+        let saved_ray = Arc::new(RwLock::new(None));
+        let shape: Shape = TestShape::new(Arc::clone(&saved_ray)).into();
         (shape, saved_ray)
     }
 
@@ -302,7 +344,7 @@ mod tests {
         let (s, saved_ray) = test_shape();
         s.set_transform(transform::scaling(2, 2, 2));
         let _ = s.intersect(r);
-        let saved = saved_ray.borrow();
+        let saved = saved_ray.read().expect("test lock poisoned");
         let saved = saved.as_ref().expect("saved ray");
         assert_relative_eq!(saved.origin.x(), 0.0, epsilon = EPSILON);
         assert_relative_eq!(saved.origin.y(), 0.0, epsilon = EPSILON);
@@ -318,7 +360,7 @@ mod tests {
         let (s, saved_ray) = test_shape();
         s.set_transform(transform::translation(5, 0, 0));
         let _ = s.intersect(r);
-        let saved = saved_ray.borrow();
+        let saved = saved_ray.read().expect("test lock poisoned");
         let saved = saved.as_ref().expect("saved ray");
         assert_relative_eq!(saved.origin.x(), -5.0, epsilon = EPSILON);
         assert_relative_eq!(saved.origin.y(), 0.0, epsilon = EPSILON);

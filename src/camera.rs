@@ -3,7 +3,8 @@ use std::f32::consts::FRAC_PI_2;
 use bon::builder;
 
 use crate::{
-    Canvas, Matrix4, ORIGIN, REFLECTION_DEPTH, Ray, World, canvas, identity_matrix, point, ray,
+    Canvas, Color, Matrix4, ORIGIN, REFLECTION_DEPTH, Ray, World, canvas_with_pixels,
+    identity_matrix, point, ray,
 };
 
 #[must_use]
@@ -13,6 +14,7 @@ pub fn camera(
     #[builder(start_fn)] vertical_size: u16,
     #[builder(default = FRAC_PI_2)] field_of_view: f32,
     #[builder(default = identity_matrix())] transform: Matrix4,
+    #[builder(default = false)] parallel: bool,
 ) -> Camera {
     let half_view = (field_of_view / 2.0).tan();
     let aspect = f32::from(horizontal_size) / f32::from(vertical_size);
@@ -37,6 +39,7 @@ pub fn camera(
         pixel_size,
         half_width,
         half_height,
+        parallel,
     }
 }
 
@@ -49,6 +52,7 @@ pub struct Camera {
     pub pixel_size: f32,
     pub half_width: f32,
     pub half_height: f32,
+    pub parallel: bool,
 }
 
 impl Camera {
@@ -73,20 +77,32 @@ impl Camera {
         ray(origin, direction)
     }
 
-    /// # Errors
-    /// Returns an error if writing a pixel to the canvas fails.
-    pub fn render(&self, world: &World) -> anyhow::Result<Canvas> {
-        let mut canvas = canvas(self.width as usize, self.height as usize);
+    #[must_use]
+    pub fn render(&self, world: &World) -> Canvas {
+        let pixels: Vec<Color> = if self.parallel {
+            use rayon::prelude::*;
 
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let ray = self.ray_for_pixel(x, y);
-                let color = world.color_at(ray, REFLECTION_DEPTH);
-                canvas.write_pixel(x as usize, y as usize, color)?;
-            }
-        }
+            (0..self.height)
+                .into_par_iter()
+                .flat_map_iter(|y| {
+                    (0..self.width).map(move |x| {
+                        let ray = self.ray_for_pixel(x, y);
+                        world.color_at(ray, REFLECTION_DEPTH)
+                    })
+                })
+                .collect()
+        } else {
+            (0..self.height)
+                .flat_map(|y| {
+                    (0..self.width).map(move |x| {
+                        let ray = self.ray_for_pixel(x, y);
+                        world.color_at(ray, REFLECTION_DEPTH)
+                    })
+                })
+                .collect()
+        };
 
-        Ok(canvas)
+        canvas_with_pixels(self.width as usize, self.height as usize, pixels)
     }
 }
 
@@ -174,10 +190,28 @@ mod tests {
                 vector(0, 1, 0),
             ))
             .build();
-        let image = c.render(&w).unwrap();
+        let image = c.render(&w);
         let pixel = image.pixel_at(5, 5).unwrap();
         assert_relative_eq!(pixel.red(), 0.38066, epsilon = EPSILON);
         assert_relative_eq!(pixel.green(), 0.47583, epsilon = EPSILON);
         assert_relative_eq!(pixel.blue(), 0.2855, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn parallel_rendering_matches_sequential() {
+        let w = default_world();
+        let t = transform::view_transform(point(0, 0, -5), point(0, 0, 0), vector(0, 1, 0));
+
+        let seq = camera(11, 11).field_of_view(FRAC_PI_2).transform(t).build();
+        let par = camera(11, 11)
+            .field_of_view(FRAC_PI_2)
+            .transform(t)
+            .parallel(true)
+            .build();
+
+        let seq_image = seq.render(&w);
+        let par_image = par.render(&w);
+
+        assert_eq!(seq_image, par_image);
     }
 }

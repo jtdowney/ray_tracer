@@ -440,6 +440,7 @@ dependencies = [
  "criterion",
  "num-traits",
  "ord_subset",
+ "rayon",
  "wide",
 ]
 

@@ -13,6 +13,15 @@ pub fn canvas(width: usize, height: usize) -> Canvas {
     }
 }
 
+#[must_use]
+pub fn canvas_with_pixels(width: usize, height: usize, pixels: Vec<Color>) -> Canvas {
+    Canvas {
+        width,
+        height,
+        pixels,
+    }
+}
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Canvas {
     pub width: usize,

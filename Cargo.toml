@@ -9,6 +9,7 @@ approx = "0.5.1"
 bon = "3"
 num-traits = "0.2.19"
 ord_subset = "3"
+rayon = "1"
 wide = "1"
 
 [dev-dependencies]

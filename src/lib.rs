@@ -15,7 +15,7 @@ mod vector;
 mod world;
 
 pub use camera::{Camera, camera};
-pub use canvas::{Canvas, canvas};
+pub use canvas::{Canvas, canvas, canvas_with_pixels};
 pub use color::{Color, color};
 pub use intersection::{Intersection, hit, intersection, intersection_with_uv};
 pub use light::{PointLight, point_light};
