@@ -35,10 +35,12 @@ impl Geometry for Plane {
         vec![Intersection {
             time,
             object: shape.clone(),
+            u: None,
+            v: None,
         }]
     }
 
-    fn local_normal_at(&self, _point: Point) -> Vector {
+    fn local_normal_at(&self, _point: Point, _hit: Option<&Intersection>) -> Vector {
         vector(0, 1, 0)
     }
 

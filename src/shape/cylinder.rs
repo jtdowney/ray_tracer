@@ -53,6 +53,8 @@ impl Cylinder {
             xs.push(Intersection {
                 time: t,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
@@ -61,6 +63,8 @@ impl Cylinder {
             xs.push(Intersection {
                 time: t,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
     }
@@ -101,6 +105,8 @@ impl Geometry for Cylinder {
             xs.push(Intersection {
                 time: t0,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
@@ -109,6 +115,8 @@ impl Geometry for Cylinder {
             xs.push(Intersection {
                 time: t1,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
@@ -117,7 +125,7 @@ impl Geometry for Cylinder {
         xs
     }
 
-    fn local_normal_at(&self, point: Point) -> Vector {
+    fn local_normal_at(&self, point: Point, _hit: Option<&Intersection>) -> Vector {
         let dist = point.x().powi(2) + point.z().powi(2);
 
         if dist < 1.0 && point.y() >= self.maximum - EPSILON {

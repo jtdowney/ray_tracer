@@ -24,7 +24,7 @@ impl Geometry for Group {
         intersections
     }
 
-    fn local_normal_at(&self, _point: Point) -> Vector {
+    fn local_normal_at(&self, _point: Point, _hit: Option<&Intersection>) -> Vector {
         panic!("Groups do not have surface normals")
     }
 
@@ -195,6 +195,6 @@ mod tests {
     #[should_panic(expected = "Groups do not have surface normals")]
     fn group_local_normal_at_panics() {
         let group = Group { children: vec![] };
-        group.local_normal_at(point(0, 0, 0));
+        group.local_normal_at(point(0, 0, 0), None);
     }
 }

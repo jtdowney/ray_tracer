@@ -12,21 +12,25 @@ mod cube;
 mod cylinder;
 mod group;
 mod plane;
+mod smooth_triangle;
 mod sphere;
+mod triangle;
 
 pub use cone::cone;
 pub use cube::cube;
 pub use cylinder::cylinder;
 pub use group::{Group, group};
 pub use plane::plane;
+pub use smooth_triangle::{SmoothTriangle, smooth_triangle};
 pub use sphere::{glass_sphere, sphere};
+pub use triangle::{Triangle, triangle};
 
 pub type ShapeRef = Rc<RefCell<ShapeInner>>;
 pub type WeakShapeRef = Weak<RefCell<ShapeInner>>;
 
 pub trait Geometry {
     fn local_intersection(&self, shape: &Shape, ray: Ray) -> Vec<Intersection>;
-    fn local_normal_at(&self, point: Point) -> Vector;
+    fn local_normal_at(&self, point: Point, hit: Option<&Intersection>) -> Vector;
     fn as_any(&self) -> &dyn Any;
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -36,7 +40,7 @@ pub struct ShapeInner {
     pub inverse_transform: Matrix4,
     pub material: Material,
     pub parent: Option<WeakShapeRef>,
-    geometry: Box<dyn Geometry>,
+    pub(crate) geometry: Box<dyn Geometry>,
 }
 
 #[derive(Clone)]
@@ -103,7 +107,20 @@ impl Shape {
     }
 
     /// Sets the material for this shape.
+    /// If this shape is a Group, the material is recursively applied to all children.
     pub fn set_material(&self, material: Material) {
+        if let Some(group) = self
+            .inner_ref
+            .borrow()
+            .geometry
+            .as_any()
+            .downcast_ref::<Group>()
+        {
+            for child in group.children() {
+                child.set_material(material.clone());
+            }
+        }
+
         self.inner_ref.borrow_mut().material = material;
     }
 
@@ -163,9 +180,15 @@ impl Shape {
     /// Computes the normal vector at a point on this shape's surface.
     #[must_use]
     pub fn normal_at(&self, world_point: Point) -> Vector {
+        self.normal_at_with_hit(world_point, None)
+    }
+
+    /// Computes the normal vector at a point, with optional intersection data for smooth triangles.
+    #[must_use]
+    pub fn normal_at_with_hit(&self, world_point: Point, hit: Option<&Intersection>) -> Vector {
         let local_point = self.world_to_object(world_point);
         let inner = self.inner_ref.borrow();
-        let local_normal = inner.geometry.local_normal_at(local_point);
+        let local_normal = inner.geometry.local_normal_at(local_point, hit);
         drop(inner);
         self.normal_to_world(local_normal)
     }
@@ -227,7 +250,7 @@ mod tests {
             vec![]
         }
 
-        fn local_normal_at(&self, point: Point) -> Vector {
+        fn local_normal_at(&self, point: Point, _hit: Option<&Intersection>) -> Vector {
             vector(point.x(), point.y(), point.z())
         }
 

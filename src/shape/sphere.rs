@@ -48,17 +48,21 @@ impl Geometry for Sphere {
             intersections.push(Intersection {
                 time: t1,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
             intersections.push(Intersection {
                 time: t2,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
         intersections
     }
 
-    fn local_normal_at(&self, point: Point) -> Vector {
+    fn local_normal_at(&self, point: Point, _hit: Option<&Intersection>) -> Vector {
         point - ORIGIN
     }
 

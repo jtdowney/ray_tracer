@@ -54,6 +54,8 @@ impl Cone {
             xs.push(Intersection {
                 time: t,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
@@ -62,6 +64,8 @@ impl Cone {
             xs.push(Intersection {
                 time: t,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
     }
@@ -87,6 +91,8 @@ impl Geometry for Cone {
                     xs.push(Intersection {
                         time: t,
                         object: shape.clone(),
+                        u: None,
+                        v: None,
                     });
                 }
             }
@@ -109,6 +115,8 @@ impl Geometry for Cone {
             xs.push(Intersection {
                 time: t0,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
@@ -117,6 +125,8 @@ impl Geometry for Cone {
             xs.push(Intersection {
                 time: t1,
                 object: shape.clone(),
+                u: None,
+                v: None,
             });
         }
 
@@ -125,7 +135,7 @@ impl Geometry for Cone {
         xs
     }
 
-    fn local_normal_at(&self, point: Point) -> Vector {
+    fn local_normal_at(&self, point: Point, _hit: Option<&Intersection>) -> Vector {
         let dist = point.x() * point.x() + point.z() * point.z();
         let max_abs = self.maximum.abs();
         let min_abs = self.minimum.abs();
@@ -240,7 +250,7 @@ mod tests {
             maximum: f32::INFINITY,
             closed: false,
         };
-        let n = cone_geom.local_normal_at(point(0, 0, 0));
+        let n = cone_geom.local_normal_at(point(0, 0, 0), None);
         assert_eq!(n, vector(0, 0, 0));
     }
 

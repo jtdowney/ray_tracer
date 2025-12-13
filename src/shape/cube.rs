@@ -63,16 +63,20 @@ impl Geometry for Cube {
                 Intersection {
                     time: tmin,
                     object: shape.clone(),
+                    u: None,
+                    v: None,
                 },
                 Intersection {
                     time: tmax,
                     object: shape.clone(),
+                    u: None,
+                    v: None,
                 },
             ]
         }
     }
 
-    fn local_normal_at(&self, point: Point) -> Vector {
+    fn local_normal_at(&self, point: Point, _hit: Option<&Intersection>) -> Vector {
         let abs_x = point.x().abs();
         let abs_y = point.y().abs();
         let abs_z = point.z().abs();

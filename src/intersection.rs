@@ -8,6 +8,22 @@ pub fn intersection(t: impl AsPrimitive<f32>, object: Shape) -> Intersection {
     Intersection {
         time: t.as_(),
         object,
+        u: None,
+        v: None,
+    }
+}
+
+pub fn intersection_with_uv(
+    t: impl AsPrimitive<f32>,
+    object: Shape,
+    u: f32,
+    v: f32,
+) -> Intersection {
+    Intersection {
+        time: t.as_(),
+        object,
+        u: Some(u),
+        v: Some(v),
     }
 }
 
@@ -24,6 +40,8 @@ where
 pub struct Intersection {
     pub time: f32,
     pub object: Shape,
+    pub u: Option<f32>,
+    pub v: Option<f32>,
 }
 
 impl PartialEq for Intersection {
@@ -37,7 +55,7 @@ impl Intersection {
     pub fn prepare_computations(&self, ray: Ray, xs: &[Intersection]) -> Computations {
         let point = ray.position(self.time);
         let eyev = -ray.direction;
-        let normalv = self.object.normal_at(point);
+        let normalv = self.object.normal_at_with_hit(point, Some(self));
         let inside = normalv.dot(&eyev) < 0.0;
         let normalv = if inside { -normalv } else { normalv };
         let over_point = point + normalv * EPSILON;
@@ -130,7 +148,7 @@ mod tests {
     use super::*;
     use crate::{
         EPSILON, Material, point, ray,
-        shape::{glass_sphere, plane, sphere},
+        shape::{glass_sphere, plane, sphere, triangle},
         transform, vector,
     };
 
@@ -337,5 +355,13 @@ mod tests {
         let comps = xs[0].prepare_computations(r, &xs);
         let reflectance = schlick(&comps);
         assert_relative_eq!(reflectance, 0.48873, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn intersection_can_encapsulate_u_and_v() {
+        let s = triangle(point(0, 1, 0), point(-1, 0, 0), point(1, 0, 0)).build();
+        let i = intersection_with_uv(3.5, s, 0.2, 0.4);
+        assert_relative_eq!(i.u.unwrap(), 0.2, epsilon = EPSILON);
+        assert_relative_eq!(i.v.unwrap(), 0.4, epsilon = EPSILON);
     }
 }
