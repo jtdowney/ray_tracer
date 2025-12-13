@@ -8,3 +8,30 @@ anyhow = "1"
 approx = "0.5.1"
 bon = "3"
 ord_subset = "3"
+
+[dev-dependencies]
+criterion = { version = "0.8", features = ["html_reports"] }
+
+[[bench]]
+name = "vector"
+harness = false
+
+[[bench]]
+name = "matrix"
+harness = false
+
+[[bench]]
+name = "intersection"
+harness = false
+
+[[bench]]
+name = "lighting"
+harness = false
+
+[[bench]]
+name = "world"
+harness = false
+
+[[bench]]
+name = "render"
+harness = false

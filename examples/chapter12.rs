@@ -211,7 +211,7 @@ fn main() -> Result<()> {
         ))
         .build();
 
-    let canvas = camera.render(&world);
+    let canvas = camera.render(&world)?;
     let ppm = canvas.to_ppm()?;
     print!("{ppm}");
 
