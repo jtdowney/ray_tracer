@@ -16,8 +16,8 @@ use crate::{
 pub fn cylinder(
     #[builder(default = identity_matrix())] transform: Matrix4,
     #[builder(default = material(), into)] material: Material,
-    #[builder(default = f64::NEG_INFINITY)] minimum: f64,
-    #[builder(default = f64::INFINITY)] maximum: f64,
+    #[builder(default = f32::NEG_INFINITY)] minimum: f32,
+    #[builder(default = f32::INFINITY)] maximum: f32,
     #[builder(default = false)] closed: bool,
 ) -> Shape {
     let shape = Shape::new(Cylinder {
@@ -31,16 +31,16 @@ pub fn cylinder(
 }
 
 pub struct Cylinder {
-    pub minimum: f64,
-    pub maximum: f64,
+    pub minimum: f32,
+    pub maximum: f32,
     pub closed: bool,
 }
 
 impl Cylinder {
-    fn check_cap(ray: Ray, t: f64) -> bool {
+    fn check_cap(ray: Ray, t: f32) -> bool {
         let x = ray.origin.x + t * ray.direction.x;
         let z = ray.origin.z + t * ray.direction.z;
-        (x.powi(2) + z.powi(2)) <= 1.0
+        (x.powi(2) + z.powi(2)) <= 1.0 + EPSILON
     }
 
     fn intersect_caps(&self, shape: &Shape, ray: Ray, xs: &mut Vec<Intersection>) {
@@ -80,10 +80,10 @@ impl Geometry for Cylinder {
         let b = 2.0 * ray.origin.x * ray.direction.x + 2.0 * ray.origin.z * ray.direction.z;
         let c = ray.origin.x.powi(2) + ray.origin.z.powi(2) - 1.0;
 
-        let discriminant = b.powi(2) - 4.0 * a * c;
-        if discriminant < 0.0 {
-            return xs;
-        }
+        let discriminant = match b.powi(2) - 4.0 * a * c {
+            d if d < -EPSILON => return xs,
+            d => d.max(0.0),
+        };
 
         let mut t0 = (-b - discriminant.sqrt()) / (2.0 * a);
         let mut t1 = (-b + discriminant.sqrt()) / (2.0 * a);
@@ -232,8 +232,8 @@ mod tests {
     #[test]
     fn default_minimum_and_maximum() {
         let cyl = Cylinder {
-            minimum: f64::NEG_INFINITY,
-            maximum: f64::INFINITY,
+            minimum: f32::NEG_INFINITY,
+            maximum: f32::INFINITY,
             closed: false,
         };
         assert!(cyl.minimum.is_infinite() && cyl.minimum.is_sign_negative());
@@ -297,8 +297,8 @@ mod tests {
     #[test]
     fn default_closed_value() {
         let cyl = Cylinder {
-            minimum: f64::NEG_INFINITY,
-            maximum: f64::INFINITY,
+            minimum: f32::NEG_INFINITY,
+            maximum: f32::INFINITY,
             closed: false,
         };
         assert!(!cyl.closed);

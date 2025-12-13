@@ -8,7 +8,7 @@ fn main() -> Result<()> {
     let canvas_pixels: usize = 100;
 
     #[allow(clippy::cast_precision_loss)]
-    let pixel_size = wall_size / canvas_pixels as f64;
+    let pixel_size = wall_size / canvas_pixels as f32;
     let half = wall_size / 2.0;
 
     let mut c = canvas(canvas_pixels, canvas_pixels);
@@ -25,10 +25,10 @@ fn main() -> Result<()> {
         clippy::cast_precision_loss
     )]
     for y in 0..canvas_pixels {
-        let world_y = half - pixel_size * y as f64;
+        let world_y = half - pixel_size * y as f32;
 
         for x in 0..canvas_pixels {
-            let world_x = -half + pixel_size * x as f64;
+            let world_x = -half + pixel_size * x as f32;
             let position = point(world_x, world_y, wall_z);
             let direction = (position - ray_origin).normalize();
             let r = ray(ray_origin, direction);

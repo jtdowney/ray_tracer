@@ -1,4 +1,4 @@
-use std::f64::consts::{FRAC_PI_2, FRAC_PI_3};
+use std::f32::consts::{FRAC_PI_2, FRAC_PI_3};
 
 use anyhow::Result;
 use ray_tracer::{
@@ -35,7 +35,7 @@ fn main() -> Result<()> {
                 .color(color(0.05, 0.05, 0.05))
                 .diffuse(0.1)
                 .specular(1.0)
-                .shininess(300)
+                .shininess(300.0)
                 .reflective(0.9)
                 .transparency(0.9)
                 .refractive_index(1.5),
@@ -50,7 +50,7 @@ fn main() -> Result<()> {
                 .ambient(0.5)
                 .diffuse(0.9)
                 .specular(0.9)
-                .shininess(200),
+                .shininess(200.0),
         )
         .build();
 
@@ -61,7 +61,7 @@ fn main() -> Result<()> {
                 .color(color(0.1, 0.1, 0.8))
                 .diffuse(0.9)
                 .specular(0.9)
-                .shininess(200)
+                .shininess(200.0)
                 .reflective(0.1),
         )
         .build();
@@ -73,7 +73,7 @@ fn main() -> Result<()> {
                 .color(color(0.1, 0.6, 0.1))
                 .diffuse(0.9)
                 .specular(0.9)
-                .shininess(200)
+                .shininess(200.0)
                 .reflective(0.1),
         )
         .build();

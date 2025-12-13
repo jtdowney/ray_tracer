@@ -1,4 +1,4 @@
-use std::f64::consts::FRAC_PI_2;
+use std::f32::consts::FRAC_PI_2;
 
 use bon::builder;
 
@@ -7,15 +7,15 @@ use crate::{
 };
 
 #[must_use]
-#[builder(finish_fn = build, on(f64, into))]
+#[builder(finish_fn = build)]
 pub fn camera(
     #[builder(start_fn)] horizontal_size: u16,
     #[builder(start_fn)] vertical_size: u16,
-    #[builder(default = FRAC_PI_2)] field_of_view: f64,
+    #[builder(default = FRAC_PI_2)] field_of_view: f32,
     #[builder(default = identity_matrix())] transform: Matrix4,
 ) -> Camera {
     let half_view = (field_of_view / 2.0).tan();
-    let aspect = f64::from(horizontal_size) / f64::from(vertical_size);
+    let aspect = f32::from(horizontal_size) / f32::from(vertical_size);
 
     let half_width;
     let half_height;
@@ -27,7 +27,7 @@ pub fn camera(
         half_height = half_view;
     }
 
-    let pixel_size = (half_width * 2.0) / f64::from(horizontal_size);
+    let pixel_size = (half_width * 2.0) / f32::from(horizontal_size);
 
     Camera {
         width: horizontal_size,
@@ -44,11 +44,11 @@ pub fn camera(
 pub struct Camera {
     pub width: u16,
     pub height: u16,
-    pub field_of_view: f64,
+    pub field_of_view: f32,
     pub transform: Matrix4,
-    pub pixel_size: f64,
-    pub half_width: f64,
-    pub half_height: f64,
+    pub pixel_size: f32,
+    pub half_width: f32,
+    pub half_height: f32,
 }
 
 impl Camera {
@@ -56,8 +56,8 @@ impl Camera {
     /// Panics if the camera's transform matrix is not invertible.
     #[must_use]
     pub fn ray_for_pixel(&self, px: u16, py: u16) -> Ray {
-        let x_offset = (f64::from(px) + 0.5) * self.pixel_size;
-        let y_offset = (f64::from(py) + 0.5) * self.pixel_size;
+        let x_offset = (f32::from(px) + 0.5) * self.pixel_size;
+        let y_offset = (f32::from(py) + 0.5) * self.pixel_size;
 
         let world_x = self.half_width - x_offset;
         let world_y = self.half_height - y_offset;
@@ -92,7 +92,7 @@ impl Camera {
 
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::{FRAC_PI_2, FRAC_PI_4};
+    use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
 
     use approx::assert_relative_eq;
 
@@ -154,7 +154,7 @@ mod tests {
             .transform(transform::rotation_y(FRAC_PI_4) * transform::translation(0, -2, 5))
             .build();
         let r = c.ray_for_pixel(100, 50);
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         assert_relative_eq!(r.origin.x, 0.0, epsilon = EPSILON);
         assert_relative_eq!(r.origin.y, 2.0, epsilon = EPSILON);
         assert_relative_eq!(r.origin.z, -5.0, epsilon = EPSILON);

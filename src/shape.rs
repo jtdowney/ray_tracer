@@ -201,7 +201,7 @@ impl<G: Geometry + 'static> From<G> for Shape {
 
 #[cfg(test)]
 mod tests {
-    use std::{any::Any, cell::RefCell, f64::consts::FRAC_1_SQRT_2, rc::Rc};
+    use std::{any::Any, cell::RefCell, f32::consts::FRAC_1_SQRT_2, rc::Rc};
 
     use approx::assert_relative_eq;
 
@@ -319,7 +319,7 @@ mod tests {
     fn computing_normal_on_transformed_shape() {
         let (s, _) = test_shape();
         let m =
-            transform::scaling(1.0, 0.5, 1.0) * transform::rotation_z(std::f64::consts::PI / 5.0);
+            transform::scaling(1.0, 0.5, 1.0) * transform::rotation_z(std::f32::consts::PI / 5.0);
         s.set_transform(m);
         let sqrt2_over_2 = FRAC_1_SQRT_2;
         let n = s.normal_at(point(0.0, sqrt2_over_2, -sqrt2_over_2));

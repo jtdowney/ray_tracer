@@ -432,6 +432,7 @@ dependencies = [
  "approx",
  "bon",
  "criterion",
+ "num-traits",
  "ord_subset",
 ]
 

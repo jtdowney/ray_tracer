@@ -12,24 +12,24 @@ pub fn material() -> Material {
 }
 
 #[derive(Builder, Clone)]
-#[builder(on(f64, into), derive(Into))]
+#[builder(derive(Into))]
 pub struct Material {
     #[builder(default = WHITE)]
     pub color: Color,
     #[builder(default = 0.1)]
-    pub ambient: f64,
+    pub ambient: f32,
     #[builder(default = 0.9)]
-    pub diffuse: f64,
+    pub diffuse: f32,
     #[builder(default = 0.9)]
-    pub specular: f64,
+    pub specular: f32,
     #[builder(default = 200.0)]
-    pub shininess: f64,
+    pub shininess: f32,
     #[builder(default = 0.0)]
-    pub reflective: f64,
+    pub reflective: f32,
     #[builder(default = 0.0)]
-    pub transparency: f64,
+    pub transparency: f32,
     #[builder(default = 1.0)]
-    pub refractive_index: f64,
+    pub refractive_index: f32,
     pub pattern: Option<Pattern>,
 }
 
@@ -52,10 +52,10 @@ impl std::fmt::Debug for Material {
 impl PartialEq for Material {
     fn eq(&self, other: &Self) -> bool {
         self.color == other.color
-            && (self.ambient - other.ambient).abs() < f64::EPSILON
-            && (self.diffuse - other.diffuse).abs() < f64::EPSILON
-            && (self.specular - other.specular).abs() < f64::EPSILON
-            && (self.shininess - other.shininess).abs() < f64::EPSILON
+            && (self.ambient - other.ambient).abs() < f32::EPSILON
+            && (self.diffuse - other.diffuse).abs() < f32::EPSILON
+            && (self.specular - other.specular).abs() < f32::EPSILON
+            && (self.shininess - other.shininess).abs() < f32::EPSILON
     }
 }
 
@@ -154,7 +154,7 @@ mod tests {
         let m = material();
         let object = sphere().build();
         let position = point(0, 0, 0);
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let eyev = vector(0.0, sqrt2_over_2, -sqrt2_over_2);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 0, -10), color(1, 1, 1));
@@ -183,7 +183,7 @@ mod tests {
         let m = material();
         let object = sphere().build();
         let position = point(0, 0, 0);
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let eyev = vector(0.0, -sqrt2_over_2, -sqrt2_over_2);
         let normalv = vector(0, 0, -1);
         let light = point_light(point(0, 10, -10), color(1, 1, 1));
@@ -226,9 +226,9 @@ mod tests {
     fn lighting_with_pattern_applied() {
         let m = Material::builder()
             .pattern(stripe_pattern(color(1, 1, 1), color(0, 0, 0)).build())
-            .ambient(1)
-            .diffuse(0)
-            .specular(0)
+            .ambient(1.0)
+            .diffuse(0.0)
+            .specular(0.0)
             .build();
         let object = sphere().build();
         let eyev = vector(0, 0, -1);

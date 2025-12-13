@@ -1,4 +1,4 @@
-use std::{f64::consts::FRAC_PI_3, hint};
+use std::{f32::consts::FRAC_PI_3, hint};
 
 use criterion::{Criterion, criterion_group, criterion_main};
 use ray_tracer::{REFLECTION_DEPTH, camera, default_world, point, ray, transform, vector};

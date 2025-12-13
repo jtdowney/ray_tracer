@@ -16,8 +16,8 @@ use crate::{
 pub fn cone(
     #[builder(default = identity_matrix())] transform: Matrix4,
     #[builder(default = material(), into)] material: Material,
-    #[builder(default = f64::NEG_INFINITY)] minimum: f64,
-    #[builder(default = f64::INFINITY)] maximum: f64,
+    #[builder(default = f32::NEG_INFINITY)] minimum: f32,
+    #[builder(default = f32::INFINITY)] maximum: f32,
     #[builder(default = false)] closed: bool,
 ) -> Shape {
     let shape = Shape::new(Cone {
@@ -31,13 +31,13 @@ pub fn cone(
 }
 
 pub struct Cone {
-    pub minimum: f64,
-    pub maximum: f64,
+    pub minimum: f32,
+    pub maximum: f32,
     pub closed: bool,
 }
 
 impl Cone {
-    fn check_cap(ray: Ray, t: f64, y: f64) -> bool {
+    fn check_cap(ray: Ray, t: f32, y: f32) -> bool {
         let x = ray.origin.x + t * ray.direction.x;
         let z = ray.origin.z + t * ray.direction.z;
         (x.powi(2) + z.powi(2)) <= y.abs().powi(2)
@@ -91,10 +91,10 @@ impl Geometry for Cone {
             return xs;
         }
 
-        let discriminant = b.powi(2) - 4.0 * a * c;
-        if discriminant < 0.0 {
-            return xs;
-        }
+        let discriminant = match b.powi(2) - 4.0 * a * c {
+            d if d < -EPSILON => return xs,
+            d => d.max(0.0),
+        };
 
         let t0 = (-b - discriminant.sqrt()) / (2.0 * a);
         let t1 = (-b + discriminant.sqrt()) / (2.0 * a);
@@ -231,8 +231,8 @@ mod tests {
     #[test]
     fn normal_on_cone_at_origin() {
         let cone_geom = Cone {
-            minimum: f64::NEG_INFINITY,
-            maximum: f64::INFINITY,
+            minimum: f32::NEG_INFINITY,
+            maximum: f32::INFINITY,
             closed: false,
         };
         let n = cone_geom.local_normal_at(point(0, 0, 0));
@@ -243,7 +243,7 @@ mod tests {
     fn normal_on_cone_positive_y() {
         let shape = cone().build();
         let n = shape.normal_at(point(1, 1, 1));
-        let sqrt2 = 2.0_f64.sqrt();
+        let sqrt2 = 2.0_f32.sqrt();
         assert_relative_eq!(n.x, 0.5, epsilon = EPSILON);
         assert_relative_eq!(n.y, -sqrt2 / 2.0, epsilon = EPSILON);
         assert_relative_eq!(n.z, 0.5, epsilon = EPSILON);
@@ -253,7 +253,7 @@ mod tests {
     fn normal_on_cone_negative_y() {
         let shape = cone().build();
         let n = shape.normal_at(point(-1, -1, 0));
-        let sqrt2 = 2.0_f64.sqrt();
+        let sqrt2 = 2.0_f32.sqrt();
         assert_relative_eq!(n.x, -1.0 / sqrt2, epsilon = EPSILON);
         assert_relative_eq!(n.y, 1.0 / sqrt2, epsilon = EPSILON);
         assert_relative_eq!(n.z, 0.0, epsilon = EPSILON);

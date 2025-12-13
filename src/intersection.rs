@@ -1,14 +1,12 @@
 use approx::relative_eq;
+use num_traits::AsPrimitive;
 use ord_subset::OrdSubsetIterExt;
 
 use crate::{EPSILON, Point, Ray, Vector, shape::Shape};
 
-pub fn intersection<T>(t: T, object: Shape) -> Intersection
-where
-    T: Into<f64>,
-{
+pub fn intersection(t: impl AsPrimitive<f32>, object: Shape) -> Intersection {
     Intersection {
-        time: t.into(),
+        time: t.as_(),
         object,
     }
 }
@@ -24,7 +22,7 @@ where
 
 #[derive(Clone)]
 pub struct Intersection {
-    pub time: f64,
+    pub time: f32,
     pub object: Shape,
 }
 
@@ -93,7 +91,7 @@ impl Intersection {
 }
 
 pub struct Computations {
-    pub time: f64,
+    pub time: f32,
     pub object: Shape,
     pub point: Point,
     pub over_point: Point,
@@ -101,13 +99,13 @@ pub struct Computations {
     pub eyev: Vector,
     pub normalv: Vector,
     pub reflectv: Vector,
-    pub n1: f64,
-    pub n2: f64,
+    pub n1: f32,
+    pub n2: f32,
     pub inside: bool,
 }
 
 #[must_use]
-pub fn schlick(comps: &Computations) -> f64 {
+pub fn schlick(comps: &Computations) -> f32 {
     let mut cos = comps.eyev.dot(&comps.normalv);
 
     if comps.n1 > comps.n2 {
@@ -243,10 +241,10 @@ mod tests {
 
     #[test]
     fn precomputing_reflection_vector() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let shape = plane().build();
         let r = ray(point(0, 1, -1), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
-        let i = intersection(2.0_f64.sqrt(), shape);
+        let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         assert_relative_eq!(comps.reflectv.x, 0.0, epsilon = EPSILON);
         assert_relative_eq!(comps.reflectv.y, sqrt2_over_2, epsilon = EPSILON);
@@ -309,7 +307,7 @@ mod tests {
 
     #[test]
     fn schlick_approximation_under_total_internal_reflection() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let shape = glass_sphere();
         let r = ray(point(0.0, 0.0, sqrt2_over_2), vector(0, 1, 0));
         let xs = [

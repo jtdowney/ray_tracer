@@ -63,7 +63,7 @@ impl Group {
 
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::FRAC_PI_2;
+    use std::f32::consts::FRAC_PI_2;
 
     use approx::assert_relative_eq;
 
@@ -169,7 +169,7 @@ mod tests {
         let s = sphere().transform(transform::translation(5, 0, 0)).build();
         g2.add_child(s.clone());
 
-        let sqrt3_over_3 = 3.0_f64.sqrt() / 3.0;
+        let sqrt3_over_3 = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_to_world(vector(sqrt3_over_3, sqrt3_over_3, sqrt3_over_3));
         assert_relative_eq!(n.x, 0.2857, epsilon = EPSILON);
         assert_relative_eq!(n.y, 0.4286, epsilon = EPSILON);

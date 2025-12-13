@@ -1,4 +1,4 @@
-use std::{f64::consts::PI, hint};
+use std::{f32::consts::PI, hint};
 
 use criterion::{Criterion, criterion_group, criterion_main};
 use ray_tracer::{point, transform, vector};

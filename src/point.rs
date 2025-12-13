@@ -1,5 +1,7 @@
 use std::ops::{Add, Sub};
 
+use num_traits::AsPrimitive;
+
 use crate::Vector;
 
 pub const ORIGIN: Point = Point {
@@ -8,19 +10,23 @@ pub const ORIGIN: Point = Point {
     z: 0.0,
 };
 
-pub fn point(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> Point {
+pub fn point(
+    x: impl AsPrimitive<f32>,
+    y: impl AsPrimitive<f32>,
+    z: impl AsPrimitive<f32>,
+) -> Point {
     Point {
-        x: x.into(),
-        y: y.into(),
-        z: z.into(),
+        x: x.as_(),
+        y: y.as_(),
+        z: z.as_(),
     }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Point {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 impl Sub for Point {

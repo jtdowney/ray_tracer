@@ -1,23 +1,29 @@
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
-pub fn vector(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> Vector {
+use num_traits::AsPrimitive;
+
+pub fn vector(
+    x: impl AsPrimitive<f32>,
+    y: impl AsPrimitive<f32>,
+    z: impl AsPrimitive<f32>,
+) -> Vector {
     Vector {
-        x: x.into(),
-        y: y.into(),
-        z: z.into(),
+        x: x.as_(),
+        y: y.as_(),
+        z: z.as_(),
     }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vector {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
 }
 
 impl Vector {
     #[must_use]
-    pub fn magnitude(&self) -> f64 {
+    pub fn magnitude(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
 
@@ -37,7 +43,7 @@ impl Vector {
     }
 
     #[must_use]
-    pub fn dot(&self, other: &Vector) -> f64 {
+    pub fn dot(&self, other: &Vector) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
@@ -87,10 +93,10 @@ impl Neg for Vector {
     }
 }
 
-impl Mul<f64> for Vector {
+impl Mul<f32> for Vector {
     type Output = Vector;
 
-    fn mul(self, rhs: f64) -> Self::Output {
+    fn mul(self, rhs: f32) -> Self::Output {
         Vector {
             x: self.x * rhs,
             y: self.y * rhs,
@@ -99,10 +105,10 @@ impl Mul<f64> for Vector {
     }
 }
 
-impl Div<f64> for Vector {
+impl Div<f32> for Vector {
     type Output = Vector;
 
-    fn div(self, rhs: f64) -> Self::Output {
+    fn div(self, rhs: f32) -> Self::Output {
         Vector {
             x: self.x / rhs,
             y: self.y / rhs,
@@ -191,13 +197,13 @@ mod tests {
     #[test]
     fn magnitude_of_vector_1_2_3() {
         let v = vector(1, 2, 3);
-        assert_relative_eq!(v.magnitude(), 14.0_f64.sqrt());
+        assert_relative_eq!(v.magnitude(), 14.0_f32.sqrt());
     }
 
     #[test]
     fn magnitude_of_negative_vector() {
         let v = vector(-1, -2, -3);
-        assert_relative_eq!(v.magnitude(), 14.0_f64.sqrt());
+        assert_relative_eq!(v.magnitude(), 14.0_f32.sqrt());
     }
 
     #[test]
@@ -210,7 +216,7 @@ mod tests {
     fn normalizing_vector_1_2_3() {
         let v = vector(1, 2, 3);
         let norm = v.normalize();
-        let sqrt14 = 14.0_f64.sqrt();
+        let sqrt14 = 14.0_f32.sqrt();
         assert_relative_eq!(norm.x, 1.0 / sqrt14);
         assert_relative_eq!(norm.y, 2.0 / sqrt14);
         assert_relative_eq!(norm.z, 3.0 / sqrt14);
@@ -249,7 +255,7 @@ mod tests {
     #[test]
     fn reflecting_vector_off_slanted_surface() {
         let v = vector(0, -1, 0);
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let n = vector(sqrt2_over_2, sqrt2_over_2, 0);
         let r = v.reflect(&n);
         assert_relative_eq!(r.x, 1.0, epsilon = crate::EPSILON);

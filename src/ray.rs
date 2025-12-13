@@ -1,3 +1,5 @@
+use num_traits::AsPrimitive;
+
 use crate::{Matrix4, Point, Vector};
 
 #[must_use]
@@ -12,8 +14,8 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn position(self, t: impl Into<f64>) -> Point {
-        self.origin + self.direction * t.into()
+    pub fn position(self, t: impl AsPrimitive<f32>) -> Point {
+        self.origin + self.direction * t.as_()
     }
 
     #[must_use]

@@ -73,7 +73,7 @@ impl Geometry for Sphere {
 
 #[cfg(test)]
 mod tests {
-    use std::f64::consts::FRAC_1_SQRT_2;
+    use std::f32::consts::FRAC_1_SQRT_2;
 
     use approx::assert_relative_eq;
 
@@ -197,7 +197,7 @@ mod tests {
     #[test]
     fn normal_on_sphere_at_nonaxial_point() {
         let s = sphere().build();
-        let sqrt3_over_3 = 3.0_f64.sqrt() / 3.0;
+        let sqrt3_over_3 = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_at(point(sqrt3_over_3, sqrt3_over_3, sqrt3_over_3));
         assert_relative_eq!(n.x, sqrt3_over_3, epsilon = EPSILON);
         assert_relative_eq!(n.y, sqrt3_over_3, epsilon = EPSILON);
@@ -207,7 +207,7 @@ mod tests {
     #[test]
     fn normal_is_normalized_vector() {
         let s = sphere().build();
-        let sqrt3_over_3 = 3.0_f64.sqrt() / 3.0;
+        let sqrt3_over_3 = 3.0_f32.sqrt() / 3.0;
         let n = s.normal_at(point(sqrt3_over_3, sqrt3_over_3, sqrt3_over_3));
         assert_relative_eq!(n.x, n.normalize().x, epsilon = EPSILON);
         assert_relative_eq!(n.y, n.normalize().y, epsilon = EPSILON);
@@ -226,9 +226,9 @@ mod tests {
     #[test]
     fn computing_normal_on_transformed_sphere() {
         let t =
-            transform::scaling(1.0, 0.5, 1.0) * transform::rotation_z(std::f64::consts::PI / 5.0);
+            transform::scaling(1.0, 0.5, 1.0) * transform::rotation_z(std::f32::consts::PI / 5.0);
         let s = sphere().transform(t).build();
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let n = s.normal_at(point(0.0, sqrt2_over_2, -sqrt2_over_2));
         assert_relative_eq!(n.x, 0.0, epsilon = EPSILON);
         assert_relative_eq!(n.y, 0.97014, epsilon = EPSILON);

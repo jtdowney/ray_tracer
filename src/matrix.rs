@@ -1,12 +1,14 @@
 use std::ops::{Index, IndexMut, Mul};
 
+use num_traits::AsPrimitive;
+
 use crate::{Point, Vector, point, vector};
 
-pub fn matrix<const N: usize, T: Into<f64> + Copy>(data: [[T; N]; N]) -> Matrix<N> {
+pub fn matrix<const N: usize, T: AsPrimitive<f32> + Copy>(data: [[T; N]; N]) -> Matrix<N> {
     let mut values = [[0.0; N]; N];
     for i in 0..N {
         for j in 0..N {
-            values[i][j] = data[i][j].into();
+            values[i][j] = data[i][j].as_();
         }
     }
 
@@ -25,7 +27,7 @@ pub fn identity_matrix<const N: usize>() -> Matrix<N> {
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Matrix<const N: usize> {
-    values: [[f64; N]; N],
+    values: [[f32; N]; N],
 }
 
 pub type Matrix2 = Matrix<2>;
@@ -40,7 +42,7 @@ impl<const N: usize> Default for Matrix<N> {
 }
 
 impl<const N: usize> Index<(usize, usize)> for Matrix<N> {
-    type Output = f64;
+    type Output = f32;
 
     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
         &self.values[row][col]
@@ -53,8 +55,8 @@ impl<const N: usize> IndexMut<(usize, usize)> for Matrix<N> {
     }
 }
 
-impl<const N: usize> FromIterator<f64> for Matrix<N> {
-    fn from_iter<T: IntoIterator<Item = f64>>(iter: T) -> Self {
+impl<const N: usize> FromIterator<f32> for Matrix<N> {
+    fn from_iter<T: IntoIterator<Item = f32>>(iter: T) -> Self {
         let mut result = Matrix::default();
         for (offset, value) in iter.into_iter().enumerate() {
             let i = offset / N;
@@ -82,7 +84,7 @@ impl<const N: usize> Matrix<N> {
 
 impl Matrix2 {
     #[must_use]
-    pub fn determinant(&self) -> f64 {
+    pub fn determinant(&self) -> f32 {
         self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]
     }
 }
@@ -97,12 +99,12 @@ impl Matrix3 {
     }
 
     #[must_use]
-    pub fn minor(&self, row: usize, col: usize) -> f64 {
+    pub fn minor(&self, row: usize, col: usize) -> f32 {
         self.submatrix(row, col).determinant()
     }
 
     #[must_use]
-    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let minor = self.minor(row, col);
         if (row + col).is_multiple_of(2) {
             minor
@@ -112,7 +114,7 @@ impl Matrix3 {
     }
 
     #[must_use]
-    pub fn determinant(&self) -> f64 {
+    pub fn determinant(&self) -> f32 {
         let row = self.values[0];
         (0..3).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }
@@ -128,12 +130,12 @@ impl Matrix4 {
     }
 
     #[must_use]
-    pub fn minor(&self, row: usize, col: usize) -> f64 {
+    pub fn minor(&self, row: usize, col: usize) -> f32 {
         self.submatrix(row, col).determinant()
     }
 
     #[must_use]
-    pub fn cofactor(&self, row: usize, col: usize) -> f64 {
+    pub fn cofactor(&self, row: usize, col: usize) -> f32 {
         let minor = self.minor(row, col);
         if (row + col).is_multiple_of(2) {
             minor
@@ -143,7 +145,7 @@ impl Matrix4 {
     }
 
     #[must_use]
-    pub fn determinant(&self) -> f64 {
+    pub fn determinant(&self) -> f32 {
         let row = self.values[0];
         (0..4).zip(row).map(|(i, n)| n * self.cofactor(0, i)).sum()
     }

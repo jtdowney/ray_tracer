@@ -1,4 +1,4 @@
-use std::f64::consts::{FRAC_PI_2, FRAC_PI_3};
+use std::f32::consts::{FRAC_PI_2, FRAC_PI_3};
 
 use anyhow::Result;
 use ray_tracer::{

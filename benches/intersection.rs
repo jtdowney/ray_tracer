@@ -53,9 +53,7 @@ fn hit_benchmarks(c: &mut Criterion) {
         intersection(2.0, sphere.clone()),
     ];
 
-    let intersections_many: Vec<_> = (0..10)
-        .map(|i| intersection(f64::from(i), sphere.clone()))
-        .collect();
+    let intersections_many: Vec<_> = (0..10).map(|i| intersection(i, sphere.clone())).collect();
 
     group.bench_function("hit_few", |b| {
         b.iter(|| hit(hint::black_box(intersections_few.clone())));
@@ -96,5 +94,10 @@ fn normal_benchmarks(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, intersection_benchmarks, hit_benchmarks, normal_benchmarks);
+criterion_group!(
+    benches,
+    intersection_benchmarks,
+    hit_benchmarks,
+    normal_benchmarks
+);
 criterion_main!(benches);

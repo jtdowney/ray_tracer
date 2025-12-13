@@ -1,4 +1,4 @@
-use std::f64::consts::{FRAC_PI_3, FRAC_PI_6};
+use std::f32::consts::{FRAC_PI_3, FRAC_PI_6};
 
 use anyhow::Result;
 use ray_tracer::{
@@ -48,9 +48,10 @@ fn hexagon_side() -> Shape {
 fn hexagon() -> Shape {
     let hex = group().build();
 
+    #[allow(clippy::cast_precision_loss)]
     for n in 0..6 {
         let side = hexagon_side();
-        side.set_transform(transform::rotation_y(f64::from(n) * FRAC_PI_3));
+        side.set_transform(transform::rotation_y(n as f32 * FRAC_PI_3));
         hex.add_child(side);
     }
 

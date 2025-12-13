@@ -1,5 +1,7 @@
 use std::ops::{Add, Mul, Sub};
 
+use num_traits::AsPrimitive;
+
 pub const BLACK: Color = Color {
     red: 0.0,
     green: 0.0,
@@ -18,19 +20,23 @@ pub const RED: Color = Color {
     blue: 0.0,
 };
 
-pub fn color(red: impl Into<f64>, green: impl Into<f64>, blue: impl Into<f64>) -> Color {
+pub fn color(
+    red: impl AsPrimitive<f32>,
+    green: impl AsPrimitive<f32>,
+    blue: impl AsPrimitive<f32>,
+) -> Color {
     Color {
-        red: red.into(),
-        green: green.into(),
-        blue: blue.into(),
+        red: red.as_(),
+        green: green.as_(),
+        blue: blue.as_(),
     }
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Color {
-    pub red: f64,
-    pub green: f64,
-    pub blue: f64,
+    pub red: f32,
+    pub green: f32,
+    pub blue: f32,
 }
 
 impl Add for Color {
@@ -57,10 +63,10 @@ impl Sub for Color {
     }
 }
 
-impl Mul<f64> for Color {
+impl Mul<f32> for Color {
     type Output = Color;
 
-    fn mul(self, rhs: f64) -> Self::Output {
+    fn mul(self, rhs: f32) -> Self::Output {
         Color {
             red: self.red * rhs,
             green: self.green * rhs,

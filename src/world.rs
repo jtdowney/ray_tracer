@@ -316,7 +316,7 @@ mod tests {
 
     #[test]
     fn reflected_color_for_reflective_material() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let mut w = default_world();
         let shape = plane()
             .material(Material::builder().reflective(0.5))
@@ -324,7 +324,7 @@ mod tests {
             .build();
         w.objects.push(shape.clone());
         let r = ray(point(0, 0, -3), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
-        let i = intersection(2.0_f64.sqrt(), shape);
+        let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.reflected_color(&comps, 5);
         assert_relative_eq!(c.red, 0.19032, epsilon = EPSILON);
@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     fn shade_hit_with_reflective_material() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let mut w = default_world();
         let shape = plane()
             .material(Material::builder().reflective(0.5))
@@ -342,7 +342,7 @@ mod tests {
             .build();
         w.objects.push(shape.clone());
         let r = ray(point(0, 0, -3), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
-        let i = intersection(2.0_f64.sqrt(), shape);
+        let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.shade_hit(&comps, 5);
         assert_relative_eq!(c.red, 0.87677, epsilon = EPSILON);
@@ -356,11 +356,11 @@ mod tests {
             .light(point_light(point(0, 0, 0), color(1, 1, 1)))
             .objects(vec![
                 plane()
-                    .material(Material::builder().reflective(1))
+                    .material(Material::builder().reflective(1.0))
                     .transform(transform::translation(0, -1, 0))
                     .build(),
                 plane()
-                    .material(Material::builder().reflective(1))
+                    .material(Material::builder().reflective(1.0))
                     .transform(transform::translation(0, 1, 0))
                     .build(),
             ])
@@ -372,7 +372,7 @@ mod tests {
 
     #[test]
     fn reflected_color_at_maximum_recursive_depth() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let mut w = default_world();
         let shape = plane()
             .material(Material::builder().reflective(0.5))
@@ -380,7 +380,7 @@ mod tests {
             .build();
         w.objects.push(shape.clone());
         let r = ray(point(0, 0, -3), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
-        let i = intersection(2.0_f64.sqrt(), shape);
+        let i = intersection(2.0_f32.sqrt(), shape);
         let comps = i.prepare_computations(r, slice::from_ref(&i));
         let c = w.reflected_color(&comps, 0);
         assert_eq!(c, color(0, 0, 0));
@@ -412,7 +412,7 @@ mod tests {
 
     #[test]
     fn refracted_color_under_total_internal_reflection() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let w = default_world();
         w.objects[0].inner_mut().material.transparency = 1.0;
         w.objects[0].inner_mut().material.refractive_index = 1.5;
@@ -451,7 +451,7 @@ mod tests {
 
     #[test]
     fn shade_hit_with_transparent_material() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let mut w = default_world();
         let floor = plane()
             .transform(transform::translation(0, -1, 0))
@@ -464,7 +464,7 @@ mod tests {
         w.objects.push(floor.clone());
         w.objects.push(ball);
         let r = ray(point(0, 0, -3), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
-        let xs = [intersection(2.0_f64.sqrt(), floor)];
+        let xs = [intersection(2.0_f32.sqrt(), floor)];
         let comps = xs[0].prepare_computations(r, &xs);
         let c = w.shade_hit(&comps, 5);
         assert_relative_eq!(c.red, 0.93642, epsilon = EPSILON);
@@ -474,7 +474,7 @@ mod tests {
 
     #[test]
     fn shade_hit_with_reflective_transparent_material() {
-        let sqrt2_over_2 = 2.0_f64.sqrt() / 2.0;
+        let sqrt2_over_2 = 2.0_f32.sqrt() / 2.0;
         let mut w = default_world();
         let floor = plane()
             .transform(transform::translation(0, -1, 0))
@@ -492,7 +492,7 @@ mod tests {
         w.objects.push(floor.clone());
         w.objects.push(ball);
         let r = ray(point(0, 0, -3), vector(0.0, -sqrt2_over_2, sqrt2_over_2));
-        let xs = [intersection(2.0_f64.sqrt(), floor)];
+        let xs = [intersection(2.0_f32.sqrt(), floor)];
         let comps = xs[0].prepare_computations(r, &xs);
         let c = w.shade_hit(&comps, 5);
         assert_relative_eq!(c.red, 0.93391, epsilon = EPSILON);

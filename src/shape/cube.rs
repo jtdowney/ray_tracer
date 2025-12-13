@@ -26,7 +26,7 @@ pub fn cube(
 pub struct Cube;
 
 impl Cube {
-    fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
+    fn check_axis(origin: f32, direction: f32) -> (f32, f32) {
         let tmin_numerator = -1.0 - origin;
         let tmax_numerator = 1.0 - origin;
 
@@ -34,8 +34,8 @@ impl Cube {
             (tmin_numerator / direction, tmax_numerator / direction)
         } else {
             (
-                tmin_numerator * f64::INFINITY,
-                tmax_numerator * f64::INFINITY,
+                tmin_numerator * f32::INFINITY,
+                tmax_numerator * f32::INFINITY,
             )
         };
 
