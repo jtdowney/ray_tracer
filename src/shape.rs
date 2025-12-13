@@ -1,8 +1,10 @@
 use crate::{Intersection, Material, Matrix4, Point, Ray, Vector, identity_matrix, material};
 
+mod cube;
 mod plane;
 mod sphere;
 
+pub use cube::cube;
 pub use plane::plane;
 pub use sphere::{glass_sphere, sphere};
 

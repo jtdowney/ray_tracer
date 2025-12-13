@@ -62,7 +62,7 @@ impl World {
             let refracted = self.refracted_color(comps, remaining);
 
             let material = &comps.object.material;
-            if material.reflective > 0.0 && material.transparency > 0.0 {
+            if material.reflective.abs() >= EPSILON && material.transparency.abs() >= EPSILON {
                 let reflectance = schlick(comps);
                 surface + reflected * reflectance + refracted * (1.0 - reflectance)
             } else {
@@ -105,8 +105,7 @@ impl World {
 
     #[must_use]
     pub fn reflected_color(&self, comps: &Computations<'_>, remaining: usize) -> Color {
-        if remaining == 0 || relative_eq!(comps.object.material.reflective, 0.0, epsilon = EPSILON)
-        {
+        if remaining == 0 || comps.object.material.reflective.abs() < EPSILON {
             BLACK
         } else {
             let reflect_ray = ray(comps.over_point, comps.reflectv);
