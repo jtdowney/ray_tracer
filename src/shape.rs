@@ -1,10 +1,14 @@
 use crate::{Intersection, Material, Matrix4, Point, Ray, Vector, identity_matrix, material};
 
+mod cone;
 mod cube;
+mod cylinder;
 mod plane;
 mod sphere;
 
+pub use cone::cone;
 pub use cube::cube;
+pub use cylinder::cylinder;
 pub use plane::plane;
 pub use sphere::{glass_sphere, sphere};
 

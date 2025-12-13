@@ -25,23 +25,25 @@ pub fn cube(
 
 pub struct Cube;
 
-fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
-    let tmin_numerator = -1.0 - origin;
-    let tmax_numerator = 1.0 - origin;
+impl Cube {
+    fn check_axis(origin: f64, direction: f64) -> (f64, f64) {
+        let tmin_numerator = -1.0 - origin;
+        let tmax_numerator = 1.0 - origin;
 
-    let (tmin, tmax) = if direction.abs() >= EPSILON {
-        (tmin_numerator / direction, tmax_numerator / direction)
-    } else {
-        (
-            tmin_numerator * f64::INFINITY,
-            tmax_numerator * f64::INFINITY,
-        )
-    };
+        let (tmin, tmax) = if direction.abs() >= EPSILON {
+            (tmin_numerator / direction, tmax_numerator / direction)
+        } else {
+            (
+                tmin_numerator * f64::INFINITY,
+                tmax_numerator * f64::INFINITY,
+            )
+        };
 
-    if tmin > tmax {
-        (tmax, tmin)
-    } else {
-        (tmin, tmax)
+        if tmin > tmax {
+            (tmax, tmin)
+        } else {
+            (tmin, tmax)
+        }
     }
 }
 
@@ -51,9 +53,9 @@ impl Geometry for Cube {
         shape: &'shape Shape,
         ray: Ray,
     ) -> Vec<Intersection<'shape>> {
-        let (xtmin, xtmax) = check_axis(ray.origin.x, ray.direction.x);
-        let (ytmin, ytmax) = check_axis(ray.origin.y, ray.direction.y);
-        let (ztmin, ztmax) = check_axis(ray.origin.z, ray.direction.z);
+        let (xtmin, xtmax) = Self::check_axis(ray.origin.x, ray.direction.x);
+        let (ytmin, ytmax) = Self::check_axis(ray.origin.y, ray.direction.y);
+        let (ztmin, ztmax) = Self::check_axis(ray.origin.z, ray.direction.z);
 
         let tmin = xtmin.max(ytmin).max(ztmin);
         let tmax = xtmax.min(ytmax).min(ztmax);
