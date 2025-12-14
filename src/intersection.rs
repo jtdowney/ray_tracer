@@ -36,7 +36,7 @@ where
         .ord_subset_min_by_key(|i| i.time)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Intersection {
     pub time: f32,
     pub object: Shape,

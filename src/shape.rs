@@ -7,6 +7,7 @@ use std::{
 use crate::{Intersection, Material, Matrix4, Point, Ray, Vector, identity_matrix, material};
 
 mod cone;
+mod csg;
 mod cube;
 mod cylinder;
 mod group;
@@ -16,6 +17,7 @@ mod sphere;
 mod triangle;
 
 pub use cone::cone;
+pub use csg::{Csg, CsgOperation, csg};
 pub use cube::cube;
 pub use cylinder::cylinder;
 pub use group::{Group, group};
