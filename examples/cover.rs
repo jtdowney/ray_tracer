@@ -94,9 +94,10 @@ fn glass_sphere() -> Shape {
 }
 
 fn main() -> Result<()> {
-    // Main light
-    let light = point_light(point(50, 100, -50), color(1, 1, 1));
-    // Secondary light (not supported yet): point(-400, 50, -10), intensity (0.2, 0.2, 0.2)
+    let lights = vec![
+        point_light(point(50, 100, -50), color(1, 1, 1)), // Main light
+        point_light(point(-400, 50, -10), color(0.2, 0.2, 0.2)), // Secondary fill light
+    ];
 
     let objects = vec![
         backdrop(),
@@ -173,7 +174,7 @@ fn main() -> Result<()> {
             .build(),
     ];
 
-    let world = World::builder().light(light).objects(objects).build();
+    let world = World::builder().lights(lights).objects(objects).build();
 
     let camera = camera(800, 800)
         .field_of_view(0.785)

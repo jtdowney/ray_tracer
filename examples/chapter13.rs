@@ -183,7 +183,7 @@ fn main() -> Result<()> {
     objects.extend(build_decorative_cylinders());
 
     let world = World::builder()
-        .light(point_light(point(-5, 5, -5), color(1, 1, 1)))
+        .lights(vec![point_light(point(-5, 5, -5), color(1, 1, 1))])
         .objects(objects)
         .build();
 

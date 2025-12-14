@@ -103,6 +103,47 @@ impl Material {
 
         ambient + diffuse + specular
     }
+
+    #[must_use]
+    pub fn lighting_contribution(
+        &self,
+        object: &Shape,
+        light: &PointLight,
+        point: Point,
+        eyev: Vector,
+        normalv: Vector,
+        in_shadow: bool,
+    ) -> Color {
+        if in_shadow {
+            return BLACK;
+        }
+
+        let color = self
+            .pattern
+            .as_ref()
+            .map_or(self.color, |p| p.pattern_at_shape(object, point));
+        let effective_color = color * light.intensity;
+        let lightv = (light.position - point).normalize();
+
+        let light_dot_normal = lightv.dot(&normalv);
+        if light_dot_normal < 0.0 {
+            return BLACK;
+        }
+
+        let diffuse = effective_color * self.diffuse * light_dot_normal;
+
+        let reflectv = (-lightv).reflect(&normalv);
+        let reflect_dot_eye = reflectv.dot(&eyev);
+
+        let specular = if reflect_dot_eye <= 0.0 {
+            BLACK
+        } else {
+            let factor = reflect_dot_eye.powf(self.shininess);
+            light.intensity * self.specular * factor
+        };
+
+        diffuse + specular
+    }
 }
 
 #[cfg(test)]
@@ -110,7 +151,9 @@ mod tests {
     use approx::assert_relative_eq;
 
     use super::*;
-    use crate::{EPSILON, color, pattern::stripe_pattern, point, point_light, sphere, vector};
+    use crate::{
+        EPSILON, color, color::BLACK, pattern::stripe_pattern, point, point_light, sphere, vector,
+    };
 
     #[test]
     fn default_material() {
@@ -238,5 +281,31 @@ mod tests {
         let c2 = m.lighting(&object, &light, point(1.1, 0, 0), eyev, normalv, false);
         assert_eq!(c1, color(1, 1, 1));
         assert_eq!(c2, color(0, 0, 0));
+    }
+
+    #[test]
+    fn lighting_contribution_returns_only_diffuse_and_specular() {
+        let m = material();
+        let object = sphere().build();
+        let position = point(0, 0, 0);
+        let eyev = vector(0, 0, -1);
+        let normalv = vector(0, 0, -1);
+        let light = point_light(point(0, 0, -10), color(1, 1, 1));
+        let result = m.lighting_contribution(&object, &light, position, eyev, normalv, false);
+        assert_relative_eq!(result.red(), 1.8, epsilon = EPSILON);
+        assert_relative_eq!(result.green(), 1.8, epsilon = EPSILON);
+        assert_relative_eq!(result.blue(), 1.8, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn lighting_contribution_in_shadow_returns_black() {
+        let m = material();
+        let object = sphere().build();
+        let position = point(0, 0, 0);
+        let eyev = vector(0, 0, -1);
+        let normalv = vector(0, 0, -1);
+        let light = point_light(point(0, 0, -10), color(1, 1, 1));
+        let result = m.lighting_contribution(&object, &light, position, eyev, normalv, true);
+        assert_eq!(result, BLACK);
     }
 }

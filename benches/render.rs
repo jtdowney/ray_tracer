@@ -20,7 +20,7 @@ fn build_test_world() -> World {
 
     World::builder()
         .objects(vec![floor, sphere])
-        .light(point_light(point(-10.0, 10.0, -10.0), color(1, 1, 1)))
+        .lights(vec![point_light(point(-10.0, 10.0, -10.0), color(1, 1, 1))])
         .build()
 }
 

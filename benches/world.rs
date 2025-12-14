@@ -17,8 +17,10 @@ fn world_benchmarks(c: &mut Criterion) {
         b.iter(|| world.color_at(hint::black_box(r), hint::black_box(REFLECTION_DEPTH)));
     });
 
-    group.bench_function("is_shadowed", |b| {
-        b.iter(|| world.is_shadowed(hint::black_box(point(0.0, 10.0, 0.0))));
+    group.bench_function("is_shadowed_for_light", |b| {
+        b.iter(|| {
+            world.is_shadowed_for_light(hint::black_box(point(0.0, 10.0, 0.0)), &world.lights[0])
+        });
     });
 
     group.finish();

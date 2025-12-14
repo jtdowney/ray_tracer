@@ -198,7 +198,7 @@ fn main() -> Result<()> {
     objects.extend(build_floor_boxes());
 
     let world = World::builder()
-        .light(point_light(point(-8, 8, -8), color(1, 1, 1)))
+        .lights(vec![point_light(point(-8, 8, -8), color(1, 1, 1))])
         .objects(objects)
         .build();
 

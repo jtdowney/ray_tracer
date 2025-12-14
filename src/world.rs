@@ -13,7 +13,7 @@ use crate::{
 #[must_use]
 pub fn default_world() -> World {
     World::builder()
-        .light(point_light(point(-10, 10, -10), WHITE))
+        .lights(vec![point_light(point(-10, 10, -10), WHITE)])
         .objects(vec![
             sphere()
                 .material(
@@ -32,7 +32,7 @@ pub fn default_world() -> World {
 
 #[derive(Builder, Default)]
 pub struct World {
-    pub light: Option<PointLight>,
+    pub lights: Vec<PointLight>,
     pub objects: Vec<Shape>,
 }
 
@@ -51,49 +51,55 @@ impl World {
 
     #[must_use]
     pub fn shade_hit(&self, comps: &Computations, remaining: usize) -> Color {
-        if let Some(light) = self.light {
-            let shadowed = self.is_shadowed(comps.over_point);
-            let inner = comps.object.inner();
-            let surface = inner.material.lighting(
+        if self.lights.is_empty() {
+            return BLACK;
+        }
+
+        let inner = comps.object.inner();
+        let material = &inner.material;
+
+        let base_color = material.pattern.as_ref().map_or(material.color, |p| {
+            p.pattern_at_shape(&comps.object, comps.over_point)
+        });
+        let ambient = base_color * material.ambient;
+
+        let surface = self.lights.iter().fold(ambient, |acc, light| {
+            let shadowed = self.is_shadowed_for_light(comps.over_point, light);
+            let contribution = material.lighting_contribution(
                 &comps.object,
-                &light,
+                light,
                 comps.over_point,
                 comps.eyev,
                 comps.normalv,
                 shadowed,
             );
-            drop(inner);
+            acc + contribution
+        });
+        drop(inner);
 
-            let reflected = self.reflected_color(comps, remaining);
-            let refracted = self.refracted_color(comps, remaining);
+        let reflected = self.reflected_color(comps, remaining);
+        let refracted = self.refracted_color(comps, remaining);
 
-            let inner = comps.object.inner();
-            let material = &inner.material;
-            if material.reflective.abs() >= EPSILON && material.transparency.abs() >= EPSILON {
-                let reflectance = schlick(comps);
-                surface + reflected * reflectance + refracted * (1.0 - reflectance)
-            } else {
-                surface + reflected + refracted
-            }
+        let inner = comps.object.inner();
+        let material = &inner.material;
+        if material.reflective.abs() >= EPSILON && material.transparency.abs() >= EPSILON {
+            let reflectance = schlick(comps);
+            surface + reflected * reflectance + refracted * (1.0 - reflectance)
         } else {
-            BLACK
+            surface + reflected + refracted
         }
     }
 
     #[must_use]
-    pub fn is_shadowed(&self, point: Point) -> bool {
-        if let Some(light) = self.light {
-            let v = light.position - point;
-            let distance = v.magnitude();
-            let direction = v.normalize();
+    pub fn is_shadowed_for_light(&self, point: Point, light: &PointLight) -> bool {
+        let v = light.position - point;
+        let distance = v.magnitude();
+        let direction = v.normalize();
 
-            let ray = ray(point, direction);
-            let xs = self.intersect(ray);
-            if let Some(i) = hit(xs) {
-                i.time < distance
-            } else {
-                false
-            }
+        let ray = ray(point, direction);
+        let xs = self.intersect(ray);
+        if let Some(i) = hit(xs) {
+            i.time < distance
         } else {
             false
         }
@@ -165,7 +171,7 @@ mod tests {
     fn creating_a_world() {
         let w = World::default();
         assert!(w.objects.is_empty());
-        assert!(w.light.is_none());
+        assert!(w.lights.is_empty());
     }
 
     #[test]
@@ -179,7 +185,7 @@ mod tests {
 
         let w = default_world();
 
-        assert_eq!(w.light, Some(light));
+        assert_eq!(w.lights, vec![light]);
         assert_eq!(w.objects.len(), 2);
         assert_eq!(w.objects[0].inner().material, s1_material);
         assert_eq!(
@@ -216,7 +222,7 @@ mod tests {
     #[test]
     fn shading_an_intersection_from_the_inside() {
         let mut w = default_world();
-        w.light = Some(point_light(point(0, 0.25, 0), color(1, 1, 1)));
+        w.lights = vec![point_light(point(0, 0.25, 0), color(1, 1, 1))];
         let r = ray(point(0, 0, 0), vector(0, 0, 1));
         let shape = w.objects[1].clone();
         let i = intersection(0.5, shape);
@@ -259,28 +265,28 @@ mod tests {
     fn no_shadow_when_nothing_is_collinear_with_point_and_light() {
         let w = default_world();
         let p = point(0, 10, 0);
-        assert!(!w.is_shadowed(p));
+        assert!(!w.is_shadowed_for_light(p, &w.lights[0]));
     }
 
     #[test]
     fn shadow_when_object_is_between_point_and_light() {
         let w = default_world();
         let p = point(10, -10, 10);
-        assert!(w.is_shadowed(p));
+        assert!(w.is_shadowed_for_light(p, &w.lights[0]));
     }
 
     #[test]
     fn no_shadow_when_object_is_behind_light() {
         let w = default_world();
         let p = point(-20, 20, -20);
-        assert!(!w.is_shadowed(p));
+        assert!(!w.is_shadowed_for_light(p, &w.lights[0]));
     }
 
     #[test]
     fn no_shadow_when_object_is_behind_point() {
         let w = default_world();
         let p = point(-2, 2, -2);
-        assert!(!w.is_shadowed(p));
+        assert!(!w.is_shadowed_for_light(p, &w.lights[0]));
     }
 
     #[test]
@@ -288,7 +294,7 @@ mod tests {
         let s1 = sphere().build();
         let s2 = sphere().transform(transform::translation(0, 0, 10)).build();
         let w = World::builder()
-            .light(point_light(point(0, 0, -10), color(1, 1, 1)))
+            .lights(vec![point_light(point(0, 0, -10), color(1, 1, 1))])
             .objects(vec![s1, s2])
             .build();
         let r = ray(point(0, 0, 5), vector(0, 0, 1));
@@ -353,7 +359,7 @@ mod tests {
     #[test]
     fn color_at_with_mutually_reflective_surfaces() {
         let w = World::builder()
-            .light(point_light(point(0, 0, 0), color(1, 1, 1)))
+            .lights(vec![point_light(point(0, 0, 0), color(1, 1, 1))])
             .objects(vec![
                 plane()
                     .material(Material::builder().reflective(1.0))
@@ -498,5 +504,63 @@ mod tests {
         assert_relative_eq!(c.red(), 0.93391, epsilon = EPSILON);
         assert_relative_eq!(c.green(), 0.69643, epsilon = EPSILON);
         assert_relative_eq!(c.blue(), 0.69243, epsilon = EPSILON);
+    }
+
+    #[test]
+    fn world_with_multiple_lights() {
+        let light1 = point_light(point(-10, 10, -10), WHITE);
+        let light2 = point_light(point(10, 10, -10), color(0.5, 0.5, 0.5));
+        let w = World::builder()
+            .lights(vec![light1, light2])
+            .objects(vec![])
+            .build();
+        assert_eq!(w.lights.len(), 2);
+        assert_eq!(w.lights[0], light1);
+        assert_eq!(w.lights[1], light2);
+    }
+
+    #[test]
+    fn shading_with_multiple_lights() {
+        let w = World::builder()
+            .lights(vec![
+                point_light(point(-10, 10, -10), WHITE),
+                point_light(point(10, 10, -10), color(0.5, 0.5, 0.5)),
+            ])
+            .objects(vec![
+                sphere()
+                    .material(
+                        Material::builder()
+                            .color(color(0.8, 1.0, 0.6))
+                            .diffuse(0.7)
+                            .specular(0.2),
+                    )
+                    .build(),
+            ])
+            .build();
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let shape = w.objects[0].clone();
+        let i = intersection(4, shape);
+        let comps = i.prepare_computations(r, slice::from_ref(&i));
+        let c = w.shade_hit(&comps, 5);
+        assert!(c.red() > 0.38066);
+        assert!(c.green() > 0.47583);
+        assert!(c.blue() > 0.2855);
+    }
+
+    #[test]
+    fn shade_hit_partial_shadow_from_multiple_lights() {
+        let light1 = point_light(point(0, 0, -10), WHITE);
+        let light2 = point_light(point(10, 10, -10), color(0.5, 0.5, 0.5));
+        let blocker = sphere().transform(transform::translation(5, 5, -5)).build();
+        let target = sphere().build();
+        let w = World::builder()
+            .lights(vec![light1, light2])
+            .objects(vec![blocker, target.clone()])
+            .build();
+        let r = ray(point(0, 0, -5), vector(0, 0, 1));
+        let i = intersection(4, target);
+        let comps = i.prepare_computations(r, slice::from_ref(&i));
+        let c = w.shade_hit(&comps, 5);
+        assert!(c.red() > 0.1);
     }
 }

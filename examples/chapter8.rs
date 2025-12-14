@@ -62,7 +62,7 @@ fn main() -> Result<()> {
         .build();
 
     let world = World::builder()
-        .light(point_light(point(-10, 10, -10), color(1, 1, 1)))
+        .lights(vec![point_light(point(-10, 10, -10), color(1, 1, 1))])
         .objects(vec![floor, left_wall, right_wall, middle, right, left])
         .build();
 

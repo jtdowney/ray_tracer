@@ -88,7 +88,7 @@ fn main() -> Result<()> {
     );
 
     let world = World::builder()
-        .light(point_light(point(-5, 5, -5), color(1, 1, 1)))
+        .lights(vec![point_light(point(-5, 5, -5), color(1, 1, 1))])
         .objects(vec![build_floor(), hex1, hex2, hex3])
         .build();
 
