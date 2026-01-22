@@ -15,11 +15,11 @@ fn vector_benchmarks(c: &mut Criterion) {
     group.bench_function("normalize", |b| b.iter(|| hint::black_box(v).normalize()));
 
     group.bench_function("dot", |b| {
-        b.iter(|| hint::black_box(v).dot(&hint::black_box(v2)))
+        b.iter(|| hint::black_box(v).dot(&hint::black_box(v2)));
     });
 
     group.bench_function("cross", |b| {
-        b.iter(|| hint::black_box(v).cross(&hint::black_box(v2)))
+        b.iter(|| hint::black_box(v).cross(&hint::black_box(v2)));
     });
 
     group.bench_function("reflect", |b| {
@@ -27,19 +27,19 @@ fn vector_benchmarks(c: &mut Criterion) {
     });
 
     group.bench_function("add", |b| {
-        b.iter(|| hint::black_box(v) + hint::black_box(v2))
+        b.iter(|| hint::black_box(v) + hint::black_box(v2));
     });
 
     group.bench_function("sub", |b| {
-        b.iter(|| hint::black_box(v) - hint::black_box(v2))
+        b.iter(|| hint::black_box(v) - hint::black_box(v2));
     });
 
     group.bench_function("mul_scalar", |b| {
-        b.iter(|| hint::black_box(v) * hint::black_box(2.5))
+        b.iter(|| hint::black_box(v) * hint::black_box(2.5));
     });
 
     group.bench_function("div_scalar", |b| {
-        b.iter(|| hint::black_box(v) / hint::black_box(2.5))
+        b.iter(|| hint::black_box(v) / hint::black_box(2.5));
     });
 
     group.bench_function("neg", |b| b.iter(|| -hint::black_box(v)));

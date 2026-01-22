@@ -10,7 +10,7 @@ fn world_benchmarks(c: &mut Criterion) {
     let r = ray(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
 
     group.bench_function("intersect", |b| {
-        b.iter(|| world.intersect(hint::black_box(r)))
+        b.iter(|| world.intersect(hint::black_box(r)));
     });
 
     group.bench_function("color_at", |b| {

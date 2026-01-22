@@ -12,7 +12,7 @@ fn matrix_benchmarks(c: &mut Criterion) {
     let v = vector(1.0, 0.0, 0.0);
 
     group.bench_function("multiply", |b| {
-        b.iter(|| hint::black_box(m1) * hint::black_box(m2))
+        b.iter(|| hint::black_box(m1) * hint::black_box(m2));
     });
 
     group.bench_function("inverse", |b| b.iter(|| hint::black_box(m1).inverse()));
@@ -20,7 +20,7 @@ fn matrix_benchmarks(c: &mut Criterion) {
     group.bench_function("transpose", |b| b.iter(|| hint::black_box(m1).transpose()));
 
     group.bench_function("determinant", |b| {
-        b.iter(|| hint::black_box(m1).determinant())
+        b.iter(|| hint::black_box(m1).determinant());
     });
 
     group.bench_function("transform_point", |b| {
