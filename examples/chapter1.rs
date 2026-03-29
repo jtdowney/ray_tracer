@@ -31,7 +31,10 @@ fn main() {
     while projectile.position.y() > 0.0 {
         println!(
             "Tick {}: position ({:.4}, {:.4}, {:.4})",
-            ticks, projectile.position.x(), projectile.position.y(), projectile.position.z()
+            ticks,
+            projectile.position.x(),
+            projectile.position.y(),
+            projectile.position.z()
         );
         projectile = tick(&environment, &projectile);
         ticks += 1;
@@ -39,6 +42,7 @@ fn main() {
 
     println!(
         "Projectile hit the ground after {} ticks at x = {:.4}",
-        ticks, projectile.position.x()
+        ticks,
+        projectile.position.x()
     );
 }

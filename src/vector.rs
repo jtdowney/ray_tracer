@@ -78,12 +78,7 @@ impl Vector {
         let (ax, ay, az) = (self.x(), self.y(), self.z());
         let (bx, by, bz) = (other.x(), other.y(), other.z());
         Vector {
-            data: f32x4::new([
-                ay * bz - az * by,
-                az * bx - ax * bz,
-                ax * by - ay * bx,
-                0.0,
-            ]),
+            data: f32x4::new([ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx, 0.0]),
         }
     }
 }

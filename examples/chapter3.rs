@@ -56,7 +56,9 @@ fn main() {
     let result = modified * p;
     println!(
         "   Modified * point: ({}, {}, {})",
-        result.x(), result.y(), result.z()
+        result.x(),
+        result.y(),
+        result.z()
     );
     println!("   Result: The y component is doubled (scaled by 2).");
 }
